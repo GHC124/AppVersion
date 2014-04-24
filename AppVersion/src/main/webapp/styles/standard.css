@@ -1,0 +1,549 @@
+/* main elements */
+
+body,div,td {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 13px;	
+}
+
+body {
+	background-color: #fff;
+	text-align: center;
+	margin: 0px;
+	padding: 0px;
+}
+
+label {
+	width:150px;
+	float:left;
+	margin-left: 5px;
+}
+
+input {
+	height:20px;
+}
+
+input, textarea, select {
+	border:1px solid #B3B3B3;
+}
+
+input.image {
+	border: none;
+	height: auto;
+	vertical-align: middle;
+}
+
+submit {
+	height:25px;
+}
+
+div {
+	text-align: left;
+}
+
+div .box {
+	display:block;
+	margin-left:105px;
+}
+
+/* menu elements*/
+
+a.menu, a.menu:link, a.menu:visited {
+	
+} 
+	
+/* text styles */
+
+h1,h2,h3 {
+	font-family: Helvetica, sans-serif;
+	color: #7db223;
+}
+
+h1 {
+	font-size: 20px;
+	line-height: 26px;
+}
+
+h2 {
+	font-size: 18px;
+	line-height: 20px;
+}
+
+h3 {
+	font-size: 15px;
+	line-height: 21px;
+	color:#555;
+}
+
+h4 {
+	font-size: 14px;
+	line-height: 20px;
+}
+
+.errors {
+	color: red;
+	font-weight: bold;
+	display: block;
+	margin-left: 105px;
+}
+
+a {
+	text-decoration: underline;
+	font-size: 12px;
+}
+
+a img {
+	border: 0 none;
+	vertical-align: middle;
+}
+
+tr:nth-child(odd) {
+	background-color: #FFFFFF;
+}
+
+tr:nth-child(even) {
+	background-color: #EFEFEF;
+}
+
+a:link {
+	color: #7db223;
+}
+
+a:hover {
+	color: #456314;
+}
+
+a:active {
+	color: #7db223;
+}
+
+a:visited {
+	color: #7db223;
+}
+
+li {
+	padding-top: 5px;
+	text-align: left;
+}
+
+ul li {
+	margin:0 0 0.25em 0;
+	padding:0;
+}
+/* table elements */
+
+table {
+	margin: 2px 0 0 0;
+	width: 100%;
+}
+
+table table {
+	margin: -5px 0;
+	width: 100%;
+}
+
+table td,table th {
+	padding: 0px;
+}
+
+table td form {
+	text-align:center;
+	vertical-align: middle;
+	margin: 0px;
+}
+
+table th {
+	font-size: 0.9em;
+	text-align: left;
+	font-weight: bold;
+	color: #FFF;
+	background: #999;
+}
+
+table thead {
+	font-weight: bold;
+	font-style: italic;
+	background-color: #BBBBBB;
+}
+
+table a:link {
+	color: #303030;
+}
+
+.utilbox {
+	width: 18px;
+}
+
+caption {
+	caption-side: top;
+	width: auto;
+	text-align: left;
+	font-size: 12px;
+	color: #848f73;
+	padding-bottom: 4px;
+}
+
+fieldset {
+	border-radius: 5px;
+	border: 1px solid #CCCCCC;
+}
+
+.table-buttons {
+	background-color:#fff;
+	border:none;
+}
+
+.table-buttons td {
+	border:none;
+}
+
+.submit input {
+	border: 1px solid #BBBBBB;
+	color:#777777;
+	padding:2px 7px;
+	font-size:11px;
+	text-transform:uppercase;
+	font-weight:bold;
+	height:24px;
+}
+
+.updated {
+	background:#ecf1e5;
+	font-size:11px;
+	margin-left:2px;
+	border:4px solid #ecf1e5;
+}
+
+.updated td {
+	padding:2px 8px;
+	font-size:11px;
+	color:#888888;
+}
+
+.dijitArrowButton {
+	height: 20px;
+}
+
+.dijitTextArea{
+	min-height:5.5em !important;
+	max-height:22em !important;
+	overflow-y: auto !important;
+	max-width: 175px;
+}
+
+.RichTextEditable{
+	min-height:18em !important;
+	max-height:18em !important;
+}
+
+.flag {
+	height: 11px;
+	width: 16px;
+}
+
+.table_no_cell{
+	background: #FFFFFF;
+	margin: 2px 0 0 0;
+	border: 0px;
+	border-collapse: collapse;
+	width: 100%;
+}
+.table_no_cell td, .table_no_cell tr {
+	padding: 2px;
+	border: 0px;
+	background: #FFFFFF;
+}
+
+/* Table */
+/* Internet Explorer 7: setting "separate" results in bad visuals; all other browsers work fine with either value. */
+/* If set to "separate", then this rule is also needed to prevent double vertical borders on hover:
+table.ui-styled-table tr * + th, table.ui-styled-table tr * + td  { border-left-width: 0px !important; } */
+table.ui-styled-table { border-collapse: collapse; }
+
+/* Undo the "bolding" that jQuery UI theme may cause on hovered elements
+/* Internet Explorer 7: does not support "inherit", so use a MS proprietary expression along with an Internet Explorer <= 7 targeting hack
+        to make the visuals consistent across all supported browsers */
+table.ui-styled-table td.ui-state-hover {
+    font-weight: inherit;
+    *font-weight: expression(this.parentNode.currentStyle['fontWeight']);
+}
+
+/* Initally remove bottom border for all cells. */
+table.ui-styled-table th, table.ui-styled-table td { border-bottom-width: 0px !important; }
+
+/* Hovered-row cells should show bottom border (will be highlighted) */
+table.ui-styled-table tbody tr:hover th,
+table.ui-styled-table tbody tr:hover td
+{ border-bottom-width: 1px !important; }
+
+/* Remove top border if the above row is being hovered to prevent double horizontal borders. */
+table.ui-styled-table tbody tr:hover + tr th,
+table.ui-styled-table tbody tr:hover + tr td
+{ border-top-width: 0px !important; }
+
+/* Last-row cells should always show bottom border (not necessarily highlighted if not hovered). */
+/* Internet Explorer 7, Internet Explorer 8: selector dependent on CSS classes because of no support for :last-child */
+table.ui-styled-table tbody tr.last-child th,
+table.ui-styled-table tbody tr.last-child td
+{ border-bottom-width: 1px !important; }
+
+/* Last-row cells should always show bottom border (not necessarily highlighted if not hovered). */
+/* Internet Explorer 8 BUG: if these (unsupported) selectors are added to a rule, other selectors for that rule will stop working as well! */
+/* Internet Explorer 9 and later, Firefox, Chrome: make sure the visuals are working even without the CSS classes crutch. */
+table.ui-styled-table tbody tr:last-child th,
+table.ui-styled-table tbody tr:last-child td
+{ border-bottom-width: 1px !important; }
+
+/* lines for jqgrid */
+.ui-jqgrid tr.jqgrow td{
+	white-space: normal !important;
+}
+
+.row{
+	width: 940px;
+	margin-left: auto;
+	margin-right: auto;
+	min-height: 500px;
+}
+
+#content{
+	min-height: 700px;
+	margin-top: 5px;
+}
+
+.bg-primary {
+	color: #fff;
+	background-color: #428bca;
+}
+
+.bg-success {
+	background-color: #dff0d8;
+}
+
+.bg-info {
+	background-color: #d9edf7;
+}
+
+.bg-warning {
+	background-color: #fcf8e3;
+}
+
+.bg-danger {
+	background-color: #f2dede;
+}
+
+div.info,div.success,div.warning,div.error {
+	border: 1px solid;
+	margin: 10px 0px;
+	padding: 15px 10px 15px 50px;
+	background-repeat: no-repeat;
+	background-position: 10px center;
+}
+
+div.info {
+	color: #00529B;
+	background-color: #BDE5F8;
+	background-image: url('images/info.png');
+}
+
+div.success {
+	color: #4F8A10;
+	background-color: #DFF2BF;
+	background-image: url('images/success.png');
+}
+
+div.warning {
+	color: #9F6000;
+	background-color: #FEEFB3;
+	background-image: url('images/warning.png');
+}
+
+div.error {
+	color: #D8000C;
+	background-color: #FFBABA;
+	background-image: url('images/error.png');
+}
+
+label.error{
+	color: #D8000C;	
+}
+
+.form-group{
+	padding: 5px;
+}
+
+.control-label{
+	float: left;
+}
+
+div.control-group {
+	margin-bottom: 20px; 
+}
+
+div.control-group label.control-label { 
+	width: 50px; 
+}
+
+div.control-group div.controls { 
+	margin-left: 100px;
+}
+
+div.control-group div.controls div.div-help-inline{
+	margin-left: 5px;
+}
+
+div.controls span { 
+	color: red; 
+	font-size: 0.8em;
+}
+
+.error{
+	color: red;
+}
+
+.success{
+	color: green;
+}
+
+span.success {
+	color: #4F8A10;
+}
+
+span.error {
+	color: #D8000C;
+}
+
+#login table{
+	margin-left: auto;
+	margin-right: auto;
+	width: 320px;
+	margin-top: 150px;	
+	border: 1px solid #022241;
+}
+
+#login table th, #login table td{
+	text-align: center;
+	border-left: 0px;
+}
+
+#login table th{
+	background-image: -webkit-linear-gradient(#04519b, #044687 60%, #033769);
+	background-image: linear-gradient(#04519b, #044687 60%, #033769);
+	background-repeat: no-repeat;
+}
+
+#login table th h3{
+	color: #ffffff;	
+	font-style: normal;
+}
+
+#login input[type="text"], #login input[type="password"]{
+	margin: 2px;
+	width: 150px;
+	margin-left: 40px;
+	padding: 5px;
+}
+
+#login .control-label{
+	width: 70px;
+	padding-top: 5px;
+}
+
+#header{	
+}
+
+#header h1{
+	padding-top: 30px;
+}
+
+#menu{
+	height: 50px;
+	color: #CCCCCC;
+}
+
+#menu .navbar{
+	height: 50px;
+	background-image: -webkit-linear-gradient(#04519b, #044687 60%, #033769);
+	background-image: linear-gradient(#04519b, #044687 60%, #033769);
+	background-repeat: no-repeat;
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff04519b', endColorstr='#ff033769', GradientType=0);
+	filter: none;
+	border-bottom: 1px solid #022241;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+	padding: 0px 5px 0px 5px;
+}
+
+#menu ul.navbar-nav{
+	float: left;
+}
+
+#menu ul.navbar-nav li{
+	display: inline;
+	margin-right: 5px;
+}
+
+#menu ul.navbar-right{
+	float: right !important;
+}
+
+#menu ul{
+	list-style: none;	
+	margin: 0px;
+	padding: 0px;
+}
+
+#menu ul li a{
+	color: #ffffff;
+	display: inline-block;
+	padding: 16px 0px 16px 0px;	
+	text-decoration: none;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+#menu ul li a.active{
+	background-color: #022f5a;
+}
+
+#menu ul li a span{
+	margin: 0 5px 0 5px;
+}
+
+#menu ul.navbar-nav li a:hover{ 
+	color: #ffffff;
+	background-color: #022f5a;
+}
+
+#menu ul.navbar-right li a{	
+	font-size:13px;
+	font-weight: normal;
+}
+
+.dialog{
+	padding:30px 0px 0px 35px !important
+}
+
+.add-dialog .control-label{
+	width: 100px !important;
+}
+
+.add-dialog input[type="text"], .add-dialog input[type="password"]{
+	width: 200px !important;
+}
+
+.delete-dialog{
+	height: 80px !important;
+}
+
+.group-dialog{
+	height: 80px !important;
+}
+
+#divPagerInfo div{
+	text-align: center !important;
+}
+
+#userInfo{
+	width: 450px;
+}
+

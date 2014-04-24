@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<div xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:spring="http://www.springframework.org/tags"
+	xmlns:form="http://www.springframework.org/tags/form"
+	xmlns:html="urn:jsptagdir:/WEB-INF/tags/html">
+	<jsp:directive.page contentType="text/html;charset=UTF-8" />
+	<jsp:output omit-xml-declaration="yes" />
+	<spring:message code="label_admin_group_new" var="labelGroupNew" />
+	<spring:message code="label_admin_group_update" var="labelGroupUpdate" />
+	<spring:message code="label_admin_group_name" var="labelGroupName" />	
+	<spring:message code="label_action_save" var="labelActionSave" />
+	<spring:eval
+		expression="group.id == null ? labelGroupNew:labelGroupUpdate"
+		var="formTitle" />
+	<h1>${formTitle}</h1>
+	<div id="groupUpdate">
+		<html:form formUrl="" modelAttribute="group" id="groupUpdateForm" method="POST">
+    		<html:inputField label="${labelGroupName}" name="name"/>    		
+    		<form:hidden path="version" />
+    		<br/>
+    		<button type="submit">${labelActionSave}</button>    		    		
+    	</html:form>    	
+	</div>
+</div>

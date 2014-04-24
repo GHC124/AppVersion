@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<div xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:spring="http://www.springframework.org/tags"
+	xmlns:form="http://www.springframework.org/tags/form"
+	xmlns:joda="http://www.joda.org/joda/time/tags" version="2.0">
+	<jsp:directive.page contentType="text/html;charset=UTF-8" />
+	<jsp:output omit-xml-declaration="yes" />
+	<spring:message code="label_admin_group_info" var="labelGroupInfo" />
+	<spring:message code="label_admin_group_name" var="labelGroupName" />	
+	<spring:message code="label_admin_group_update" var="labelGroupUpdate"/>
+	<spring:url value="/admin/groups" var="editGroupUrl" />
+	<h1>${labelGroupInfo}</h1>
+	<div id="groupInfo">
+		<table>
+			<tr>
+				<td>${labelGroupName}</td>
+				<td>${group.name}</td>
+			</tr>						
+		</table>
+		<a href="${editGroupUrl}/${group.id}?form">${labelGroupUpdate}</a>
+	</div>
+</div>

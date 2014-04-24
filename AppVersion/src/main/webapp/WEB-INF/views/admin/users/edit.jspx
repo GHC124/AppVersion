@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<div xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:spring="http://www.springframework.org/tags"
+	xmlns:form="http://www.springframework.org/tags/form"
+	xmlns:html="urn:jsptagdir:/WEB-INF/tags/html" >
+	<jsp:directive.page contentType="text/html;charset=UTF-8" />
+	<jsp:output omit-xml-declaration="yes" />
+	<spring:message code="label_admin_user_new" var="labelUserNew" />
+	<spring:message code="label_admin_user_update" var="labelUserUpdate" />
+	<spring:message code="label_admin_user_email" var="labelUserEmail" />	
+	<spring:message code="label_admin_user_first_name"
+		var="labelUserFirstName" />
+	<spring:message code="label_admin_user_last_name"
+		var="labelUserLastName" />	
+	<spring:message code="label_admin_user_is_active" var="labelUserIsActive" />
+	<spring:message code="label_action_save" var="labelActionSave" />
+	<spring:eval
+		expression="user.id == null ? labelUserNew:labelUserUpdate"
+		var="formTitle" />
+	<h1>${formTitle}</h1>
+	<div id="userUpdate">
+		<html:form formUrl="" modelAttribute="user" method="POST" id="userUpdateForm">
+			<html:inputField label="${labelUserEmail}" name="email"/>
+    		<html:inputField label="${labelUserFirstName}" name="firstName"/>
+    		<html:inputField label="${labelUserLastName}" name="lastName"/>
+    		<html:inputField label="${labelUserIsActive}" name="isActive"/>
+    		<form:hidden path="version" />    	
+    		<br/>
+    		<button type="submit">${labelActionSave}</button>		    		
+		</html:form>		
+	</div>
+</div>

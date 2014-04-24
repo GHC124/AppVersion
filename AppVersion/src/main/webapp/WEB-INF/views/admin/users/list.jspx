@@ -1,0 +1,225 @@
+<div xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:spring="http://www.springframework.org/tags"
+	xmlns:joda="http://www.joda.org/joda/time/tags"
+	xmlns:form="http://www.springframework.org/tags/form"
+	xmlns:html="urn:jsptagdir:/WEB-INF/tags/html" 
+	xmlns:ajax="urn:jsptagdir:/WEB-INF/tags/ajax">
+	<jsp:directive.page contentType="text/html;charset=UTF-8" />
+	<jsp:output omit-xml-declaration="yes" />
+	<!-- List -->
+	<spring:message code="label_admin_user_email" var="labelUserEmail" />
+	<spring:message code="label_admin_user_password" var="labelUserPassword"/>	
+	<spring:message code="label_admin_user_new" var="labelUserNew"/>
+	<spring:message code="label_admin_user_groups" var="labelUserGroups"/>
+	<spring:message code="label_admin_group_filter" var="labelGroupFilter"/>
+	<spring:message code="label_admin_group_name" var="labelGroupName"/>
+	<spring:url value="/admin/users" var="showUserUrl"/>
+	<spring:url value="/admin/groups" var="showGroupUrl"/>
+	<spring:url value="/admin/users?ajax" var="addUserAjax"/>
+	<!-- Add -->
+	<spring:message code="label_admin_user_first_name"
+		var="labelUserFirstName" />
+	<spring:message code="label_admin_user_last_name"
+		var="labelUserLastName" />	
+	<spring:message code="label_admin_user_confirm_password" var="labelConfirmPassword"/>
+	<spring:message code="validation.password.NotMatch.message" var="messageConfirmPasswordNotMatch"/>
+	<spring:message code="validation.password.NotEmpty.message" var="messagePasswordRequire"/>
+	<spring:message code="label_admin_user_is_active" var="labelUserIsActive" />
+	<spring:message code="label_action_save" var="labelActionSave" />
+	<div style="float:left">
+		<div> 
+	    	<table id="list" class="table table-bordered"><tr><td></td></tr></table> 
+	    	<span id="pager"></span> 
+	    </div> 
+	    <div>
+	    	<button id="btnNewUser" onclick="showNewUserDialog();">${labelUserNew}</button>
+	    </div>
+    </div>
+    <div style="float:right">
+    	<fieldset>
+    		<legend>${labelGroupFilter}</legend>
+	    	<div> 
+		    	<table id="listGroup" class="table table-bordered"><tr><td></td></tr></table> 
+		    	<span id="pagerGroup"></span> 
+		    </div> 
+	    </fieldset>
+    </div>
+    <div id="newUserDialog" title="${labelUserNew}" class="dialog add-dialog" style="display: none">
+    	<html:form formUrl="/admin/users?ajax" modelAttribute="user" id="userUpdateForm" method="POST">
+    		<html:inputField label="${labelUserEmail}" name="email"/>
+    		<html:passwordField label="${labelUserPassword}" name="password"/>
+    		<div class="control-group" id="divConfirmPassword">
+				<label for="confirmPassword" class="control-label">${labelConfirmPassword}</label>
+				<div class="controls">
+					<input type="password" id="confirmPassword" name="confirmPassword"/>
+					<div class="div-help-inline">
+						<span class="help-inline">${messageConfirmPasswordNotMatch}</span>
+					</div>
+				</div>
+			</div>
+    		<html:inputField label="${labelUserFirstName}" name="firstName"/>    		
+    		<html:inputField label="${labelUserLastName}" name="lastName"/>
+    		<html:inputField label="${labelUserIsActive}" name="isActive"/>
+    		<form:hidden path="version" />    		    		
+    	</html:form>    	
+	</div>
+    <script type="text/javascript">
+    	var refreshUserList = false;
+    	$(function(){       
+	    	$("#list").jqGrid({ 
+			    url:'${showUserUrl}/listgrid', 
+			    datatype: 'json', 
+			    mtype: 'GET', 
+			    postData:{filterGroup:collectFilterGroup},
+			    colNames:['${labelUserEmail}', '${labelUserGroups}'], 
+			    colModel :[  
+			      {name:'email', index:'email', width:150},
+			      {name:'groupNames', index:'groupNames', sortable:false, width:150}
+			    ], 
+			    jsonReader : { 
+			        root:"data", 
+			        page: "currentPage", 
+			        total: "totalPages", 
+			        records: "totalRecords", 
+			        repeatitems: false, 
+			        id: "userId" 
+			    },       
+			    pager: '#pager', 
+			    rowNum:10, 
+			    rowList:[10,20,30,50], 
+			    sortname: 'email', 
+			    sortorder: 'asc', 
+			    viewrecords: true, 
+			    gridview: true, 
+			    height: 500, 
+			    width: 600, 
+			    onSelectRow: function(id){  
+			        document.location.href ="${showUserUrl}/" + id; 
+			    },
+			    loadComplete: function() {			    	
+			    }
+			  });
+			
+			$("#listGroup").jqGrid({ 
+		        url:'${showGroupUrl}/listgrid', 
+		        datatype: 'json', 
+		        mtype: 'GET', 
+		        colNames:['${labelGroupName}'], 
+		        colModel :[  
+		          {name:'name', index:'name', width:150, formatter: checkboxFormatter} 
+		        ], 
+		        jsonReader : { 
+		            root:"data", 
+		            page: "currentPage", 
+		            total: "totalPages", 
+		            records: "totalRecords", 
+		            repeatitems: false, 
+		            id: "id" 
+		        },       
+		        pager: '#pagerGroup',
+		        viewrecords: true,
+		        rowNum:10, 
+		        rowList:[10,20,30,50], 
+		        sortname: 'name', 
+		        sortorder: 'asc', 
+		        gridview: true, 
+		        height: 250, 
+		        width: 300, 
+		        onSelectRow: function(id){  
+		        	filterGroupClick(id);
+		        }, 
+		        beforeRequest: function(){
+		        	var filterGroup = collectFilterGroup();
+		        	if(filterGroup.length > 0){
+		        		refreshUserList = true;
+		        	}
+		        },
+		        loadComplete: function() {
+			    	var grid = $("#listGroup");
+		            var pager = $(grid[0].p.pager);
+		            var pagerInfo = $(grid[0].p.pager + '_right');
+		            var divPagerInfo = pager.find("#divPagerInfo");
+		           	if(divPagerInfo.length == 0){
+		           		var tableGroup = pager.find("table.ui-pg-table:first");
+		           		divPagerInfo = $("<div></div>");
+		           		divPagerInfo.attr("id","divPagerInfo");
+		           		divPagerInfo.append(pagerInfo.html());
+			            $(tableGroup).after(divPagerInfo);
+			            pagerInfo.html("");
+			        }
+		           	if(refreshUserList){
+		           		refreshUserList = false;
+		           		refreshJQGrid("#list");
+		           	}
+		        }
+		      }); 
+			 $( "#newUserDialog" ).dialog({
+			      autoOpen: false,
+			      height: 400,
+			      width: 400,
+			      modal: true,
+			      resizable: false,
+			      buttons: {
+			        "${labelActionSave}": function() {
+			        	var valid = false;
+			        	var passwordControl = $('#div_password');
+			        	var confirmPasswordControl = $('#div_confirmPassword');
+			        	var password = $('#password');
+			        	var confirmPassword = $('#confirmPassword');
+			        	console.log(password.val());
+			        	removeInputError('#div_password');	
+			        	if(password.val().length == 0){
+			        		addInputError('#div_password', '${messagePasswordRequire}');			        		
+			        	}else{
+			        		var password1 = password.val();
+			        		var password2 = confirmPassword.val();
+			        		console.log(password1);
+			        		console.log(password2);
+			        		if(password1 === password2){
+			        			valid = true;
+			        		}else{
+			        			addInputError('#div_confirmPassword', '${messageConfirmPasswordNotMatch}');			        			
+			        		}
+			        	}
+			        	if(valid){
+				        	formAjaxSubmit("#userUpdateForm","${addUserAjax}",function(){
+				        		refreshJQGrid("#list");
+				        		$("#newUserDialog").dialog("close");
+				          	}, function(response){	              			              		
+				          	});
+			        	}
+			        }	            
+			      }
+			    });
+			}); 
+	    	function collectFilterGroup(){
+	    		var filter = '';
+	    		$("input[type='checkbox'][id*=filterGroup_]").each(function() {
+	    			var checkbox = $(this);
+	    		    if(checkbox.prop('checked')){
+	    		    	filter += checkbox.attr('group') + ',';
+	    		    }
+	    		});
+	    		if(filter.length > 0){
+	    			filter = filter.substr(0, filter.length - 1);
+	    		}
+	    		return filter;
+	    	}
+		    function checkboxFormatter(cellvalue, options, rowObject) {
+		    	return '<div><input id="filterGroup_'+ rowObject.id +'" group="'+ rowObject.id +'" type="checkbox" onclick="filterGroupClick();" style="height: auto; margin: 5px"/><span>'+ cellvalue +'</span></div>';
+	    	}
+		    function filterGroupClick(id){	
+		    	if(id){
+		    		var checkbox = $('#filterGroup_' + id);
+		    		checkbox.prop('checked', !checkbox.prop('checked'));
+		    	}
+		    	refreshJQGrid("#list");		    	
+		    }
+			function showNewUserDialog(){
+				var dialog = $("#newUserDialog");
+			    dialog.dialog("open");
+			    removeInputError("#userUpdateForm");
+			}
+    </script>
+</div>

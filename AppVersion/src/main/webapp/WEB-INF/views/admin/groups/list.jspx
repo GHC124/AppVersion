@@ -1,0 +1,133 @@
+<div xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:spring="http://www.springframework.org/tags"
+	xmlns:joda="http://www.joda.org/joda/time/tags"
+	xmlns:form="http://www.springframework.org/tags/form"
+	xmlns:html="urn:jsptagdir:/WEB-INF/tags/html" 
+	xmlns:ajax="urn:jsptagdir:/WEB-INF/tags/ajax">
+	<jsp:directive.page contentType="text/html;charset=UTF-8" />
+	<jsp:output omit-xml-declaration="yes" />
+	<!-- List -->
+	<spring:message code="label_action_actions" var="labelActions"/>
+	<spring:message code="label_admin_group_name" var="labelGroupName" />	
+	<spring:message code="label_admin_group_new" var="labelGroupNew"/>
+	<spring:url value="/admin/groups" var="showGroupUrl"/>
+	<spring:url value="/admin/groups?ajax" var="addGroupAjax"/>
+	<!-- Add -->
+	<spring:message code="label_action_save" var="labelActionSave" />
+	<!-- Delete -->
+	<spring:message code="label_action_delete" var="labelActionDelete"/>
+	<spring:message code="label_admin_group_delete" var="labelGroupDelete"/>
+	<spring:message code="admin_group_delete_confirm" var="messageGroupDelete"/>
+	<spring:message code="admin_group_delete_error" var="messageGroupDeleteError"/>
+	
+	<div> 
+    	<table id="list" class="table table-bordered"><tr><td></td></tr></table> 
+    	<span id="pager"></span> 
+    </div> 
+    <div>
+    	<button id="btnNewGroup" onclick="showNewGroupDialog();">${labelGroupNew}</button>
+    </div>
+    <div id="newGroupDialog" title="${labelGroupNew}" class="dialog add-dialog group-dialog" style="display: none">
+    	<html:form formUrl="/admin/groups?ajax" modelAttribute="group" id="groupUpdateForm" method="POST">
+    		<html:inputField label="${labelGroupName}" name="name"/>    		
+    		<form:hidden path="version" />    		    		
+    	</html:form>    	
+	</div>
+	<div id="deleteGroupDialog" title="${labelGroupDelete}" class="dialog delete-dialog" style="display: none">   
+		<span id="deleteGroupMessage">${messageGroupDelete}</span> 	  
+		<br/>
+		<span id="deleteGroupError" class="error" style="display: none"></span>	
+	</div>
+    <script type="text/javascript"> 
+	    $(function(){       
+	      $("#list").jqGrid({ 
+	        url:'${showGroupUrl}/listgrid', 
+	        datatype: 'json', 
+	        mtype: 'GET', 
+	        colNames:['${labelGroupName}', '${labelActions}'], 
+	        colModel :[  
+	          {name:'name', index:'name', width:150},
+	          {name:'act', index:'act', sortable:false, width:25}
+	        ], 
+	        jsonReader : { 
+	            root:"data", 
+	            page: "currentPage", 
+	            total: "totalPages", 
+	            records: "totalRecords", 
+	            repeatitems: false, 
+	            id: "id" 
+	        },       
+	        pager: '#pager', 
+	        rowNum:10, 
+	        rowList:[10,20,30,50], 
+	        sortname: 'name', 
+	        sortorder: 'asc', 
+	        viewrecords: true, 
+	        gridview: true, 
+	        height: 250, 
+	        width: 500, 
+	        onSelectRow: function(id){  
+	            document.location.href ="${showGroupUrl}/" + id; 
+	        },
+	        loadComplete: function () {
+	            var grid = $(this);
+	            addDeleteAction2JQGrid(grid,'name','act','${labelActionDelete}', function(id, value){
+	            		showDeleteGroupDialog(id, value);
+            		});
+	            }
+	      }); 
+	      $( "#newGroupDialog" ).dialog({
+	          autoOpen: false,
+	          height: 350,
+	          width: 400,
+	          modal: true,
+	          resizable: false,
+	          buttons: {
+	            "${labelActionSave}": function() {
+	            	formAjaxSubmit("#groupUpdateForm","${addGroupAjax}",function(){
+	            		refreshJQGrid("#list");
+	            		$("#newGroupDialog").dialog("close");
+	              	}, function(response){	              			              		
+	              	});
+	            }	            
+	          }
+	        });
+	      $( "#deleteGroupDialog" ).dialog({
+	          autoOpen: false,
+	          height: 350,
+	          width: 400,
+	          modal: true,
+	          resizable: false,
+	          buttons: {
+	            "${labelActionDelete}": function() {
+	            	var id = $(this).data('id');
+	            	var data = {};
+	            	$.post('${showGroupUrl}' + '/' + id + '?delete', data, function(response) {
+	            		
+	            	}, 'json').done(function(){
+	            		$("#deleteGroupDialog").dialog("close");
+	            		refreshJQGrid("#list");
+	            	}).fail(function(){
+	            		var error = $("#deleteGroupDialog").find("#deleteGroupError");
+	            		error.css({"display": "block"});
+	            		error.html('${messageGroupDeleteError}');
+	            	});	            		
+	            }	            
+	          }
+	        });
+	    }); 
+	    function showNewGroupDialog(){
+	    	var dialog = $("#newGroupDialog");
+	        dialog.dialog("open");
+	        removeInputError("#groupUpdateForm");
+	    }
+	    function showDeleteGroupDialog(id, value){
+	    	var dialog = $("#deleteGroupDialog");
+	    	var message = '${messageGroupDelete}' + ' ' + value + "?";
+	    	dialog.find("#deleteGroupMessage").html(message);
+	    	dialog.find("#deleteGroupError").css({"display": "none"});
+	        dialog.data('id',id).dialog("open");	        
+	    }
+    </script>
+</div>
