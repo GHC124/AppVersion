@@ -91,8 +91,12 @@ function enableInputs(formName, type){
 }
 
 /* JQGrid*/
-function refreshJQGrid(listId){
-	$(listId).setGridParam({ page: 1, datatype: "json" }).trigger('reloadGrid');
+function refreshJQGrid(listId, data){
+	if(data){
+		$(listId).setGridParam(data).trigger('reloadGrid');
+	}else{
+		$(listId).setGridParam({ page: 1, datatype: "json" }).trigger('reloadGrid');
+	}
 }
 
 function getJQGridColumnIndexByName(grid,columnName) {
@@ -105,7 +109,20 @@ function getJQGridColumnIndexByName(grid,columnName) {
     return -1;
 }
 
-function addDeleteAction2JQGrid(grid, valueCol, actionCol, deleteLabel, deleteAction){
+function removeActionJQGrid(grid, actionCol){
+	var iCol = getJQGridColumnIndexByName(grid, actionCol) + 1;
+	if(iCol == -1){
+		return;
+	}
+    grid.children("tbody")
+        .children("tr.jqgrow")
+        .children("td:nth-child("+iCol+")")
+        .each(function() {
+        	$(this).html("");
+        });
+}
+
+function addAction2JQGrid(grid, valueCol, actionCol, title, icon, action){
 	var iCol = getJQGridColumnIndexByName(grid, actionCol) + 1;
 	var vCol = getJQGridColumnIndexByName(grid, valueCol) + 1;
 	if(iCol == -1 || vCol == -1){
@@ -115,11 +132,10 @@ function addDeleteAction2JQGrid(grid, valueCol, actionCol, deleteLabel, deleteAc
         .children("tr.jqgrow")
         .children("td:nth-child("+iCol+")")
         .each(function() {
-        	$(this).html("");
-        	var divDelete = 
+        	var div = 
         	$("<div></div>",
                 {
-                    title: deleteLabel,
+                    title: title,
                     mouseover: function() {
                         $(this).addClass('ui-state-hover');
                     },
@@ -129,14 +145,47 @@ function addDeleteAction2JQGrid(grid, valueCol, actionCol, deleteLabel, deleteAc
                     click: function(e) {
                     	var id = $(e.target).closest("tr.jqgrow").attr("id"); 
                     	var value = $(e.target).closest("tr.jqgrow").children("td:nth-child("+vCol+")").html();  
-                        deleteAction(id, value);
+                        action(id, value);
                         return cancelDefaultAction(e);
                     }
                 }
               ).css({"margin-left": "5px", float:"left"})
                .addClass("ui-pg-div ui-inline-custom")
-               .append('<span class="ui-icon ui-icon-trash"></span>');
-             $(this).append(divDelete);
+               .append('<span class="ui-icon '+ icon +'"></span>');
+             $(this).append(div);
     });
+}
+
+function moveJQGridPagerInfo2Bottom(grid){
+	var pager = $(grid[0].p.pager);
+    var pagerInfo = $(grid[0].p.pager + '_right');
+    var divPagerInfo = pager.find("#divPagerInfo");
+   	if(divPagerInfo.length == 0){
+   		var tableGroup = pager.find("table.ui-pg-table:first");
+   		divPagerInfo = $("<div></div>");
+   		divPagerInfo.attr("id","divPagerInfo");
+   		divPagerInfo.append(pagerInfo.html());
+        $(tableGroup).after(divPagerInfo);
+        pagerInfo.html("");
+        
+        var pagerCenter = $(grid[0].p.pager + '_center');
+       	pagerCenter.css({"width":"230px"});
+    }		     
+}
+
+function clearJQGridData(grid, data){
+	if(data){
+		grid.jqGrid("clearGridData", true).setGridParam(data);
+	}else{
+		grid.jqGrid("clearGridData", true);
+	}
+}
+
+function getJQGridSelectedRow(grid){
+	return grid.jqGrid('getGridParam','selrow');
+}
+
+function deleteJQGridRow(grid, rowId){
+	grid.jqGrid('delRowData',rowId);
 }
 

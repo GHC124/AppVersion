@@ -25,7 +25,8 @@
     		<html:inputField label="${labelUserFirstName}" name="firstName"/>
     		<html:inputField label="${labelUserLastName}" name="lastName"/>
     		<html:inputField label="${labelUserIsActive}" name="isActive"/>
-    		<form:hidden path="version" />    	
+    		<form:hidden path="version" />
+    		<form:hidden path="password" />      	
     		<br/>
     		<button type="submit">${labelActionSave}</button>		    		
 		</html:form>		

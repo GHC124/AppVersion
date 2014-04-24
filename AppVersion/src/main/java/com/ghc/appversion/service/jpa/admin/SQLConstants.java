@@ -27,4 +27,15 @@ public interface SQLConstants {
 	 */
 	String GROUP_USER_CHECK_QUERY = "SELECT g.ID, g.NAME, (SELECT ID FROM user_group WHERE USER_ID = :userId AND GROUP_ID = g.ID LIMIT 1) " +
              "as USER_GROUP_ID FROM groups as g WHERE 1 ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
+		
+	String GROUP_ID = "groupId";
+	/**
+	 * Count members in a group
+	 */
+	String GROUP_MEMBERS_COUNT_QUERY = "SELECT COUNT(ID) FROM user_group WHERE GROUP_ID = :groupId";
+	/**
+	 * Select members in a group
+	 */
+	String GROUP_MEMBERS_QUERY = "SELECT USER_ID,EMAIL,USER_GROUP_ID FROM view_user_summary WHERE GROUP_ID=:groupId " +
+			"ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
 }

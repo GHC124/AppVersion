@@ -11,8 +11,18 @@
 	<spring:message code="label_action_actions" var="labelActions"/>
 	<spring:message code="label_admin_group_name" var="labelGroupName" />	
 	<spring:message code="label_admin_group_new" var="labelGroupNew"/>
+	<spring:message code="label_action_edit" var="labelGroupEdit"/>
 	<spring:url value="/admin/groups" var="showGroupUrl"/>
 	<spring:url value="/admin/groups?ajax" var="addGroupAjax"/>
+	<!-- Group Info -->
+	<spring:message code="label_admin_group_info" var="labelGroupInfo"/>
+	<spring:message code="label_admin_group_members" var="labelGroupMembers"/>
+	<!-- Members -->
+	<spring:message code="label_admin_user_email" var="labelUserEmail" />
+	<spring:message code="label_admin_group_add_member" var="labelAddMember"/>
+	<spring:message code="admin_user_group_update_error" var="labelUserGroupUpdate"/>
+	<spring:url value="/admin/users" var="showUserUrl"/>
+	<spring:url value="/admin/users/usergroup" var="editUserGroupUrl" />
 	<!-- Add -->
 	<spring:message code="label_action_save" var="labelActionSave" />
 	<!-- Delete -->
@@ -20,24 +30,45 @@
 	<spring:message code="label_admin_group_delete" var="labelGroupDelete"/>
 	<spring:message code="admin_group_delete_confirm" var="messageGroupDelete"/>
 	<spring:message code="admin_group_delete_error" var="messageGroupDeleteError"/>
-	
-	<div> 
-    	<table id="list" class="table table-bordered"><tr><td></td></tr></table> 
-    	<span id="pager"></span> 
-    </div> 
-    <div>
-    	<button id="btnNewGroup" onclick="showNewGroupDialog();">${labelGroupNew}</button>
+	<div style="float:left">
+		<div> 
+	    	<table id="list" class="table table-bordered"><tr><td></td></tr></table> 
+	    	<span id="pager"></span> 
+	    </div> 
+	    <div>
+	    	<button id="btnNewGroup" onclick="showNewGroupDialog();">${labelGroupNew}</button>
+	    </div>
     </div>
+    <div style="float:right">
+    	<fieldset>
+    		<legend>${labelGroupInfo}</legend>
+    		<fieldset>
+    			<legend>${labelGroupMembers}</legend>
+    			<div id="memberMessage" style="display: none" class="error"><span></span></div>
+    			<div> 
+			    	<table id="listMember" class="table table-bordered"><tr><td></td></tr></table> 
+			    	<span id="pagerMember"></span> 
+			    </div>
+			    <div>
+			    	<button id="btnAddMember" onclick="showAddMemberDialog();">${labelAddMember}</button>
+			    </div>			    
+    		</fieldset>
+    	</fieldset>
+	</div>
     <div id="newGroupDialog" title="${labelGroupNew}" class="dialog add-dialog group-dialog" style="display: none">
     	<html:form formUrl="/admin/groups?ajax" modelAttribute="group" id="groupUpdateForm" method="POST">
     		<html:inputField label="${labelGroupName}" name="name"/>    		
     		<form:hidden path="version" />    		    		
     	</html:form>    	
-	</div>
+	</div>	
 	<div id="deleteGroupDialog" title="${labelGroupDelete}" class="dialog delete-dialog" style="display: none">   
 		<span id="deleteGroupMessage">${messageGroupDelete}</span> 	  
 		<br/>
 		<span id="deleteGroupError" class="error" style="display: none"></span>	
+	</div>
+	<div id="addMemberDialog" title="${labelAddMember}" class="dialog member-dialog" style="display: none">
+    	<table id="listUser" class="table table-bordered"><tr><td></td></tr></table> 
+    	<span id="pagerUser"></span> 
 	</div>
     <script type="text/javascript"> 
 	    $(function(){       
@@ -46,11 +77,11 @@
 	        datatype: 'json', 
 	        mtype: 'GET', 
 	        colNames:['${labelGroupName}', '${labelActions}'], 
-	        colModel :[  
+	        colModel:[  
 	          {name:'name', index:'name', width:150},
 	          {name:'act', index:'act', sortable:false, width:25}
 	        ], 
-	        jsonReader : { 
+	        jsonReader: { 
 	            root:"data", 
 	            page: "currentPage", 
 	            total: "totalPages", 
@@ -65,18 +96,94 @@
 	        sortorder: 'asc', 
 	        viewrecords: true, 
 	        gridview: true, 
-	        height: 250, 
+	        height: 500, 
 	        width: 500, 
 	        onSelectRow: function(id){  
-	            document.location.href ="${showGroupUrl}/" + id; 
+	        	refreshJQGrid('#listMember', { page: 1, postData: {groupId:id}, datatype: "json" });
 	        },
 	        loadComplete: function () {
 	            var grid = $(this);
-	            addDeleteAction2JQGrid(grid,'name','act','${labelActionDelete}', function(id, value){
-	            		showDeleteGroupDialog(id, value);
-            		});
-	            }
+	            addAction2JQGrid(grid,'name','act','${labelGroupEdit}','ui-icon-pencil',function(id, value){
+	            	document.location.href ="${showGroupUrl}/" + id; 
+       			});                
+		        addAction2JQGrid(grid,'name','act','${labelActionDelete}','ui-icon-trash',function(id, value){
+	        		showDeleteGroupDialog(id, value);
+	    		});	
+		        var listUser = $('#listMember');
+		        clearJQGridData(listUser, { page: 1, postData: '' });
+		    }
 	      }); 
+	      $("#listMember").jqGrid({ 
+		    url:'${showGroupUrl}/listgrid?members', 
+		    datatype: 'local', 
+		    mtype: 'GET', 
+		    colNames:['${labelUserEmail}', '${labelActions}'], 
+		    colModel :[  
+		      {name:'email', index:'email', width:120},
+		      {name:'act', index:'act', sortable:false, width:25}
+		    ], 
+		    jsonReader : { 
+		        root:"data", 
+		        page: "currentPage", 
+		        total: "totalPages", 
+		        records: "totalRecords", 
+		        repeatitems: false, 
+		        id: "userGroupId" 
+		    },       
+		    pager: '#pagerMember', 
+		    rowNum:10, 
+		    rowList:[10,20,30,50], 
+		    sortname: 'email', 
+		    sortorder: 'asc', 
+		    viewrecords: true, 
+		    gridview: true, 
+		    height: 280, 
+		    width: 300, 
+		    onSelectRow: function(id){  
+		        
+		    },
+		    loadComplete: function() {	
+		    	var grid = $(this);
+		    	addAction2JQGrid(grid,'name','act','${labelActionDelete}','ui-icon-trash',function(id, value){
+		    		deleteGroupMember(id, value);
+		    	});
+		    	moveJQGridPagerInfo2Bottom(grid);
+		    }
+		  });
+	      $("#listUser").jqGrid({ 
+			    url:'${showUserUrl}/listgrid', 
+			    datatype: 'local', 
+			    mtype: 'GET', 
+			    colNames:['${labelUserEmail}', '${labelActions}'], 
+			    colModel :[  
+			      {name:'email', index:'email', width:120},
+			      {name:'act', index:'act', sortable:false, width:25}
+			    ], 
+			    jsonReader : { 
+			        root:"data", 
+			        page: "currentPage", 
+			        total: "totalPages", 
+			        records: "totalRecords", 
+			        repeatitems: false, 
+			        id: "id" 
+			    },       
+			    pager: '#pagerUser', 
+			    rowNum:10, 
+			    rowList:[10,20,30,50], 
+			    sortname: 'email', 
+			    sortorder: 'asc', 
+			    viewrecords: true, 
+			    gridview: true, 
+			    height: 280, 
+			    width: 410, 
+			    onSelectRow: function(id){  
+			        
+			    },
+			    loadComplete: function() {	
+			    	var grid = $(this);
+			    	moveJQGridPagerInfo2Bottom(grid);
+			    }
+			  });
 	      $( "#newGroupDialog" ).dialog({
 	          autoOpen: false,
 	          height: 350,
@@ -116,7 +223,34 @@
 	            }	            
 	          }
 	        });
-	    }); 
+	      $( "#addMemberDialog" ).dialog({
+	          autoOpen: false,
+	          height: 480,
+	          width: 500,
+	          modal: true,
+	          resizable: false,
+	          buttons: {
+	            "${labelActionSave}": function() {
+	            	
+	            }	            
+	          }
+	        });
+	    });
+	    function deleteGroupMember(id, value){
+	    	var error = $("#memberMessage");
+    		error.css({"display": "none"});
+    		error.find('span').html('');
+	    	var url = '${editUserGroupUrl}' + '?userGroupId=' + id;
+	    	var data={};
+	    	$.post(url, data, function(response) {
+	    	}, 'json').done(function(data){
+    			deleteJQGridRow($('#listMember'), id);        			
+    		}).fail(function(){
+   				var error = $("#memberMessage");
+        		error.css({"display": "block"});
+        		error.find('span').html('${labelUserGroupUpdate}');
+        	});	      
+	    }
 	    function showNewGroupDialog(){
 	    	var dialog = $("#newGroupDialog");
 	        dialog.dialog("open");
@@ -128,6 +262,12 @@
 	    	dialog.find("#deleteGroupMessage").html(message);
 	    	dialog.find("#deleteGroupError").css({"display": "none"});
 	        dialog.data('id',id).dialog("open");	        
+	    }
+	    function showAddMemberDialog(){
+	    	var dialog = $("#addMemberDialog");
+	        dialog.dialog("open");
+	        var id = getJQGridSelectedRow($('#listUser'));
+	        refreshJQGrid('#listUser', { page: 1, postData: {groupId:id}, datatype: "json" });
 	    }
     </script>
 </div>

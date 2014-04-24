@@ -120,7 +120,39 @@ public class UsersController extends AbstractAdminController {
 
 	@RequestMapping(value = "/listgrid", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	public DataGrid<UserSummary> listGrid(
+	public DataGrid<User> listGrid(
+			@RequestParam(value = "page", required = false) Integer page,
+			@RequestParam(value = "rows", required = false) Integer rows,
+			@RequestParam(value = "sidx", required = false) String sortBy,
+			@RequestParam(value = "sord", required = false) String order) {
+		Sort sort = null;
+		String orderBy = sortBy;
+		if (orderBy != null && order != null) {
+			if (order.equals("desc")) {
+				sort = new Sort(Sort.Direction.DESC, orderBy);
+			} else {
+				sort = new Sort(Sort.Direction.ASC, orderBy);
+			}
+		}
+		PageRequest pageRequest = null;
+		if (sort != null) {
+			pageRequest = new PageRequest(page - 1, rows, sort);
+		} else {
+			pageRequest = new PageRequest(page - 1, rows);
+		}
+		Page<User> userPage = userService.findAllByPage(pageRequest);
+		DataGrid<User> userGrid = new DataGrid<>();
+		userGrid.setCurrentPage(userPage.getNumber() + 1);
+		userGrid.setTotalPages(userPage.getTotalPages());
+		userGrid.setTotalRecords(userPage.getTotalElements());
+		userGrid.setData(userPage.getContent());
+
+		return userGrid;
+	}
+
+	@RequestMapping(value = "/listsummary", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public DataGrid<UserSummary> listSummary(
 			@RequestParam(value = "filterGroup", required = false) String filterGroup,
 			@RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "rows", required = false) Integer rows,
@@ -159,14 +191,13 @@ public class UsersController extends AbstractAdminController {
 			@RequestParam(value = "userId", required = false) Long userId,
 			@RequestParam(value = "groupId", required = false) Long groupId,
 			@RequestParam(value = "userGroupId", required = false) Long userGroupId) {
-		if(userId != null && groupId != null) {
+		if (userId != null && groupId != null) {
 			UserGroup userGroup = new UserGroup();
 			userGroup.setUserId(userId);
 			userGroup.setGroupId(groupId);
 			UserGroup data = userGroupService.save(userGroup);
 			return data.getId();
-		}
-		else if (userGroupId != null && userGroupId > 0) {
+		} else if (userGroupId != null && userGroupId > 0) {
 			userGroupService.delete(userGroupId);
 		}
 		return 0l;

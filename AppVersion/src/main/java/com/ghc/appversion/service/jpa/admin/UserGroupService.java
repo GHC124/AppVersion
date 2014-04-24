@@ -14,4 +14,9 @@ public interface UserGroupService {
 	UserGroup save(UserGroup userGroup);
 	
 	void delete(Long id);
+	
+	/**
+	 * Count members in a group
+	 */
+	long count(Long groupId);
 }

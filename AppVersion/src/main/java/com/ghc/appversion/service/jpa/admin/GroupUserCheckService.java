@@ -14,5 +14,5 @@ import com.ghc.appversion.domain.admin.GroupUserCheck;
  * 
  */
 public interface GroupUserCheckService {
-	Page<GroupUserCheck> findAllByPage(Pageable pageable, Integer userId, long total);
+	Page<GroupUserCheck> findAllByPage(Pageable pageable, Long userId, long total);
 }

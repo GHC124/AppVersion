@@ -38,17 +38,7 @@ CREATE TABLE USER_GROUP (
 
 /* VIEWS */
 
-CREATE OR REPLACE VIEW VIEW_USER_SUMMARY (USER_ID, EMAIL, GROUP_ID, GROUP_NAME) AS
-  select u.id as USER_ID, u.email, g.id as GROUP_ID, g.name as GROUP_NAME
+CREATE OR REPLACE VIEW VIEW_USER_SUMMARY (USER_ID, EMAIL, GROUP_ID, GROUP_NAME, USER_GROUP_ID) AS
+  select u.id as USER_ID, u.email, g.id as GROUP_ID, g.name as GROUP_NAME, ug.id as USER_GROUP_ID
 from users u left join user_group ug on u.id = ug.user_id
 left join  groups g on ug.group_id = g.id;
-
-/* FUNCTIONS */
-DELIMITER //
-
-CREATE FUNCTION x_cast_to_int(number bigint) RETURNS int
-BEGIN
-    return number;
-END//
-
-DELIMITER ;

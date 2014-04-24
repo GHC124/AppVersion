@@ -8,14 +8,14 @@ import java.io.Serializable;
  */
 public class GroupUserCheck implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private Integer mId;
+	private Long mId;
 	private String mName;
-	private Integer mUserGroupId;
+	private Long mUserGroupId;
 
 	public GroupUserCheck(Integer id, String name, Integer userGroupId) {
-		mId = id;
+		mId = id.longValue();
 		mName = name;
-		mUserGroupId = userGroupId;
+		mUserGroupId = userGroupId.longValue();
 	}
 	
 	/**
@@ -25,11 +25,11 @@ public class GroupUserCheck implements Serializable {
 		this(id, name, 0);
 	}
 
-	public Integer getId() {
+	public Long getId() {
 		return mId;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		mId = id;
 	}
 
@@ -41,11 +41,11 @@ public class GroupUserCheck implements Serializable {
 		mName = name;
 	}
 
-	public Integer getUserGroupId() {
+	public Long getUserGroupId() {
 		return mUserGroupId;
 	}
 
-	public void setUserGroupId(Integer userGroupId) {
+	public void setUserGroupId(Long userGroupId) {
 		mUserGroupId = userGroupId;
 	}
 }

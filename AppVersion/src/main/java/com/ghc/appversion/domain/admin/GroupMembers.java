@@ -1,5 +1,5 @@
 /**
- * UserSummary.java
+ * GroupMembers.java
  *
  *	
  */
@@ -8,18 +8,18 @@ package com.ghc.appversion.domain.admin;
 import java.io.Serializable;
 
 /**
- * Select all users information(email, groups)
+ * Members in a group
  */
-public class UserSummary implements Serializable {
+public class GroupMembers implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private Long mUserId;
 	private String mEmail;
-	private String mGroupNames;	
-	
-	public UserSummary(Integer userId, String email, String groupNames) {
+	private Long mUserGroupId;
+
+	public GroupMembers(Integer userId, String email, Integer userGroupId) {
 		mUserId = userId.longValue();
 		mEmail = email;
-		mGroupNames = groupNames;
+		mUserGroupId = userGroupId.longValue();
 	}
 
 	public Long getUserId() {
@@ -38,12 +38,12 @@ public class UserSummary implements Serializable {
 		mEmail = email;
 	}
 
-	public String getGroupNames() {
-		return mGroupNames;
+	public Long getUserGroupId() {
+		return mUserGroupId;
 	}
 
-	public void setGroupNames(String groupNames) {
-		mGroupNames = groupNames;
+	public void setUserGroupId(Long userGroupId) {
+		mUserGroupId = userGroupId;
 	}
-	
+
 }

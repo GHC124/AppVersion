@@ -24,9 +24,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ghc.appversion.domain.admin.Group;
+import com.ghc.appversion.domain.admin.GroupMembers;
 import com.ghc.appversion.domain.admin.GroupUserCheck;
+import com.ghc.appversion.service.jpa.admin.GroupMembersService;
 import com.ghc.appversion.service.jpa.admin.GroupService;
 import com.ghc.appversion.service.jpa.admin.GroupUserCheckService;
+import com.ghc.appversion.service.jpa.admin.UserGroupService;
 import com.ghc.appversion.web.form.ErrorMessage;
 import com.ghc.appversion.web.form.Message;
 import com.ghc.appversion.web.form.ValidationResponse;
@@ -41,8 +44,14 @@ public class GroupsController extends AbstractAdminController {
 	private GroupService groupService;
 	
 	@Autowired
+	private UserGroupService userGroupService;
+	
+	@Autowired
 	private GroupUserCheckService groupUserCheckService;
-
+	
+	@Autowired
+	private GroupMembersService groupMembersService;
+	
 	@RequestMapping(method = RequestMethod.GET)
 	public String list(Model model) {
 		Group group = new Group();
@@ -152,7 +161,7 @@ public class GroupsController extends AbstractAdminController {
 			@RequestParam(value = "rows", required = false) Integer rows,
 			@RequestParam(value = "sidx", required = false) String sortBy,
 			@RequestParam(value = "sord", required = false) String order,
-			@RequestParam(value = "userId", required = true) Integer userId) {
+			@RequestParam(value = "userId", required = true) Long userId) {
 		Sort sort = null;
 		String orderBy = sortBy;
 		if (orderBy != null && order != null) {
@@ -171,6 +180,40 @@ public class GroupsController extends AbstractAdminController {
 		long total = groupService.count();
 		Page<GroupUserCheck> groupPage = groupUserCheckService.findAllByPage(pageRequest, userId, total);
 		DataGrid<GroupUserCheck> groupGrid = new DataGrid<>();
+		groupGrid.setCurrentPage(groupPage.getNumber() + 1);
+		groupGrid.setTotalPages(groupPage.getTotalPages());
+		groupGrid.setTotalRecords(groupPage.getTotalElements());
+		groupGrid.setData(groupPage.getContent());
+
+		return groupGrid;
+	}
+	
+	@RequestMapping(value = "/listgrid", params = "members", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public DataGrid<GroupMembers> listGridMembers(
+			@RequestParam(value = "page", required = false) Integer page,
+			@RequestParam(value = "rows", required = false) Integer rows,
+			@RequestParam(value = "sidx", required = false) String sortBy,
+			@RequestParam(value = "sord", required = false) String order,
+			@RequestParam(value = "groupId", required = false) Long groupId) {
+		Sort sort = null;
+		String orderBy = sortBy;
+		if (orderBy != null && order != null) {
+			if (order.equals("desc")) {
+				sort = new Sort(Sort.Direction.DESC, orderBy);
+			} else {
+				sort = new Sort(Sort.Direction.ASC, orderBy);
+			}
+		}
+		PageRequest pageRequest = null;
+		if (sort != null) {
+			pageRequest = new PageRequest(page - 1, rows, sort);
+		} else {
+			pageRequest = new PageRequest(page - 1, rows);
+		}
+		long total = userGroupService.count(groupId);
+		Page<GroupMembers> groupPage = groupMembersService.findAllByPage(pageRequest, groupId, total);
+		DataGrid<GroupMembers> groupGrid = new DataGrid<>();
 		groupGrid.setCurrentPage(groupPage.getNumber() + 1);
 		groupGrid.setTotalPages(groupPage.getTotalPages());
 		groupGrid.setTotalRecords(groupPage.getTotalElements());

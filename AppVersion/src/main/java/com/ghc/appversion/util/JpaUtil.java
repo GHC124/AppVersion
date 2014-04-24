@@ -6,6 +6,7 @@
 package com.ghc.appversion.util;
 
 import java.lang.reflect.Constructor;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +21,11 @@ public class JpaUtil {
 		List<Class<?>> tupleTypes = new ArrayList<>();
 		for (Object field : tuple) {
 			if(field != null) {
-				tupleTypes.add(field.getClass());
+				if(field instanceof BigInteger) {
+					tupleTypes.add(Long.class);
+				}else {
+					tupleTypes.add(field.getClass());
+				}
 			}else {
 				tupleTypes.add(String.class);
 			}
@@ -46,5 +51,13 @@ public class JpaUtil {
 		@SuppressWarnings("unchecked")
 		List<Object[]> records = query.getResultList();
 		return map(type, records);
+	}
+	
+	public static <T> T getSingleResult(Query query, Class<T> type) {
+		Object object = query.getSingleResult();
+		if(object instanceof BigInteger) {
+			object = ((BigInteger)object).longValue();
+		}
+		return type.cast(object);
 	}
 }

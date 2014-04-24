@@ -92,21 +92,8 @@
 		        beforeRequest: function(){		        	
 		        },
 		        loadComplete: function() {
-			    	var grid = $("#listGroup");
-		            var pager = $(grid[0].p.pager);
-		            var pagerInfo = $(grid[0].p.pager + '_right');
-		            var divPagerInfo = pager.find("#divPagerInfo");
-		           	if(divPagerInfo.length == 0){
-		           		var tableGroup = pager.find("table.ui-pg-table:first");
-		           		divPagerInfo = $("<div></div>");
-		           		divPagerInfo.attr("id","divPagerInfo");
-		           		divPagerInfo.append(pagerInfo.html());
-			            $(tableGroup).after(divPagerInfo);
-			            pagerInfo.html("");
-			            
-			            var pagerCenter = $(grid[0].p.pager + '_center');
-			           	pagerCenter.css({"width":"230px"});
-			        }		           			           	
+		        	var grid = $(this);
+			    	moveJQGridPagerInfo2Bottom(grid);		           			           	
 		        }
 		      }); 
 		});
