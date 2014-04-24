@@ -25,7 +25,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ghc.appversion.domain.admin.User;
 import com.ghc.appversion.domain.admin.UserGroup;
+import com.ghc.appversion.domain.admin.UserGroupCheck;
 import com.ghc.appversion.domain.admin.UserSummary;
+import com.ghc.appversion.service.jpa.admin.UserGroupCheckService;
 import com.ghc.appversion.service.jpa.admin.UserGroupService;
 import com.ghc.appversion.service.jpa.admin.UserService;
 import com.ghc.appversion.service.jpa.admin.UserSummaryService;
@@ -47,6 +49,9 @@ public class UsersController extends AbstractAdminController {
 
 	@Autowired
 	private UserGroupService userGroupService;
+	
+	@Autowired
+	private UserGroupCheckService userGroupCheckService;
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String list(Model model) {
@@ -177,6 +182,44 @@ public class UsersController extends AbstractAdminController {
 		Page<UserSummary> userPage = userSummaryService.findAllByPage(
 				pageRequest, total, filterGroup);
 		DataGrid<UserSummary> userGrid = new DataGrid<>();
+		userGrid.setCurrentPage(userPage.getNumber() + 1);
+		userGrid.setTotalPages(userPage.getTotalPages());
+		userGrid.setTotalRecords(userPage.getTotalElements());
+		userGrid.setData(userPage.getContent());
+
+		return userGrid;
+	}
+	
+	/**
+	 * Select all users and show that user joined a specific group or not
+	 */
+	@RequestMapping(value = "/listGroupCheck", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public DataGrid<UserGroupCheck> listGridGroupCheck(
+			@RequestParam(value = "groupId", required = false) Long groupId,
+			@RequestParam(value = "page", required = false) Integer page,
+			@RequestParam(value = "rows", required = false) Integer rows,
+			@RequestParam(value = "sidx", required = false) String sortBy,
+			@RequestParam(value = "sord", required = false) String order) {
+		Sort sort = null;
+		String orderBy = sortBy;
+		if (orderBy != null && order != null) {
+			if (order.equals("desc")) {
+				sort = new Sort(Sort.Direction.DESC, orderBy);
+			} else {
+				sort = new Sort(Sort.Direction.ASC, orderBy);
+			}
+		}
+		PageRequest pageRequest = null;
+		if (sort != null) {
+			pageRequest = new PageRequest(page - 1, rows, sort);
+		} else {
+			pageRequest = new PageRequest(page - 1, rows);
+		}
+		long total = userService.count();
+		Page<UserGroupCheck> userPage = userGroupCheckService.findAllByPage(
+				pageRequest, groupId, total);
+		DataGrid<UserGroupCheck> userGrid = new DataGrid<>();
 		userGrid.setCurrentPage(userPage.getNumber() + 1);
 		userGrid.setTotalPages(userPage.getTotalPages());
 		userGrid.setTotalRecords(userPage.getTotalElements());

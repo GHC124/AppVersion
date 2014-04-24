@@ -23,8 +23,8 @@
 	<spring:message code="admin_user_group_update_error" var="labelUserGroupUpdate"/>
 	<spring:url value="/admin/users" var="showUserUrl"/>
 	<spring:url value="/admin/users/usergroup" var="editUserGroupUrl" />
-	<!-- Add -->
-	<spring:message code="label_action_save" var="labelActionSave" />
+	<!-- Add Group -->
+	<spring:message code="label_action_save" var="labelActionSave" />		
 	<!-- Delete -->
 	<spring:message code="label_action_delete" var="labelActionDelete"/>
 	<spring:message code="label_admin_group_delete" var="labelGroupDelete"/>
@@ -64,18 +64,23 @@
 		<span id="deleteGroupError" class="error" style="display: none"></span>	
 	</div>
 	<div id="addMemberDialog" title="${labelAddMember}" class="dialog member-dialog" style="display: none">
-    	<table id="listUser" class="table table-bordered"><tr><td></td></tr></table> 
-    	<span id="pagerUser"></span> 
+    	<div id="userMessage" style="display: none" class="error"><span></span></div>
+    	<div>
+    		<table id="listUser" class="table table-bordered"><tr><td></td></tr></table> 
+    		<span id="pagerUser"></span>
+    	</div> 
 	</div>
     <script type="text/javascript"> 
+    	<![CDATA[
 	    $(function(){       
 	      $("#list").jqGrid({ 
 	        url:'${showGroupUrl}/listgrid', 
 	        datatype: 'json', 
 	        mtype: 'GET', 
-	        colNames:['${labelGroupName}', '${labelActions}'], 
+	        colNames:['${labelGroupName}', '${labelGroupMembers}', '${labelActions}'], 
 	        colModel:[  
 	          {name:'name', index:'name', width:150},
+	          {name:'members', index:'members', width:50},
 	          {name:'act', index:'act', sortable:false, width:25}
 	        ], 
 	        jsonReader: { 
@@ -150,13 +155,13 @@
 		    }
 		  });
 	      $("#listUser").jqGrid({ 
-			    url:'${showUserUrl}/listgrid', 
+			    url:'${showUserUrl}/listGroupCheck', 
 			    datatype: 'local', 
 			    mtype: 'GET', 
-			    colNames:['${labelUserEmail}', '${labelActions}'], 
+			    postData:{groupId:getSelectedGroupId},
+			    colNames:['${labelUserEmail}'], 
 			    colModel :[  
-			      {name:'email', index:'email', width:120},
-			      {name:'act', index:'act', sortable:false, width:25}
+			      {name:'email', index:'email', width:160, formatter: checkboxFormatter}			      
 			    ], 
 			    jsonReader : { 
 			        root:"data", 
@@ -176,7 +181,7 @@
 			    height: 280, 
 			    width: 410, 
 			    onSelectRow: function(id){  
-			        
+			    	filterUserClick(id, true);
 			    },
 			    loadComplete: function() {	
 			    	var grid = $(this);
@@ -228,10 +233,8 @@
 	          width: 500,
 	          modal: true,
 	          resizable: false,
-	          buttons: {
-	            "${labelActionSave}": function() {
-	            	
-	            }	            
+	          close: function(){
+	        	  refreshJQGrid("#listMember");
 	          }
 	        });
 	    });
@@ -250,6 +253,48 @@
         		error.find('span').html('${labelUserGroupUpdate}');
         	});	      
 	    }
+	    function checkboxFormatter(cellvalue, options, rowObject) {
+			var s = $('<div><input id="filterUser_'+ rowObject.id +'" type="checkbox" onclick="filterUserClick('+ rowObject.id +');" style="height: auto; margin: 5px"/><span>'+ cellvalue +'</span></div>');
+	    	console.log(rowObject);
+			if(rowObject.userGroupId){
+	    		var checkbox = s.find("#filterUser_" + rowObject.id);
+	    		checkbox.attr('usergroup', rowObject.userGroupId);
+	    		checkbox.attr('checked', 'checked');
+	    	}
+	    	return s.html();
+    	}
+	    function filterUserClick(id, check){
+	    	var error = $("#userMessage");
+    		error.css({"display": "none"});
+    		error.find('span').html('');
+    		
+	    	var checkbox = $('#filterUser_' + id);
+	    	if(check){	
+	    		checkbox.prop('checked', !checkbox.prop('checked'));
+	    	}	
+	    	var checked = checkbox.prop('checked');
+	    	var data = {};
+	    	var url = '';
+	    	if(checked){
+	    		var groupId = getSelectedGroupId();
+	    		url = '${editUserGroupUrl}' + '?userId=' + id + '&groupId=' + groupId;
+	    	}else{
+	    		url = '${editUserGroupUrl}' + '?userGroupId=' + checkbox.attr('usergroup');
+	    	}
+	    	disableInputs('#addMemberDialog','checkbox');
+        	$.post(url, data, function(response) {
+        			enableInputs('#addMemberDialog','checkbox');
+        		}, 'json').done(function(data){
+        			checkbox.attr('usergroup', data);        			
+        		}).fail(function(){
+       				var error = $("#userMessage");
+	        		error.css({"display": "block"});
+	        		error.find('span').html('${labelUserGroupUpdate}');
+	        	});	      
+	    }
+	    function getSelectedGroupId(){
+	    	return getJQGridSelectedRow($('#list'));
+	    }
 	    function showNewGroupDialog(){
 	    	var dialog = $("#newGroupDialog");
 	        dialog.dialog("open");
@@ -265,8 +310,8 @@
 	    function showAddMemberDialog(){
 	    	var dialog = $("#addMemberDialog");
 	        dialog.dialog("open");
-	        var id = getJQGridSelectedRow($('#listUser'));
-	        refreshJQGrid('#listUser', { page: 1, postData: {groupId:id}, datatype: "json" });
+	        refreshJQGrid('#listUser', { page: 1, datatype: "json" });
 	    }	    
+    ]]>
     </script>
 </div>

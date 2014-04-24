@@ -107,7 +107,7 @@
 	    	return s.html();
     	}
 	    function filterGroupClick(id, check){
-	    	var error = $("#groups").find("#groupMessage");
+	    	var error = $("#groupMessage");
     		error.css({"display": "none"});
     		error.find('span').html('');
     		
@@ -129,7 +129,7 @@
         		}, 'json').done(function(data){
         			checkbox.attr('usergroup', data);        			
         		}).fail(function(){
-       				var error = $("#groups").find("#groupMessage");
+       				var error = $("#groupMessage");
 	        		error.css({"display": "block"});
 	        		error.find('span').html('${labelUserGroupUpdate}');
 	        	});	      

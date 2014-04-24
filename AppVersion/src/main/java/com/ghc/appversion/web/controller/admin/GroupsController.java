@@ -25,9 +25,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ghc.appversion.domain.admin.Group;
 import com.ghc.appversion.domain.admin.GroupMembers;
+import com.ghc.appversion.domain.admin.GroupSummary;
 import com.ghc.appversion.domain.admin.GroupUserCheck;
 import com.ghc.appversion.service.jpa.admin.GroupMembersService;
 import com.ghc.appversion.service.jpa.admin.GroupService;
+import com.ghc.appversion.service.jpa.admin.GroupSummaryService;
 import com.ghc.appversion.service.jpa.admin.GroupUserCheckService;
 import com.ghc.appversion.service.jpa.admin.UserGroupService;
 import com.ghc.appversion.web.form.ErrorMessage;
@@ -42,6 +44,9 @@ public class GroupsController extends AbstractAdminController {
 
 	@Autowired
 	private GroupService groupService;
+	
+	@Autowired
+	private GroupSummaryService groupSummaryService;
 	
 	@Autowired
 	private UserGroupService userGroupService;
@@ -124,7 +129,7 @@ public class GroupsController extends AbstractAdminController {
 
 	@RequestMapping(value = "/listgrid", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	public DataGrid<Group> listGrid(
+	public DataGrid<GroupSummary> listGrid(
 			@RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "rows", required = false) Integer rows,
 			@RequestParam(value = "sidx", required = false) String sortBy,
@@ -144,8 +149,9 @@ public class GroupsController extends AbstractAdminController {
 		} else {
 			pageRequest = new PageRequest(page - 1, rows);
 		}
-		Page<Group> groupPage = groupService.findAllByPage(pageRequest);
-		DataGrid<Group> groupGrid = new DataGrid<>();
+		long total = groupService.count();
+		Page<GroupSummary> groupPage = groupSummaryService.findAllByPage(pageRequest, total);
+		DataGrid<GroupSummary> groupGrid = new DataGrid<>();
 		groupGrid.setCurrentPage(groupPage.getNumber() + 1);
 		groupGrid.setTotalPages(groupPage.getTotalPages());
 		groupGrid.setTotalRecords(groupPage.getTotalElements());
@@ -154,6 +160,9 @@ public class GroupsController extends AbstractAdminController {
 		return groupGrid;
 	}
 	
+	/**
+	 * Select all groups and show groups that a user joined
+	 */
 	@RequestMapping(value = "/listgrid", params = "user", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
 	public DataGrid<GroupUserCheck> listGridUserCheck(

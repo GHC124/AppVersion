@@ -21,6 +21,12 @@ public interface SQLConstants {
 			"FROM (select * from view_user_summary where GROUP_ID in ( :filterGroup )) as t " +
 			"WHERE 1 group by USER_ID ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
 	
+	/**
+	 * Select all groups information(name, members count)
+	 */
+	String GROUP_SUMMARY_QUERY = "SELECT ID, NAME, (SELECT COUNT(ID) FROM user_group WHERE GROUP_ID = g.ID) as MEMBERS FROM groups g WHERE 1 " +
+			"ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
+	
 	String USER_ID = "userId";
 	/**
 	 * Select all groups and show groups that a user joined
