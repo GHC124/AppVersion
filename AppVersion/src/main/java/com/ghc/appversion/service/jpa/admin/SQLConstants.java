@@ -38,4 +38,10 @@ public interface SQLConstants {
 	 */
 	String GROUP_MEMBERS_QUERY = "SELECT USER_ID,EMAIL,USER_GROUP_ID FROM view_user_summary WHERE GROUP_ID=:groupId " +
 			"ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
+
+	/**
+	 * Select all users and show that user joined a specific group or not
+	 */
+	String USER_GROUP_CHECK_QUERY = "SELECT ID, EMAIL,(SELECT ID FROM user_group WHERE USER_ID = u.ID AND GROUP_ID = :groupId LIMIT 1) as USER_GROUP_ID " +
+			"FROM users as u WHERE 1 ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
 }

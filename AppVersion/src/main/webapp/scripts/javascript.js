@@ -72,12 +72,20 @@ function formAjaxSubmit(formName, validateUrl, successMethod, failMethod){
 	}, 'json');
 }
 
+function enableInput(input){
+	input.button('enable'); 
+}
+
+function disableInput(input){
+	input.button('disable'); 
+}
+
 function disableInputs(formName, type){
 	var $form = $(formName);
 	var $inputs = $form.find('input[type="' + type + '"]');
 	for (var i = 0; i < $inputs.length; i++) {
 		var $item = $($inputs[i]);
-		$item.attr("disabled", "disabled"); 
+		disableInput($item);
 	}
 }
 
@@ -86,7 +94,7 @@ function enableInputs(formName, type){
 	var $inputs = $form.find('input[type="' + type + '"]');
 	for (var i = 0; i < $inputs.length; i++) {
 		var $item = $($inputs[i]);
-		$item.removeAttr("disabled"); 
+		enableInput($item);
 	}
 }
 

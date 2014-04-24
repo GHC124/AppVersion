@@ -40,20 +40,17 @@
 	    </div>
     </div>
     <div style="float:right">
-    	<fieldset>
-    		<legend>${labelGroupInfo}</legend>
-    		<fieldset>
-    			<legend>${labelGroupMembers}</legend>
-    			<div id="memberMessage" style="display: none" class="error"><span></span></div>
-    			<div> 
-			    	<table id="listMember" class="table table-bordered"><tr><td></td></tr></table> 
-			    	<span id="pagerMember"></span> 
-			    </div>
-			    <div>
-			    	<button id="btnAddMember" onclick="showAddMemberDialog();">${labelAddMember}</button>
-			    </div>			    
-    		</fieldset>
-    	</fieldset>
+   		<fieldset>
+   			<legend>${labelGroupMembers}</legend>
+   			<div id="memberMessage" style="display: none" class="error"><span></span></div>
+   			<div> 
+		    	<table id="listMember" class="table table-bordered"><tr><td></td></tr></table> 
+		    	<span id="pagerMember"></span> 
+		    </div>
+		    <div>
+		    	<button id="btnAddMember" onclick="showAddMemberDialog();" disabled="disabled">${labelAddMember}</button>
+		    </div>			    
+   		</fieldset>
 	</div>
     <div id="newGroupDialog" title="${labelGroupNew}" class="dialog add-dialog group-dialog" style="display: none">
     	<html:form formUrl="/admin/groups?ajax" modelAttribute="group" id="groupUpdateForm" method="POST">
@@ -100,6 +97,7 @@
 	        width: 500, 
 	        onSelectRow: function(id){  
 	        	refreshJQGrid('#listMember', { page: 1, postData: {groupId:id}, datatype: "json" });
+	        	enableInput($('#btnAddMember'));
 	        },
 	        loadComplete: function () {
 	            var grid = $(this);
@@ -111,6 +109,7 @@
 	    		});	
 		        var listUser = $('#listMember');
 		        clearJQGridData(listUser, { page: 1, postData: '' });
+		        disableInput($('#btnAddMember'));
 		    }
 	      }); 
 	      $("#listMember").jqGrid({ 
@@ -268,6 +267,6 @@
 	        dialog.dialog("open");
 	        var id = getJQGridSelectedRow($('#listUser'));
 	        refreshJQGrid('#listUser', { page: 1, postData: {groupId:id}, datatype: "json" });
-	    }
+	    }	    
     </script>
 </div>
