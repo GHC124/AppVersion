@@ -21,10 +21,10 @@
 	<h1>${formTitle}</h1>
 	<div id="userUpdate">
 		<html:form formUrl="" modelAttribute="user" method="POST" id="userUpdateForm">
-			<html:inputField label="${labelUserEmail}" name="email"/>
-    		<html:inputField label="${labelUserFirstName}" name="firstName"/>
+			<html:inputField label="${labelUserEmail}" name="email" require="true"/>
+    		<html:inputField label="${labelUserFirstName}" name="firstName" require="true"/>
     		<html:inputField label="${labelUserLastName}" name="lastName"/>
-    		<html:inputField label="${labelUserIsActive}" name="isActive"/>
+    		<html:inputField label="${labelUserIsActive}" name="isActive" require="true"/>
     		<form:hidden path="version" />
     		<form:hidden path="password" />      	
     		<br/>

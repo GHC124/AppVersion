@@ -26,6 +26,7 @@
 	<spring:message code="validation.password.NotMatch.message" var="messageConfirmPasswordNotMatch"/>
 	<spring:message code="validation.password.NotEmpty.message" var="messagePasswordRequire"/>
 	<spring:message code="label_admin_user_is_active" var="labelUserIsActive" />
+	<spring:message code="admin_user_save_fail" var="messageUserSaveFail"/>
 	<spring:message code="label_action_save" var="labelActionSave" />
 	<div style="float:left">
 		<div> 
@@ -47,8 +48,8 @@
     </div>
     <div id="newUserDialog" title="${labelUserNew}" class="dialog add-dialog" style="display: none">
     	<html:form formUrl="/admin/users?ajax" modelAttribute="user" id="userUpdateForm" method="POST">
-    		<html:inputField label="${labelUserEmail}" name="email"/>
-    		<html:passwordField label="${labelUserPassword}" name="password"/>
+    		<html:inputField label="${labelUserEmail}" name="email" require="true"/>
+    		<html:passwordField label="${labelUserPassword}" name="password" require="true"/>
     		<div class="control-group" id="div_confirmPassword">
 				<label for="confirmPassword" class="control-label">${labelConfirmPassword}</label>
 				<div class="controls">
@@ -58,9 +59,9 @@
 					</div>
 				</div>
 			</div>
-    		<html:inputField label="${labelUserFirstName}" name="firstName"/>    		
+    		<html:inputField label="${labelUserFirstName}" name="firstName" require="true"/>    		
     		<html:inputField label="${labelUserLastName}" name="lastName"/>
-    		<html:inputField label="${labelUserIsActive}" name="isActive"/>
+    		<html:inputField label="${labelUserIsActive}" name="isActive" require="true"/>
     		<form:hidden path="version" />    		    		
     	</html:form>    	
 	</div>
@@ -136,18 +137,8 @@
 		        	}
 		        },
 		        loadComplete: function() {
-			    	var grid = $("#listGroup");
-		            var pager = $(grid[0].p.pager);
-		            var pagerInfo = $(grid[0].p.pager + '_right');
-		            var divPagerInfo = pager.find("#divPagerInfo");
-		           	if(divPagerInfo.length == 0){
-		           		var tableGroup = pager.find("table.ui-pg-table:first");
-		           		divPagerInfo = $("<div></div>");
-		           		divPagerInfo.attr("id","divPagerInfo");
-		           		divPagerInfo.append(pagerInfo.html());
-			            $(tableGroup).after(divPagerInfo);
-			            pagerInfo.html("");
-			        }
+			    	var grid = $(this);
+			    	moveJQGridPagerInfo2Bottom(grid);		  
 		           	if(refreshUserList){
 		           		refreshUserList = false;
 		           		refreshJQGrid("#list");
@@ -186,7 +177,9 @@
 				        	formAjaxSubmit("#userUpdateForm","${addUserAjax}",function(){
 				        		refreshJQGrid("#list");
 				        		$("#newUserDialog").dialog("close");
-				          	}, function(response){	              			              		
+				          	},null,null,function(){
+				          		removeInputError('#userUpdateForm');
+			              		addInputError('#userUpdateForm #div_email','${messageUserSaveFail}');
 				          	});
 			        	}
 			        }	            
@@ -219,6 +212,8 @@
 			function showNewUserDialog(){
 				var dialog = $("#newUserDialog");
 			    dialog.dialog("open");
+			    $('#password').val("");
+	        	$('#confirmPassword').val("");
 			    removeInputError("#userUpdateForm");
 			}
     </script>

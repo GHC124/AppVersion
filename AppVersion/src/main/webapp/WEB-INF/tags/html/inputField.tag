@@ -5,12 +5,16 @@
 	description="Name of corresponding property in bean object"%>
 <%@ attribute name="label" required="true" rtexprvalue="true"
 	description="Label appears in red color if input is considered as invalid after submission"%>
-
+<%@ attribute name="require" required="false" rtexprvalue="true" 
+	description="This field is require or not"%>
+	
 <spring:bind path="${name}">
 	<c:set var="cssGroup"
-		value="control-group ${status.error ? 'error' : '' }" />
+		value="control-group ${require ? 'require' : '' } ${status.error ? 'error' : '' }" />
 	<div class="${cssGroup}" id="div_${name}">
-		<form:label path="${name}" class="control-label">${label}</form:label>
+		<form:label path="${name}" class="control-label">${label}
+			<span class="star">*</span>			
+		</form:label>
 		<div class="controls">
 			<form:input path="${name}" />
 			<div class="div-help-inline">

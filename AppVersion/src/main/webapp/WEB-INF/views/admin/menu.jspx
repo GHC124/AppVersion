@@ -8,10 +8,12 @@
 	<spring:message code="label_logout" var="labelLogout"/> 
     <spring:message code="label_welcome" var="labelWelcome"/>
     <spring:message code="menu_admin_user" var="menuUser"/>
-    <spring:message code="menu_admin_group" var="menuGroup"/>    
+    <spring:message code="menu_admin_group" var="menuGroup"/>
+    <spring:message code="menu_admin_app" var="menuApp"/>     
     <spring:url var="logoutUrl" value="/j_spring_security_logout" />
     <spring:url var="userUrl" value="/admin/users" />
     <spring:url var="groupUrl" value="/admin/groups" />
+    <spring:url var="appUrl" value="/admin/apps" />
    	<spring:eval
 		expression="pageContext.request.getAttribute('javax.servlet.forward.request_uri').toString()"
 		var="currentUrl" />
@@ -27,7 +29,9 @@
     			nav.find(".menu-user").addClass("active");
     		}else if(currentUrl.indexOf('groups')>-1){
     			nav.find(".menu-group").addClass("active");
-    		} 
+    		}else if(currentUrl.indexOf('apps')>-1){
+    			nav.find(".menu-app").addClass("active");
+    		}  
     	});
     </script>
 	<nav class="navbar" role="navigation">
@@ -38,7 +42,10 @@
         </li>
         <li>
           <a href="${groupUrl}" class="menu menu-group"><span>${menuGroup}</span></a>
-        </li>          
+        </li>
+        <li>
+          <a href="${appUrl}" class="menu menu-app"><span>${menuApp}</span></a>
+        </li>            
       </ul>
       <ul class="nav navbar-right">
         <li>

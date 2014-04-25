@@ -1,6 +1,16 @@
 package com.ghc.appversion.service.jpa.admin;
 
 public interface SQLConstants {
+	//
+	// Database constants
+	//
+	String PLATFORM_TYPE_ANDROID = "ANDROID";
+	String PLATFORM_TYPE_IOS = "IOS";
+	
+	
+	//
+	// SQL Query constants
+	//
 	String ORDER_BY = ":orderBy";
 	String SORT = ":sort";
 	String LIMIT = "limit";

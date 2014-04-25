@@ -17,16 +17,15 @@ import javax.persistence.Query;
  * 
  */
 public class JpaUtil {
-	public static <T> T map(Class<T> type, Object[] tuple) {
+	private static <T> T map(Class<T> type, Object[] tuple) {
 		List<Class<?>> tupleTypes = new ArrayList<>();
-		for (Object field : tuple) {
-			if(field != null) {
-				if(field instanceof BigInteger) {
-					tupleTypes.add(Long.class);
-				}else {
-					tupleTypes.add(field.getClass());
+		for (int i = 0; i < tuple.length; i++) {
+			if (tuple[i] != null) {
+				if (tuple[i] instanceof BigInteger) {
+					tuple[i] = new Long(((BigInteger) tuple[i]).longValue());
 				}
-			}else {
+				tupleTypes.add(tuple[i].getClass());
+			} else {
 				tupleTypes.add(String.class);
 			}
 		}
@@ -39,7 +38,7 @@ public class JpaUtil {
 		}
 	}
 
-	public static <T> List<T> map(Class<T> type, List<Object[]> records) {
+	private static <T> List<T> map(Class<T> type, List<Object[]> records) {
 		List<T> result = new LinkedList<>();
 		for (Object[] record : records) {
 			result.add(map(type, record));
@@ -52,11 +51,11 @@ public class JpaUtil {
 		List<Object[]> records = query.getResultList();
 		return map(type, records);
 	}
-	
+
 	public static <T> T getSingleResult(Query query, Class<T> type) {
 		Object object = query.getSingleResult();
-		if(object instanceof BigInteger) {
-			object = ((BigInteger)object).longValue();
+		if (object instanceof BigInteger) {
+			object = ((BigInteger) object).longValue();
 		}
 		return type.cast(object);
 	}

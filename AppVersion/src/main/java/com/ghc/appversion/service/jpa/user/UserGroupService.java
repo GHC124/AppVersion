@@ -3,7 +3,7 @@
  *
  *	
  */
-package com.ghc.appversion.service.jpa.admin;
+package com.ghc.appversion.service.jpa.user;
 
 import com.ghc.appversion.domain.admin.UserGroup;
 

@@ -30,7 +30,9 @@ function cancelDefaultAction(e) {
 	 return false;
 }
 
-function collectFormData(fields) {
+function collectFormData(formId) {
+	var form = $(formId);
+	var fields = form.find('input');
 	var data = {};
 	for (var i = 0; i < fields.length; i++) {
 		var $item = $(fields[i]);
@@ -39,37 +41,57 @@ function collectFormData(fields) {
 	return data;
 }
 
-function addInputError(fieldName, message){
-	var $controlGroup = $(fieldName);
+function populateFormData(formId, data) {
+	var form = $(formId);
+	var fields = form.find('input');
+	for (var i = 0; i < fields.length; i++) {
+		var $item = $(fields[i]);
+		 $item.val(data[$item.attr('name')]);
+	}
+}
+
+function addInputError(fieldId, message){
+	var $controlGroup = $(fieldId);
 	$controlGroup.find('.control-label').addClass('error');
 	$controlGroup.find('.help-inline').addClass('error');
 	$controlGroup.find('.help-inline').append(message);			
 }
 
-function removeInputError(formName){
-	var $form = $(formName);	
+function removeInputError(formId){
+	var $form = $(formId);	
 	$form.find('.control-label').removeClass('error');
 	$form.find('.help-inline').removeClass('error');
 	$form.find('.help-inline').empty();
 	$form.find('.alert').remove();		
 }
 
-function formAjaxSubmit(formName, validateUrl, successMethod, failMethod){
-	var $form = $(formName);
-	var $inputs = $form.find('input');
-	var data = collectFormData($inputs);				
+function formAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMethod, errorMethod){
+	var data = collectFormData(formId);				
 	$.post(validateUrl, data, function(response) {
-		removeInputError(formName);
+		removeInputError(formId);
 		if (response.status == 'FAIL') {
+			console.log('error');
 			for (var i = 0; i < response.result.length; i++) {
 				var item = response.result[i];
-				addInputError("#div_" + item.fieldName, item.message+"<br/>");								
+				addInputError(formId + " #div_" + item.fieldName, item.message+"<br/>");								
 			}
-			failMethod(response);
+			if(failMethod){
+				failMethod(response);
+			}
 		} else {
-			successMethod();
+			if(successMethod){
+				successMethod();
+			}
 		}
-	}, 'json');
+	}, 'json').done(function(){
+		if(doneMethod){
+			doneMethod();
+		}
+	}).fail(function(){
+		if(errorMethod){
+			errorMethod();
+		}
+	});
 }
 
 function enableInput(input){
@@ -193,7 +215,15 @@ function getJQGridSelectedRow(grid){
 	return grid.jqGrid('getGridParam','selrow');
 }
 
+function setJQGridSelectedRow(grid, rowId){
+	grid.jqGrid('setSelection',rowId); 
+}
+
 function deleteJQGridRow(grid, rowId){
 	grid.jqGrid('delRowData',rowId);
+}
+
+function getJQGridUserData(grid){
+	return grid.getGridParam('userData');
 }
 

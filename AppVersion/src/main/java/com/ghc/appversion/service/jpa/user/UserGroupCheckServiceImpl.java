@@ -3,7 +3,7 @@
  *
  *	
  */
-package com.ghc.appversion.service.jpa.admin;
+package com.ghc.appversion.service.jpa.user;
 
 import static com.ghc.appversion.service.jpa.admin.SQLConstants.GROUP_ID;
 import static com.ghc.appversion.service.jpa.admin.SQLConstants.LIMIT;

@@ -3,7 +3,7 @@
  *
  *	
  */
-package com.ghc.appversion.service.jpa.admin;
+package com.ghc.appversion.service.jpa.admin.group;
 
 import java.util.List;
 

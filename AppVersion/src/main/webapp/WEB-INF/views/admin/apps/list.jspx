@@ -1,0 +1,92 @@
+<div xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:spring="http://www.springframework.org/tags"
+	xmlns:joda="http://www.joda.org/joda/time/tags"
+	xmlns:form="http://www.springframework.org/tags/form"
+	xmlns:html="urn:jsptagdir:/WEB-INF/tags/html" 
+	xmlns:ajax="urn:jsptagdir:/WEB-INF/tags/ajax">
+	<jsp:directive.page contentType="text/html;charset=UTF-8" />
+	<jsp:output omit-xml-declaration="yes" />
+	<!-- List -->
+	<spring:message code="label_admin_platform" var="labelPlatform" />
+	<spring:message code="label_admin_platform_name" var="labelPlatformName" />
+	<spring:message code="label_admin_app_new" var="labelNewApp"/>
+	<spring:url value="/admin/apps" var="showAppUrl"/>
+	<spring:message code="label_action_save" var="labelActionSave" />
+	<div style="float:left">
+		<div> 
+	    	<table id="list" class="table table-bordered"><tr><td></td></tr></table> 
+	    	<span id="pager"></span> 
+	    </div> 
+	    <div>
+	    	<button id="btnNewApp" onclick="showNewAppDialog();">${labelNewApp}</button>
+	    </div>
+    </div>
+    <div style="float:right">
+    	<fieldset>
+    		<legend>${labelPlatform}</legend>
+	    	<div> 
+		    	<table id="listPlatform" class="table table-bordered"><tr><td></td></tr></table> 
+		    	<span id="pagerPlatform"></span> 
+		    </div> 
+	    </fieldset>
+    </div>
+    <div id="newAppDialog" title="${labelNewApp}" class="dialog add-dialog" style="display: none">
+    	
+	</div>
+    <script type="text/javascript">
+    	$(function(){       
+	    	$("#listPlatform").jqGrid({ 
+		        url:'${showAppUrl}/platform', 
+		        datatype: 'json', 
+		        mtype: 'GET', 
+		        colNames:['${labelPlatformName}'], 
+		        colModel :[  
+		          {name:'name', index:'name', width:150, formatter: checkboxFormatter} 
+		        ], 
+		        jsonReader : { 
+		            root:"data", 
+		            page: "currentPage", 
+		            total: "totalPages", 
+		            records: "totalRecords", 
+		            repeatitems: false, 
+		            id: "id" 
+		        },       
+		        pager: '#pagerPlatform',
+		        viewrecords: true,
+		        rowNum:10, 
+		        rowList:[10,20,30,50], 
+		        sortname: 'name', 
+		        sortorder: 'asc', 
+		        gridview: true, 
+		        height: 250, 
+		        width: 300, 
+		        onSelectRow: function(id){  
+		        	
+		        }, 
+		        beforeRequest: function(){
+		        },
+		        loadComplete: function() {
+		        	var grid = $(this);
+		        	moveJQGridPagerInfo2Bottom(grid);		           	
+		        }
+		      }); 
+			 $( "#newAppDialog" ).dialog({
+			      autoOpen: false,
+			      height: 400,
+			      width: 400,
+			      modal: true,
+			      resizable: false,
+			      buttons: {
+			        "${labelActionSave}": function() {
+			        	
+			        }	            
+			      }
+			    });
+			});	    	
+			function showNewAppDialog(){
+				var dialog = $("#newAppDialog");
+			    dialog.dialog("open");			    
+			}
+    </script>
+</div>

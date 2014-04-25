@@ -395,6 +395,14 @@ div.controls span {
 	color: red; 
 	font-size: 0.8em;
 }
+div.control-group .star{
+	display: none;
+}
+
+div.require .star {
+	color: red; 
+	display: inline;
+}
 
 .error{
 	color: red;

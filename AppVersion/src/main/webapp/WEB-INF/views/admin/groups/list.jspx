@@ -13,7 +13,6 @@
 	<spring:message code="label_admin_group_new" var="labelGroupNew"/>
 	<spring:message code="label_action_edit" var="labelGroupEdit"/>
 	<spring:url value="/admin/groups" var="showGroupUrl"/>
-	<spring:url value="/admin/groups?ajax" var="addGroupAjax"/>
 	<!-- Group Info -->
 	<spring:message code="label_admin_group_info" var="labelGroupInfo"/>
 	<spring:message code="label_admin_group_members" var="labelGroupMembers"/>
@@ -24,12 +23,18 @@
 	<spring:url value="/admin/users" var="showUserUrl"/>
 	<spring:url value="/admin/users/usergroup" var="editUserGroupUrl" />
 	<!-- Add Group -->
-	<spring:message code="label_action_save" var="labelActionSave" />		
+	<spring:message code="label_action_save" var="labelActionSave" />
+	<spring:message code="admin_group_save_fail" var="messageGroupSaveFail"/>
+	<spring:url value="/admin/groups?createAjax" var="addGroupAjax"/>		
 	<!-- Delete -->
 	<spring:message code="label_action_delete" var="labelActionDelete"/>
 	<spring:message code="label_admin_group_delete" var="labelGroupDelete"/>
 	<spring:message code="admin_group_delete_confirm" var="messageGroupDelete"/>
 	<spring:message code="admin_group_delete_error" var="messageGroupDeleteError"/>
+	<!-- Edit -->
+	<spring:message code="label_action_edit" var="labelActionEdit" />	
+	<spring:message code="admin_group_get_fail" var="messageGetGroupFail"/>
+	
 	<div style="float:left">
 		<div> 
 	    	<table id="list" class="table table-bordered"><tr><td></td></tr></table> 
@@ -53,11 +58,19 @@
    		</fieldset>
 	</div>
     <div id="newGroupDialog" title="${labelGroupNew}" class="dialog add-dialog group-dialog" style="display: none">
-    	<html:form formUrl="/admin/groups?ajax" modelAttribute="group" id="groupUpdateForm" method="POST">
-    		<html:inputField label="${labelGroupName}" name="name"/>    		
+    	<html:form formUrl="/admin/groups?ajax" modelAttribute="group" id="groupNewForm" method="POST">
+    		<html:inputField label="${labelGroupName}" name="name" require="true"/>    		
     		<form:hidden path="version" />    		    		
     	</html:form>    	
-	</div>	
+	</div>
+	<div id="editGroupDialog" title="${labelGroupEdit}" class="dialog edit-dialog group-dialog" style="display: none">
+    	<html:form formUrl="/admin/groups?ajax" modelAttribute="group" id="groupEditForm" method="POST">
+    		<html:inputField label="${labelGroupName}" name="name" require="true"/>    		
+    		<form:hidden path="version" />    		    		
+    	</html:form>
+    	<br/>
+    	<span id="editGroupError" class="error" style="display: none"></span>    	
+	</div>		
 	<div id="deleteGroupDialog" title="${labelGroupDelete}" class="dialog delete-dialog" style="display: none">   
 		<span id="deleteGroupMessage">${messageGroupDelete}</span> 	  
 		<br/>
@@ -72,15 +85,16 @@
 	</div>
     <script type="text/javascript"> 
     	<![CDATA[
-	    $(function(){       
+    	var globalSelectedGroupId = -1;         
+    	$(function(){       
 	      $("#list").jqGrid({ 
-	        url:'${showGroupUrl}/listgrid', 
+	        url:'${showGroupUrl}/listSummary', 
 	        datatype: 'json', 
 	        mtype: 'GET', 
 	        colNames:['${labelGroupName}', '${labelGroupMembers}', '${labelActions}'], 
 	        colModel:[  
 	          {name:'name', index:'name', width:150},
-	          {name:'members', index:'members', width:50},
+	          {name:'members', index:'members', width:30},
 	          {name:'act', index:'act', sortable:false, width:25}
 	        ], 
 	        jsonReader: { 
@@ -101,20 +115,25 @@
 	        height: 500, 
 	        width: 500, 
 	        onSelectRow: function(id){  
+	        	globalSelectedGroupId = id;
 	        	refreshJQGrid('#listMember', { page: 1, postData: {groupId:id}, datatype: "json" });
 	        	enableInput($('#btnAddMember'));
 	        },
 	        loadComplete: function () {
 	            var grid = $(this);
 	            addAction2JQGrid(grid,'name','act','${labelGroupEdit}','ui-icon-pencil',function(id, value){
-	            	document.location.href ="${showGroupUrl}/" + id; 
+	            	showEditGroupDialog(id, value);
        			});                
 		        addAction2JQGrid(grid,'name','act','${labelActionDelete}','ui-icon-trash',function(id, value){
 	        		showDeleteGroupDialog(id, value);
 	    		});	
 		        var listUser = $('#listMember');
 		        clearJQGridData(listUser, { page: 1, postData: '' });
-		        disableInput($('#btnAddMember'));
+		        if(globalSelectedGroupId > 0){
+		        	setJQGridSelectedRow(grid, globalSelectedGroupId);
+		        }else{
+		        	disableInput($('#btnAddMember'));
+		        }
 		    }
 	      }); 
 	      $("#listMember").jqGrid({ 
@@ -149,7 +168,19 @@
 		    loadComplete: function() {	
 		    	var grid = $(this);
 		    	addAction2JQGrid(grid,'name','act','${labelActionDelete}','ui-icon-trash',function(id, value){
-		    		deleteGroupMember(id, value);
+		    		var error = $("#memberMessage");
+		    		error.css({"display": "none"});
+		    		error.find('span').html('');
+			    	var url = '${editUserGroupUrl}' + '?userGroupId=' + id;
+			    	var data={};
+			    	$.post(url, data, function(response) {
+			    	}, 'json').done(function(data){
+		    			refreshJQGrid('#list');
+		    		}).fail(function(){
+		   				var error = $("#memberMessage");
+		        		error.css({"display": "block"});
+		        		error.find('span').html('${labelUserGroupUpdate}');
+		        	});	      
 		    	});
 		    	moveJQGridPagerInfo2Bottom(grid);
 		    }
@@ -196,10 +227,32 @@
 	          resizable: false,
 	          buttons: {
 	            "${labelActionSave}": function() {
-	            	formAjaxSubmit("#groupUpdateForm","${addGroupAjax}",function(){
+	            	formAjaxSubmit("#groupNewForm","${addGroupAjax}", function(){
+	            		globalSelectedGroupId = -1;
 	            		refreshJQGrid("#list");
 	            		$("#newGroupDialog").dialog("close");
-	              	}, function(response){	              			              		
+	            	}, null, null, function(){
+	            		removeInputError('#newGroupDialog #div_name');
+	              		addInputError('#newGroupDialog #div_name','${messageGroupSaveFail}');
+	              	});
+	            }	            
+	          }
+	        });
+	      $( "#editGroupDialog" ).dialog({
+	          autoOpen: false,
+	          height: 350,
+	          width: 400,
+	          modal: true,
+	          resizable: false,
+	          buttons: {
+	            "${labelActionEdit}": function() {
+	            	var id = $(this).data('id');
+	            	formAjaxSubmit("#groupEditForm","${showGroupUrl}/" + id + "?updateAjax", function(){
+	            		refreshJQGrid("#list");
+	            		$("#editGroupDialog").dialog("close");
+	            	}, null, null, function(){
+	            		removeInputError('#editGroupDialog');
+	              		addInputError('#editGroupDialog #div_name','${messageGroupSaveFail}');
 	              	});
 	            }	            
 	          }
@@ -214,11 +267,15 @@
 	            "${labelActionDelete}": function() {
 	            	var id = $(this).data('id');
 	            	var data = {};
-	            	$.post('${showGroupUrl}' + '/' + id + '?delete', data, function(response) {
+	            	$.post('${showGroupUrl}' + '/' + id + '?deleteAjax', data, function(response) {
 	            		
 	            	}, 'json').done(function(){
+	            		deleteJQGridRow($('#list'), id);
+	            		if(id == globalSelectedGroupId){
+	            			globalSelectedGroupId = -1;
+	            			clearJQGridData($('#listMember'));
+	            		}
 	            		$("#deleteGroupDialog").dialog("close");
-	            		refreshJQGrid("#list");
 	            	}).fail(function(){
 	            		var error = $("#deleteGroupDialog").find("#deleteGroupError");
 	            		error.css({"display": "block"});
@@ -234,28 +291,13 @@
 	          modal: true,
 	          resizable: false,
 	          close: function(){
-	        	  refreshJQGrid("#listMember");
+	        	  refreshJQGrid("#list", {datatype:"json"});	        	  
 	          }
 	        });
 	    });
-	    function deleteGroupMember(id, value){
-	    	var error = $("#memberMessage");
-    		error.css({"display": "none"});
-    		error.find('span').html('');
-	    	var url = '${editUserGroupUrl}' + '?userGroupId=' + id;
-	    	var data={};
-	    	$.post(url, data, function(response) {
-	    	}, 'json').done(function(data){
-    			deleteJQGridRow($('#listMember'), id);        			
-    		}).fail(function(){
-   				var error = $("#memberMessage");
-        		error.css({"display": "block"});
-        		error.find('span').html('${labelUserGroupUpdate}');
-        	});	      
-	    }
-	    function checkboxFormatter(cellvalue, options, rowObject) {
+
+    	function checkboxFormatter(cellvalue, options, rowObject) {
 			var s = $('<div><input id="filterUser_'+ rowObject.id +'" type="checkbox" onclick="filterUserClick('+ rowObject.id +');" style="height: auto; margin: 5px"/><span>'+ cellvalue +'</span></div>');
-	    	console.log(rowObject);
 			if(rowObject.userGroupId){
 	    		var checkbox = s.find("#filterUser_" + rowObject.id);
 	    		checkbox.attr('usergroup', rowObject.userGroupId);
@@ -298,7 +340,22 @@
 	    function showNewGroupDialog(){
 	    	var dialog = $("#newGroupDialog");
 	        dialog.dialog("open");
-	        removeInputError("#groupUpdateForm");
+	        removeInputError("#groupNewForm");
+	    }
+	    function showEditGroupDialog(id, value){
+	    	removeInputError("#groupEditForm");
+	    	$.get('${showGroupUrl}/' + id + '?showAjax', {}, function(response) {
+    			populateFormData('#groupEditForm', response);
+    		}, 'json').done(function(data){
+    			        			
+    		}).fail(function(){
+   				var error = $("#editGroupError");
+        		error.css({"display": "block"});
+        		error.find('span').html('${messageGetGroupFail}');
+        	});	    
+	    	
+	    	var dialog = $("#editGroupDialog");	        
+	        dialog.data('id',id).dialog("open");
 	    }
 	    function showDeleteGroupDialog(id, value){
 	    	var dialog = $("#deleteGroupDialog");
