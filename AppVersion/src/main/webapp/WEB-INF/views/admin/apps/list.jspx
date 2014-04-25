@@ -10,9 +10,19 @@
 	<!-- List -->
 	<spring:message code="label_admin_platform" var="labelPlatform" />
 	<spring:message code="label_admin_platform_name" var="labelPlatformName" />
+	<spring:message code="label_admin_platform_type" var="labelPlatformType" />
+	<spring:message code="label_admin_app_name" var="labelAppName"/>
+	<spring:message code="label_admin_app_platform" var="labelAppPlatform"/>
+	<spring:message code="label_admin_app_lastest_version" var="labelAppVersion"/>
+	<spring:message code="label_admin_app_description" var="labelAppDescription"/>
 	<spring:message code="label_admin_app_new" var="labelNewApp"/>
 	<spring:url value="/admin/apps" var="showAppUrl"/>
 	<spring:message code="label_action_save" var="labelActionSave" />
+	<!-- Platform -->
+	<spring:message code="label_admin_platform_new" var="labelNewPlatform"/>
+	<spring:message code="admin_platform_save_fail" var="messagePlatformSaveFail"/>
+	<spring:url value="/admin/apps/platform?createAjax" var="addPlatformAjax"/>
+	
 	<div style="float:left">
 		<div> 
 	    	<table id="list" class="table table-bordered"><tr><td></td></tr></table> 
@@ -29,20 +39,77 @@
 		    	<table id="listPlatform" class="table table-bordered"><tr><td></td></tr></table> 
 		    	<span id="pagerPlatform"></span> 
 		    </div> 
+		    <div>
+		    	<button id="btnNewPlatform" onclick="showNewPlatformDialog();">${labelNewPlatform}</button>
+		    </div>
 	    </fieldset>
     </div>
     <div id="newAppDialog" title="${labelNewApp}" class="dialog add-dialog" style="display: none">
-    	
+    	<html:form formUrl="/admin/apps?createAjax" modelAttribute="app" id="appNewForm" method="POST">
+    		<html:inputField label="${labelAppName}" name="name" require="true"/>
+    		<html:selectField label="${labelAppPlatform}" name="platformId" require="true">
+    			<form:select path="platformId" items="${listPlatforms}"/>
+    		</html:selectField>
+    		<html:areaField label="${labelAppDescription}" name="description"/>
+    		<form:hidden path="version" />    		    		
+    	</html:form>   
+	</div>
+	<div id="newPlatformDialog" title="${labelNewPlatform}" class="dialog add-dialog" style="display: none">
+    	<html:form formUrl="/admin/apps/platform?createAjax" modelAttribute="platform" id="platformNewForm" method="POST">
+    		<html:inputField label="${labelPlatformName}" name="name" require="true"/>
+    		<html:selectField label="${labelPlatformType}" name="platformType" require="true">
+    			<form:select path="platformType" items="${listPlatformTypes}"/>
+    		</html:selectField>
+    		<form:hidden path="version" />    		    		
+    	</html:form>    
 	</div>
     <script type="text/javascript">
-    	$(function(){       
+    	$(function(){    
+    		$("#list").jqGrid({ 
+		        url:'${showAppUrl}/listgrid', 
+		        datatype: 'json', 
+		        mtype: 'GET', 
+		        colNames:['${labelAppName}','${labelAppPlatform}','${labelAppVersion}'], 
+		        colModel :[  
+		          {name:'name', index:'name', width:150},
+		          {name:'platformId', index:'platformId', width:100, formatter: platformFormatter},
+		          {name:'lastestVersion', index:'lastestVersion', width:50}
+		        ], 
+		        jsonReader : { 
+		            root:"data", 
+		            page: "currentPage", 
+		            total: "totalPages", 
+		            records: "totalRecords", 
+		            repeatitems: false, 
+		            id: "id" 
+		        },       
+		        pager: '#pager',
+		        viewrecords: true,
+		        rowNum:10, 
+		        rowList:[10,20,30,50], 
+		        sortname: 'name', 
+		        sortorder: 'asc', 
+		        gridview: true, 
+		        height: 250, 
+		        width: 300, 
+		        onSelectRow: function(id){  
+		        	
+		        }, 
+		        beforeRequest: function(){
+		        },
+		        loadComplete: function() {
+		        	var grid = $(this);
+		        	moveJQGridPagerInfo2Bottom(grid);		           	
+		        }
+		      }); 
 	    	$("#listPlatform").jqGrid({ 
 		        url:'${showAppUrl}/platform', 
 		        datatype: 'json', 
 		        mtype: 'GET', 
-		        colNames:['${labelPlatformName}'], 
+		        colNames:['${labelPlatformName}','${labelPlatformType}'], 
 		        colModel :[  
-		          {name:'name', index:'name', width:150, formatter: checkboxFormatter} 
+		          {name:'name', index:'name', width:150},
+		          {name:'platformType', index:'platformType', width:50}
 		        ], 
 		        jsonReader : { 
 		            root:"data", 
@@ -83,10 +150,36 @@
 			        }	            
 			      }
 			    });
-			});	    	
+			 $( "#newPlatformDialog" ).dialog({
+			      autoOpen: false,
+			      height: 320,
+			      width: 400,
+			      modal: true,
+			      resizable: false,
+			      buttons: {
+			        "${labelActionSave}": function() {
+			        	formAjaxSubmit("#platformNewForm","${addPlatformAjax}", function(){
+			        		refreshJQGrid("#listPlatform");
+		            		$("#newPlatformDialog").dialog("close");
+		            	}, null, null, function(){
+		            		removeInputError('#newPlatformDialog #div_name');
+		              		addInputError('#newPlatformDialog #div_name','${messagePlatformSaveFail}');
+		              	});
+			        }	            
+			      }
+			    });
+			});	 
+    		function platformFormatter(cellvalue, options, rowObject){
+    			
+    		}
 			function showNewAppDialog(){
 				var dialog = $("#newAppDialog");
 			    dialog.dialog("open");			    
+			}
+			function showNewPlatformDialog(){
+				var dialog = $("#newPlatformDialog");
+			    dialog.dialog("open");
+			    removeInputError("#platformNewForm");
 			}
     </script>
 </div>

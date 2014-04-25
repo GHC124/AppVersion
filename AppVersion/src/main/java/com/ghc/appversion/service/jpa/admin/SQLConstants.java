@@ -19,7 +19,7 @@ public interface SQLConstants {
 	/**
 	 * Select all users information(email, groups)
 	 */
-	String USER_SUMMARY_QUERY = "SELECT distinct USER_ID, EMAIL, GROUP_CONCAT(GROUP_NAME) as GROUPNAMES FROM view_user_summary " +
+	String USER_SUMMARY_QUERY = "SELECT distinct USER_ID, EMAIL, GROUP_CONCAT(GROUP_NAME) as GROUPNAMES FROM view_user_group_summary " +
 			"WHERE 1 group by USER_ID ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
 	
 	String FILTER_GROUP = ":filterGroup";
@@ -28,7 +28,7 @@ public interface SQLConstants {
 	 * and filter by group
 	 */
 	String USER_SUMMARY_FILTER_GROUP_QUERY = "SELECT distinct USER_ID, EMAIL, GROUP_CONCAT(GROUP_NAME) as GROUPNAMES " +
-			"FROM (select * from view_user_summary where GROUP_ID in ( :filterGroup )) as t " +
+			"FROM (select * from view_user_group_summary where GROUP_ID in ( :filterGroup )) as t " +
 			"WHERE 1 group by USER_ID ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
 	
 	/**
@@ -52,7 +52,7 @@ public interface SQLConstants {
 	/**
 	 * Select members in a group
 	 */
-	String GROUP_MEMBERS_QUERY = "SELECT USER_ID,EMAIL,USER_GROUP_ID FROM view_user_summary WHERE GROUP_ID=:groupId " +
+	String GROUP_MEMBERS_QUERY = "SELECT USER_ID,EMAIL,USER_GROUP_ID FROM view_user_group_summary WHERE GROUP_ID=:groupId " +
 			"ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
 
 	/**

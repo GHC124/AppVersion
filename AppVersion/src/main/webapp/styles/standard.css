@@ -539,6 +539,15 @@ span.error {
 	width: 200px !important;
 }
 
+.add-dialog textarea{
+	width: 192px !important;
+	height: 145px !important;
+}
+
+.add-dialog select{
+	width: 200px !important;
+}
+
 .delete-dialog{
 	height: 80px !important;
 }

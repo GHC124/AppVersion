@@ -31,21 +31,32 @@ function cancelDefaultAction(e) {
 }
 
 function collectFormData(formId) {
-	var form = $(formId);
-	var fields = form.find('input');
 	var data = {};
-	for (var i = 0; i < fields.length; i++) {
-		var $item = $(fields[i]);
+	var form = $(formId);
+	var inputs = form.find('input');
+	for (var i = 0; i < inputs.length; i++) {
+		var $item = $(inputs[i]);
 		data[$item.attr('name')] = $item.val(); 
 	}
+	var selects = form.find('select');
+	for (var i = 0; i < selects.length; i++) {
+		var $item = $(selects[i]);
+		data[$item.attr('name')] = $item.val(); 
+	}
+	
 	return data;
 }
 
 function populateFormData(formId, data) {
 	var form = $(formId);
-	var fields = form.find('input');
-	for (var i = 0; i < fields.length; i++) {
-		var $item = $(fields[i]);
+	var inputs = form.find('input');
+	for (var i = 0; i < inputs.length; i++) {
+		var $item = $(inputs[i]);
+		 $item.val(data[$item.attr('name')]);
+	}
+	var selects = form.find('select');
+	for (var i = 0; i < selects.length; i++) {
+		var $item = $(selects[i]);
 		 $item.val(data[$item.attr('name')]);
 	}
 }

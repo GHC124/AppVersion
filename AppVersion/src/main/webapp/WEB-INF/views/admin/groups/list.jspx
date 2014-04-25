@@ -58,7 +58,7 @@
    		</fieldset>
 	</div>
     <div id="newGroupDialog" title="${labelGroupNew}" class="dialog add-dialog group-dialog" style="display: none">
-    	<html:form formUrl="/admin/groups?ajax" modelAttribute="group" id="groupNewForm" method="POST">
+    	<html:form formUrl="/admin/groups?createAjax" modelAttribute="group" id="groupNewForm" method="POST">
     		<html:inputField label="${labelGroupName}" name="name" require="true"/>    		
     		<form:hidden path="version" />    		    		
     	</html:form>    	

@@ -13,6 +13,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotEmpty;
 
 import com.ghc.appversion.domain.BaseEntity;
 
@@ -20,7 +23,7 @@ import com.ghc.appversion.domain.BaseEntity;
  * 
  */
 @Entity
-@Table(name = "platform")
+@Table(name = "platforms")
 public class Platform extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private Long mId;
@@ -38,6 +41,8 @@ public class Platform extends BaseEntity implements Serializable {
 		mId = id;
 	}
 
+	@NotEmpty(message = "{validation.name.NotEmpty.message}")
+	@Size(min = 3, max = 255, message = "{validation.name.Size.message}")
 	@Column(name="name")
 	public String getName() {
 		return mName;
@@ -47,6 +52,8 @@ public class Platform extends BaseEntity implements Serializable {
 		mName = name;
 	}
 
+	@NotEmpty(message = "{validation.platform.NotEmpty.message}")
+	@Size(min = 3, max = 255, message = "{validation.platform.Size.message}")
 	@Column(name="platform_type")
 	public String getPlatformType() {
 		return mPlatformType;
