@@ -29,7 +29,7 @@ public class App extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private Long mId;
 	private String mName;
-	private String mIcon;
+	private String mIconUrl;
 	private String mDescription;
 	private String mLastestVersion;
 	private Long mPlatformId;
@@ -58,13 +58,13 @@ public class App extends BaseEntity implements Serializable {
 
 	@NotEmpty(message = "{validation.icon.NotEmpty.message}")
 	@Size(min = 1, max = 4000, message = "{validation.icon.Size.message}")
-	@Column(name="icon")
-	public String getIcon() {
-		return mIcon;
+	@Column(name="icon_url")
+	public String getIconUrl() {
+		return mIconUrl;
 	}
 
-	public void setIcon(String icon) {
-		mIcon = icon;
+	public void setIconUrl(String iconUrl) {
+		mIconUrl = iconUrl;
 	}
 
 	@Size(min = 0, max = 4000, message = "{validation.description.Size.message}")

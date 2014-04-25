@@ -58,6 +58,6 @@
 		<beans:property name="validationMessageSource" ref="messageSource"/> 
 	</beans:bean>
 	<beans:bean 
-		class="org.springframework.web.multipart.support.StandardServletMultipartResolver" 
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver" 
 		id="multipartResolver"/> 	
 </beans:beans> 

@@ -3,6 +3,9 @@ package com.ghc.appversion.web.controller;
 import static com.ghc.appversion.web.Constants.DATE_FORMAT_PATTERN;
 
 import java.beans.PropertyEditorSupport;
+import java.util.Locale;
+
+import javax.annotation.PostConstruct;
 
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +18,18 @@ public abstract class AbstractController {
 	@Autowired
 	protected MessageSource messageSource;
 
+	protected String mUploadRootDirectory;
+
 	@InitBinder
 	protected void initBinder(WebDataBinder binder) {
 		binder.registerCustomEditor(DateTime.class, new DateTimeEditor());
-		//binder.registerCustomEditor(Integer.class, new IntegerEditor());
+		// binder.registerCustomEditor(Integer.class, new IntegerEditor());
+	}
+
+	@PostConstruct
+	public void init() {
+		mUploadRootDirectory = messageSource.getMessage(
+				"file_upload_directory", new Object[] {}, Locale.US);
 	}
 
 	public class DateTimeEditor extends PropertyEditorSupport {
@@ -44,7 +55,7 @@ public abstract class AbstractController {
 			return s;
 		}
 	}
-	
+
 	public class IntegerEditor extends PropertyEditorSupport {
 
 		@Override
@@ -60,7 +71,7 @@ public abstract class AbstractController {
 		public String getAsText() throws IllegalArgumentException {
 			String s = "";
 			if (getValue() != null && getValue() instanceof Integer) {
-				s = ((Integer)getValue()).intValue() + "";
+				s = ((Integer) getValue()).intValue() + "";
 			}
 			return s;
 		}
