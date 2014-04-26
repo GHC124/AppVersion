@@ -106,7 +106,7 @@ public class AppVersionsServiceImpl implements AppVersionsService {
 		
 		List<AppVersions> result = JpaUtil.getResultList(query,
 				AppVersions.class);
-		if(result.size() == 0) {
+		if(result == null || result.size() == 0) {
 			return null;
 		}
 		return result.get(0);

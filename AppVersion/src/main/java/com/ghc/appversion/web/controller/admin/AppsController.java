@@ -129,6 +129,15 @@ public class AppsController extends AbstractAdminController {
 						objectError.getDefaultMessage()));
 			}
 		} else {
+			// Check name
+			App exitApp = appService.findByName(app.getName());
+			if (exitApp != null) {
+				List<ErrorMessage> errorMesages = res.getResult();
+				errorMesages.add(new ErrorMessage("name", messageSource
+						.getMessage("validation.appName.Exist.message",
+								new Object[] {}, locale)));
+				return res;
+			}
 			// get the file from the request object
 			Iterator<String> itr = request.getFileNames();
 			if (itr.hasNext()) {
@@ -140,7 +149,7 @@ public class AppsController extends AbstractAdminController {
 					List<ErrorMessage> errorMesages = res.getResult();
 					errorMesages.add(new ErrorMessage("iconUrl", messageSource
 							.getMessage("validation.icon.InvalidType.message",
-									new Object[] {PHOTO_TYPE}, locale)));
+									new Object[] { PHOTO_TYPE }, locale)));
 				}
 			} else {
 				List<ErrorMessage> errorMesages = res.getResult();
@@ -169,6 +178,15 @@ public class AppsController extends AbstractAdminController {
 						objectError.getDefaultMessage()));
 			}
 		} else {
+			// Check name
+			App exitApp = appService.findByName(app.getName());
+			if (exitApp != null) {
+				List<ErrorMessage> errorMesages = res.getResult();
+				errorMesages.add(new ErrorMessage("name", messageSource
+						.getMessage("validation.appName.Exist.message",
+								new Object[] {}, locale)));
+				return res;
+			}
 			// get the file from the request object
 			Iterator<String> itr = request.getFileNames();
 			if (!itr.hasNext()) {
@@ -195,7 +213,7 @@ public class AppsController extends AbstractAdminController {
 					List<ErrorMessage> errorMesages = res.getResult();
 					errorMesages.add(new ErrorMessage("iconUrl", messageSource
 							.getMessage("validation.icon.InvalidType.message",
-									new Object[] {PHOTO_TYPE}, locale)));
+									new Object[] { PHOTO_TYPE }, locale)));
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -224,8 +242,9 @@ public class AppsController extends AbstractAdminController {
 			// validate version
 			AppVersions latestVersion = appVersionsService
 					.latestVersion(appVersions.getAppId());
-			if (latestVersion != null && compareVersions(latestVersion.getVersion(),
-					appVersions.getVersion()) >= 0) {
+			if (latestVersion != null
+					&& compareVersions(latestVersion.getVersion(),
+							appVersions.getVersion()) >= 0) {
 				List<ErrorMessage> errorMesages = res.getResult();
 				errorMesages.add(new ErrorMessage("version", messageSource
 						.getMessage("validation.version.Smaller.message",
@@ -252,7 +271,7 @@ public class AppsController extends AbstractAdminController {
 				errorMesages.add(new ErrorMessage("appDownloadUrl",
 						messageSource.getMessage(
 								"validation.file.InvalidType.message",
-								new Object[] {ANDROID_TYPE}, locale)));
+								new Object[] { ANDROID_TYPE }, locale)));
 			}
 		}
 
@@ -277,36 +296,36 @@ public class AppsController extends AbstractAdminController {
 		} else {
 			// get the file from the request object
 			Iterator<String> itr = request.getFileNames();
-			if (itr.hasNext()) {
-				MultipartFile mpf = request.getFile(itr.next());
-				try {
-					String type = mpf.getContentType();
-					long size = mpf.getSize();
-					if (UploadUtil.isValidAndroid(type)) {
-						String rootDirectory = mUploadRootDirectory;
-						UploadUtil.createUploadFolder(rootDirectory);
-						String downloadUrl = UploadUtil.saveAndroidFile(
-								rootDirectory, mpf.getInputStream());
-						appVersions.setAppDownloadUrl(downloadUrl);
-						appVersions.setAppSize(size);
-						appVersionsService.save(appVersions);
-						res.setStatus("SUCCESS");
-					} else {
-						List<ErrorMessage> errorMesages = res.getResult();
-						errorMesages.add(new ErrorMessage("appDownloadUrl",
-								messageSource.getMessage(
-										"validation.file.InvalidType.message",
-										new Object[] {ANDROID_TYPE}, locale)));
-					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			} else {
+			if (!itr.hasNext()) {
 				List<ErrorMessage> errorMesages = res.getResult();
 				errorMesages.add(new ErrorMessage("appDownloadUrl",
 						messageSource.getMessage(
 								"validation.file.NotEmpty.message",
 								new Object[] {}, locale)));
+				return res;
+			}
+			MultipartFile mpf = request.getFile(itr.next());
+			try {
+				String originalName = mpf.getOriginalFilename();
+				long size = mpf.getSize();
+				if (UploadUtil.isValidAndroid(originalName)) {
+					String rootDirectory = mUploadRootDirectory;
+					UploadUtil.createUploadFolder(rootDirectory);
+					String downloadUrl = UploadUtil.saveAndroidFile(
+							rootDirectory, mpf.getInputStream());
+					appVersions.setAppDownloadUrl(downloadUrl);
+					appVersions.setAppSize(size);
+					appVersionsService.save(appVersions);
+					res.setStatus("SUCCESS");
+				} else {
+					List<ErrorMessage> errorMesages = res.getResult();
+					errorMesages.add(new ErrorMessage("appDownloadUrl",
+							messageSource.getMessage(
+									"validation.file.InvalidType.message",
+									new Object[] { ANDROID_TYPE }, locale)));
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}
 

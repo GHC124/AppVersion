@@ -27,4 +27,6 @@ public interface AppService {
 	void delete(Long id);
 
 	long count();	
+	
+	App findByName(String name);
 }

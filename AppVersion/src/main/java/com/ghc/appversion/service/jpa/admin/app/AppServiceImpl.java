@@ -5,7 +5,14 @@
  */
 package com.ghc.appversion.service.jpa.admin.app;
 
+import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_NAME;
+import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_SELECT_BY_NAME_QUERY;
+
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ghc.appversion.domain.admin.App;
 import com.ghc.appversion.repository.jpa.admin.AppRepository;
+import com.ghc.appversion.util.JpaUtil;
 import com.ghc.appversion.util.ListUtil;
 
 /**
@@ -25,6 +33,9 @@ import com.ghc.appversion.util.ListUtil;
 @Repository
 @Transactional
 public class AppServiceImpl implements AppService {
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	@Autowired
 	private AppRepository appRepository;
@@ -81,5 +92,27 @@ public class AppServiceImpl implements AppService {
 	@Override
 	public long count() {
 		return appRepository.count();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.ghc.appversion.service.jpa.admin.app.AppService#findByName(java.lang
+	 * .String)
+	 */
+	@Override
+	public App findByName(String name) {
+		// TODO use setParameter
+		String sql = APP_SELECT_BY_NAME_QUERY;
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter(APP_NAME, "%" + name + "%");
+
+		List<App> result = JpaUtil.getResultList(query, App.class);
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+
+		return result.get(0);
 	}
 }

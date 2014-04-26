@@ -24,7 +24,7 @@ import com.ghc.appversion.domain.BaseEntity;
  * 
  */
 @Entity
-@Table(name="apps")
+@Table(name = "apps")
 public class App extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private Long mId;
@@ -34,9 +34,24 @@ public class App extends BaseEntity implements Serializable {
 	private String mLatestVersion;
 	private Long mPlatformId;
 
+	public App() {
+		super();
+	}
+
+	public App(Long id, String name, String iconUrl, String description,
+			String latestVersion, Long platformId, Long version) {
+		super(version);
+		mId = id;
+		mName = name;
+		mIconUrl = iconUrl;
+		mDescription = description;
+		mLatestVersion = latestVersion;
+		mPlatformId = platformId;
+	}
+
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
 	public Long getId() {
 		return mId;
 	}
@@ -47,7 +62,7 @@ public class App extends BaseEntity implements Serializable {
 
 	@NotEmpty(message = "{validation.name.NotEmpty.message}")
 	@Size(min = 1, max = 255, message = "{validation.name.Size.message}")
-	@Column(name="name")
+	@Column(name = "name")
 	public String getName() {
 		return mName;
 	}
@@ -56,7 +71,7 @@ public class App extends BaseEntity implements Serializable {
 		mName = name;
 	}
 
-	@Column(name="icon_url")
+	@Column(name = "icon_url")
 	public String getIconUrl() {
 		return mIconUrl;
 	}
@@ -66,7 +81,7 @@ public class App extends BaseEntity implements Serializable {
 	}
 
 	@Size(min = 0, max = 4000, message = "{validation.description.Size.message}")
-	@Column(name="description")
+	@Column(name = "description")
 	public String getDescription() {
 		return mDescription;
 	}
@@ -75,17 +90,17 @@ public class App extends BaseEntity implements Serializable {
 		mDescription = description;
 	}
 
-	@Column(name="latest_version")
+	@Column(name = "latest_version")
 	public String getLatestVersion() {
 		return mLatestVersion;
 	}
-	
+
 	public void setLatestVersion(String latestVersion) {
 		mLatestVersion = latestVersion;
 	}
 
-	@NotNull(message="{validation.platform.NotNull.message}")
-	@Column(name="platform_id")
+	@NotNull(message = "{validation.platform.NotNull.message}")
+	@Column(name = "platform_id")
 	public Long getPlatformId() {
 		return mPlatformId;
 	}

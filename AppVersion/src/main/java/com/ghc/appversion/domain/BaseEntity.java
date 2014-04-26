@@ -4,15 +4,23 @@ import javax.persistence.Column;
 import javax.persistence.Version;
 
 public abstract class BaseEntity {
-	protected int mVersion;
+	protected Long mVersion;
+
+	public BaseEntity() {
+		
+	}
+	
+	public BaseEntity(Long version) {
+		mVersion = version;
+	}
 
 	@Version
 	@Column(name="version")
-	public int getVersion() {
+	public Long getVersion() {
 		return mVersion;
 	}
 
-	public void setVersion(int version) {
+	public void setVersion(Long version) {
 		mVersion = version;
 	}
 	
