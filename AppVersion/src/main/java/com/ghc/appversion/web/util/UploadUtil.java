@@ -44,6 +44,9 @@ public class UploadUtil {
 		while ((read = inputStream.read(data, 0, data.length)) != -1) {
 			outputStream.write(data, 0, read);
 		}
+		outputStream.flush();
+		outputStream.close();
+		inputStream.close();
 		String iconUrl = String.format("\\AppIcon\\%s", fileName);
 		return iconUrl;
 	}

@@ -8,6 +8,7 @@
 	<jsp:directive.page contentType="text/html;charset=UTF-8" />
 	<jsp:output omit-xml-declaration="yes" />
 	<spring:message code="label_action_save" var="labelActionSave" />
+	<spring:message code="label_action_cancel" var="labelActionCancel" />
 	<!-- List -->
 	<spring:message code="label_admin_platform" var="labelPlatform" />
 	<spring:message code="label_admin_platform_name" var="labelPlatformName" />
@@ -26,6 +27,12 @@
 	<spring:message code="label_admin_platform_new" var="labelNewPlatform"/>
 	<spring:message code="admin_platform_save_fail" var="messagePlatformSaveFail"/>
 	<spring:url value="/admin/apps/platform?createAjax" var="addPlatformAjax"/>
+	<!-- Version -->
+	<spring:message code="label_admin_version_new" var="labelNewVersion"/>
+	<spring:message code="label_admin_version_version" var="labelVersionVersion"/>
+	<spring:message code="label_admin_version_release_date" var="labelVersionReleaseDate"/>
+	<spring:message code="label_admin_version_release_note" var="labelVersionReleaseNote"/>
+	<spring:message code="label_admin_version_file" var="labelVersionFile"/>
 	
 	<div style="float:left">
 		<div> 
@@ -48,7 +55,7 @@
 		    </div>
 	    </fieldset>
     </div>
-    <div id="newAppDialog" title="${labelNewApp}" class="dialog add-dialog" style="display: none">
+    <div id="newAppDialog" title="${labelNewApp}" class="dialog add-dialog app-dialog" style="display: none">
     	<html:uploadForm formUrl="/admin/apps?createAjax" modelAttribute="app" id="appNewForm" method="POST">
     		<html:inputField label="${labelAppName}" name="name" require="true"/>
     		<html:selectField label="${labelAppPlatform}" name="platformId" require="true">
@@ -58,6 +65,14 @@
     		<html:areaField label="${labelAppDescription}" name="description"/>
     		<form:hidden path="lastestVersion" />
     		<form:hidden path="version" />    		  		    		
+    	</html:uploadForm>   
+	</div>
+	<div id="newVersionDialog" title="${labelNewVersion}" class="dialog add-dialog version-dialog" style="display: none">
+    	<html:uploadForm formUrl="/admin/apps/version?createAjax" modelAttribute="appVersions" id="versionNewForm" method="POST">
+    		<html:inputField label="${labelVersionVersion}" name="version" require="true"/>
+   			<html:dateField label="${labelVersionReleaseDate}" name="releaseDate"/>
+   			<html:areaField label="${labelVersionReleaseNote}" name="releaseNote"/>
+    		<html:fileField label="${labelVersionFile}" name="appDowloadUrl" require="true"/>	
     	</html:uploadForm>   
 	</div>
 	<div id="newPlatformDialog" title="${labelNewPlatform}" class="dialog add-dialog" style="display: none">
@@ -146,20 +161,32 @@
 		      }); 
 			 $( "#newAppDialog" ).dialog({
 			      autoOpen: false,
+			      height: 480,
+			      width: 500,
+			      modal: true,
+			      resizable: false,
+			      buttons: {
+			        "${labelNewVersion}": function() {
+			        	
+			        },
+			        "${labelActionCancel}":function(){
+			        	$("#newAppDialog").dialog("close");
+			        }
+			      }
+			    });
+			 $( "#newVersionDialog" ).dialog({
+			      autoOpen: false,
 			      height: 400,
 			      width: 400,
 			      modal: true,
 			      resizable: false,
 			      buttons: {
 			        "${labelActionSave}": function() {
-			        	formAjaxSubmit("#appNewForm","${addAddAjax}", function(){
-			        		refreshJQGrid("#list");
-		            		$("#newAppDialog").dialog("close");
-		            	}, null, null, function(){
-		            		removeInputError('#newAppDialog #div_name');
-		              		addInputError('#newAppDialog #div_name','${messageAppSaveFail}');
-		              	});
-			        }	            
+									        	
+			        },
+			        "${labelActionCancel}":function(){
+			        	$("#newVersionDialog").dialog("close");
+			        }
 			      }
 			    });
 			 $( "#newPlatformDialog" ).dialog({
@@ -186,12 +213,22 @@
     		}
 			function showNewAppDialog(){
 				var dialog = $("#newAppDialog");
-			    dialog.dialog("open");			    
+			    dialog.dialog("open");	
+			    removeInputError("#appNewForm");
 			}
 			function showNewPlatformDialog(){
 				var dialog = $("#newPlatformDialog");
 			    dialog.dialog("open");
 			    removeInputError("#platformNewForm");
+			}
+			function submitNewApp(){
+				fileAjaxSubmit("#appNewForm","${addAppAjax}", function(){
+	        		refreshJQGrid("#list");
+            		$("#newAppDialog").dialog("close");
+            	}, null, null, function(){
+            		removeInputError('#newAppDialog #div_name');
+              		addInputError('#newAppDialog #div_name','${messageAppSaveFail}');
+              	});
 			}
     </script>
 </div>

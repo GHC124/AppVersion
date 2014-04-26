@@ -33,30 +33,19 @@ function cancelDefaultAction(e) {
 function collectFormData(formId) {
 	var data = {};
 	var form = $(formId);
-	var inputs = form.find('input');
+	var inputs = form.find('input[type=text],select,textarea');
 	for (var i = 0; i < inputs.length; i++) {
 		var $item = $(inputs[i]);
 		data[$item.attr('name')] = $item.val(); 
 	}
-	var selects = form.find('select');
-	for (var i = 0; i < selects.length; i++) {
-		var $item = $(selects[i]);
-		data[$item.attr('name')] = $item.val(); 
-	}
-	
 	return data;
 }
 
 function populateFormData(formId, data) {
 	var form = $(formId);
-	var inputs = form.find('input');
+	var inputs = form.find('input[type=text],select,textarea');
 	for (var i = 0; i < inputs.length; i++) {
 		var $item = $(inputs[i]);
-		 $item.val(data[$item.attr('name')]);
-	}
-	var selects = form.find('select');
-	for (var i = 0; i < selects.length; i++) {
-		var $item = $(selects[i]);
 		 $item.val(data[$item.attr('name')]);
 	}
 }
@@ -77,24 +66,77 @@ function removeInputError(formId){
 }
 
 function formAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMethod, errorMethod){
-	var data = collectFormData(formId);				
-	$.post(validateUrl, data, function(response) {
-		removeInputError(formId);
-		if (response.status == 'FAIL') {
-			console.log('error');
-			for (var i = 0; i < response.result.length; i++) {
-				var item = response.result[i];
-				addInputError(formId + " #div_" + item.fieldName, item.message+"<br/>");								
+	var data = collectFormData(formId);
+	$.ajax({
+	    url: validateUrl,
+	    data: data,
+	    dataType: 'json',
+	    processData: true,
+	    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+	    type: 'POST',
+	    success: function(response){
+	    	removeInputError(formId);
+			if (response.status == 'FAIL') {
+				for (var i = 0; i < response.result.length; i++) {
+					var item = response.result[i];
+					addInputError(formId + " #div_" + item.fieldName, item.message+"<br/>");								
+				}
+				if(failMethod){
+					failMethod(response);
+				}
+			} else {
+				if(successMethod){
+					successMethod();
+				}
 			}
-			if(failMethod){
-				failMethod(response);
-			}
-		} else {
-			if(successMethod){
-				successMethod();
-			}
+	    }
+	}).done(function(){
+		if(doneMethod){
+			doneMethod();
 		}
-	}, 'json').done(function(){
+	}).fail(function(){
+		if(errorMethod){
+			errorMethod();
+		}
+	});
+}
+
+function fileAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMethod, errorMethod){
+	var data = collectFormData(formId);
+	var formData = new FormData();
+	for(var key in data){
+		formData.append(key, data[key]);
+	}
+	$.each($(formId + ' input[type=file]'), function(index, value){
+		var item = $(value)[0];
+		$.each(item.files, function(i, file) {
+			formData.append('file-' + i, file);
+		});
+	});	
+	$.ajax({
+	    url: validateUrl,
+	    data: formData,
+	    dataType: 'json',
+	    processData: false,
+	    contentType: false,
+	    type: 'POST',
+	    success: function(response){
+	    	removeInputError(formId);
+			if (response.status == 'FAIL') {
+				for (var i = 0; i < response.result.length; i++) {
+					var item = response.result[i];
+					addInputError(formId + " #div_" + item.fieldName, item.message+"<br/>");								
+				}
+				if(failMethod){
+					failMethod(response);
+				}
+			} else {
+				if(successMethod){
+					successMethod();
+				}
+			}
+	    }
+	}).done(function(){
 		if(doneMethod){
 			doneMethod();
 		}

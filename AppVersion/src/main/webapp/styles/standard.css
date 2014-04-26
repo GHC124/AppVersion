@@ -535,7 +535,7 @@ span.error {
 	width: 100px !important;
 }
 
-.add-dialog input[type="text"], .add-dialog input[type="password"]{
+.add-dialog input[type="text"], .add-dialog input[type="password"], .add-dialog input[type="file"]{
 	width: 200px !important;
 }
 
@@ -546,6 +546,10 @@ span.error {
 
 .add-dialog select{
 	width: 200px !important;
+}
+
+.app-dialog{
+	padding-left: 80px !important;
 }
 
 .delete-dialog{

@@ -56,8 +56,6 @@ public class App extends BaseEntity implements Serializable {
 		mName = name;
 	}
 
-	@NotEmpty(message = "{validation.icon.NotEmpty.message}")
-	@Size(min = 1, max = 4000, message = "{validation.icon.Size.message}")
 	@Column(name="icon_url")
 	public String getIconUrl() {
 		return mIconUrl;
@@ -77,8 +75,6 @@ public class App extends BaseEntity implements Serializable {
 		mDescription = description;
 	}
 
-	@NotEmpty(message = "{validation.lastestVersion.NotEmpty.message}")
-	@Size(min = 1, max = 255, message = "{validation.lastestVersion.Size.message}")
 	@Column(name="lastest_version")
 	public String getLastestVersion() {
 		return mLastestVersion;

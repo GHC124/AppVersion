@@ -1,10 +1,11 @@
 package com.ghc.appversion.web.form;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ValidationResponse {
-	private String mStatus;
-	private List<ErrorMessage> mResult;
+	private String mStatus = "FAIL";
+	private List<ErrorMessage> mResult = new ArrayList<>();
 
 	public String getStatus() {
 		return mStatus;

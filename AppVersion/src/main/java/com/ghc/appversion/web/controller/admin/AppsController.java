@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.ghc.appversion.domain.admin.App;
+import com.ghc.appversion.domain.admin.AppVersions;
 import com.ghc.appversion.domain.admin.Platform;
 import com.ghc.appversion.service.jpa.admin.app.AppService;
 import com.ghc.appversion.service.jpa.admin.app.PlatformService;
@@ -49,7 +50,7 @@ import com.ghc.appversion.web.util.UploadUtil;
  */
 @RequestMapping("/admin/apps")
 @Controller
-public class AppsController extends AbstractAdminController{
+public class AppsController extends AbstractAdminController {
 	@Autowired
 	private AppService appService;
 
@@ -59,9 +60,11 @@ public class AppsController extends AbstractAdminController{
 	@RequestMapping(method = RequestMethod.GET)
 	public String list(Model model) {
 		App app = new App();
-		app.setLastestVersion("1.0");
 		model.addAttribute("app", app);
 
+		AppVersions appVersions = new AppVersions();
+		model.addAttribute("appVersions", appVersions);
+		
 		Platform platform = new Platform();
 		model.addAttribute("platform", platform);
 
@@ -105,44 +108,54 @@ public class AppsController extends AbstractAdminController{
 
 	@RequestMapping(params = "createAjax", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	public ValidationResponse createAjax(MultipartHttpServletRequest request,
-			@ModelAttribute(value = "app") @Valid App app, BindingResult result) {
+	public ValidationResponse createAjax(
+			@ModelAttribute(value = "app") @Valid App app,
+			BindingResult result, MultipartHttpServletRequest request,
+			Locale locale) {
 		ValidationResponse res = new ValidationResponse();
+		res.setStatus("FAIL");
 		if (result.hasErrors()) {
-			res.setStatus("FAIL");
 			List<FieldError> allErrors = result.getFieldErrors();
-			List<ErrorMessage> errorMesages = new ArrayList<ErrorMessage>();
+			List<ErrorMessage> errorMesages = res.getResult();
 			for (FieldError objectError : allErrors) {
 				errorMesages.add(new ErrorMessage(objectError.getField(),
 						objectError.getDefaultMessage()));
 			}
-			res.setResult(errorMesages);
 		} else {
 			// get the file from the request object
 			Iterator<String> itr = request.getFileNames();
-			MultipartFile mpf = request.getFile(itr.next());
-			try {
-				String type = mpf.getContentType();
-				if(PhotoUtil.isValidType(type)){
-					String rootDirectory = mUploadRootDirectory;
-					UploadUtil.createUploadFolder(rootDirectory);
-					String iconUrl = UploadUtil.saveIconFile(rootDirectory, mpf.getInputStream());
-					app.setIconUrl(iconUrl);
-					appService.save(app);
-					res.setStatus("SUCCESS");
-				}else{
-					List<ErrorMessage> errorMesages = res.getResult();
-					errorMesages.add(new ErrorMessage("iconUrl", 
-							messageSource.getMessage("validation.icon.InvalidType.message", new Object[]{}, Locale.US)));
-				}				
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}			
+			if (itr.hasNext()) {
+				MultipartFile mpf = request.getFile(itr.next());
+				try {
+					String type = mpf.getContentType();
+					if (PhotoUtil.isValidType(type)) {
+						String rootDirectory = mUploadRootDirectory;
+						UploadUtil.createUploadFolder(rootDirectory);
+						String iconUrl = UploadUtil.saveIconFile(rootDirectory,
+								mpf.getInputStream());
+						app.setIconUrl(iconUrl);
+						appService.save(app);
+						res.setStatus("SUCCESS");
+					} else {
+						List<ErrorMessage> errorMesages = res.getResult();
+						errorMesages.add(new ErrorMessage("iconUrl", messageSource
+								.getMessage("validation.icon.InvalidType.message",
+										new Object[] {}, locale)));
+					}
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			} else {
+				List<ErrorMessage> errorMesages = res.getResult();
+				errorMesages.add(new ErrorMessage("iconUrl", messageSource
+						.getMessage("validation.icon.NotEmpty.message",
+								new Object[] {}, locale)));
+			}
 		}
 
 		return res;
 	}
-
+	
 	@RequestMapping(value = "/listgrid", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
 	public DataGrid<App> listGrid(

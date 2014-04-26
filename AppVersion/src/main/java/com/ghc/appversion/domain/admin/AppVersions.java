@@ -8,7 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Type;
@@ -69,7 +68,6 @@ public class AppVersions implements Serializable {
 		mReleaseNote = releaseNote;
 	}
 
-	@NotNull(message="{validation.appId.NotNull.message}")
 	@Column(name="app_id")
 	public Long getAppId() {
 		return mAppId;
@@ -79,8 +77,6 @@ public class AppVersions implements Serializable {
 		mAppId = appId;
 	}
 
-	@NotEmpty(message = "{validation.url.NotEmpty.message}")
-	@Size(min = 1, max = 4000, message = "{validation.url.Size.message}")
 	@Column(name="app_download_url")
 	public String getAppDowloadUrl() {
 		return mAppDowloadUrl;
@@ -90,7 +86,6 @@ public class AppVersions implements Serializable {
 		mAppDowloadUrl = appDowloadUrl;
 	}
 
-	@NotNull(message="{validation.appSize.NotNull.message}")
 	@Column(name="app_size")
 	public Long getAppSize() {
 		return mAppSize;
