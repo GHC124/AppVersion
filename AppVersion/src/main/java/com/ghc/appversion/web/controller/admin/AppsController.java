@@ -7,6 +7,8 @@ package com.ghc.appversion.web.controller.admin;
 
 import static com.ghc.appversion.service.jpa.admin.SQLConstants.PLATFORM_TYPE_ANDROID;
 import static com.ghc.appversion.service.jpa.admin.SQLConstants.PLATFORM_TYPE_IOS;
+import static com.ghc.appversion.web.Constants.ANDROID_TYPE;
+import static com.ghc.appversion.web.Constants.PHOTO_TYPE;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,11 +41,11 @@ import com.ghc.appversion.domain.admin.App;
 import com.ghc.appversion.domain.admin.AppVersions;
 import com.ghc.appversion.domain.admin.Platform;
 import com.ghc.appversion.service.jpa.admin.app.AppService;
+import com.ghc.appversion.service.jpa.admin.app.AppVersionsService;
 import com.ghc.appversion.service.jpa.admin.app.PlatformService;
+import com.ghc.appversion.web.form.DataGrid;
 import com.ghc.appversion.web.form.ErrorMessage;
 import com.ghc.appversion.web.form.ValidationResponse;
-import com.ghc.appversion.web.form.admin.DataGrid;
-import com.ghc.appversion.web.util.PhotoUtil;
 import com.ghc.appversion.web.util.UploadUtil;
 
 /**
@@ -55,6 +58,9 @@ public class AppsController extends AbstractAdminController {
 	private AppService appService;
 
 	@Autowired
+	private AppVersionsService appVersionsService;
+
+	@Autowired
 	private PlatformService platformService;
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -63,8 +69,9 @@ public class AppsController extends AbstractAdminController {
 		model.addAttribute("app", app);
 
 		AppVersions appVersions = new AppVersions();
+		appVersions.setReleaseDate(new DateTime());
 		model.addAttribute("appVersions", appVersions);
-		
+
 		Platform platform = new Platform();
 		model.addAttribute("platform", platform);
 
@@ -106,6 +113,46 @@ public class AppsController extends AbstractAdminController {
 		return res;
 	}
 
+	@RequestMapping(params = "validateAjax", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ValidationResponse validateAjax(
+			@ModelAttribute(value = "app") @Valid App app,
+			BindingResult result, MultipartHttpServletRequest request,
+			Locale locale) {
+		ValidationResponse res = new ValidationResponse();
+		res.setStatus("FAIL");
+		if (result.hasErrors()) {
+			List<FieldError> allErrors = result.getFieldErrors();
+			List<ErrorMessage> errorMesages = res.getResult();
+			for (FieldError objectError : allErrors) {
+				errorMesages.add(new ErrorMessage(objectError.getField(),
+						objectError.getDefaultMessage()));
+			}
+		} else {
+			// get the file from the request object
+			Iterator<String> itr = request.getFileNames();
+			if (itr.hasNext()) {
+				MultipartFile mpf = request.getFile(itr.next());
+				String type = mpf.getContentType();
+				if (UploadUtil.isValidPhoto(type)) {
+					res.setStatus("SUCCESS");
+				} else {
+					List<ErrorMessage> errorMesages = res.getResult();
+					errorMesages.add(new ErrorMessage("iconUrl", messageSource
+							.getMessage("validation.icon.InvalidType.message",
+									new Object[] {PHOTO_TYPE}, locale)));
+				}
+			} else {
+				List<ErrorMessage> errorMesages = res.getResult();
+				errorMesages.add(new ErrorMessage("iconUrl", messageSource
+						.getMessage("validation.icon.NotEmpty.message",
+								new Object[] {}, locale)));
+			}
+		}
+
+		return res;
+	}
+
 	@RequestMapping(params = "createAjax", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ValidationResponse createAjax(
@@ -124,38 +171,148 @@ public class AppsController extends AbstractAdminController {
 		} else {
 			// get the file from the request object
 			Iterator<String> itr = request.getFileNames();
+			if (!itr.hasNext()) {
+				List<ErrorMessage> errorMesages = res.getResult();
+				errorMesages.add(new ErrorMessage("iconUrl", messageSource
+						.getMessage("validation.icon.NotEmpty.message",
+								new Object[] {}, locale)));
+				return res;
+			}
+			MultipartFile mpf = request.getFile(itr.next());
+			try {
+				String type = mpf.getContentType();
+				if (UploadUtil.isValidPhoto(type)) {
+					String rootDirectory = mUploadRootDirectory;
+					UploadUtil.createUploadFolder(rootDirectory);
+					String iconUrl = UploadUtil.saveIconFile(rootDirectory,
+							mpf.getInputStream());
+					app.setIconUrl(iconUrl);
+					App saveApp = appService.save(app);
+					// Return new AppId
+					res.setExtraData(saveApp.getId().toString());
+					res.setStatus("SUCCESS");
+				} else {
+					List<ErrorMessage> errorMesages = res.getResult();
+					errorMesages.add(new ErrorMessage("iconUrl", messageSource
+							.getMessage("validation.icon.InvalidType.message",
+									new Object[] {PHOTO_TYPE}, locale)));
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		return res;
+	}
+
+	@RequestMapping(value = "/version", params = "validateAjax", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ValidationResponse validateVersionAjax(
+			@ModelAttribute(value = "appVersions") @Valid AppVersions appVersions,
+			BindingResult result, MultipartHttpServletRequest request,
+			Locale locale) {
+		ValidationResponse res = new ValidationResponse();
+		res.setStatus("FAIL");
+		if (result.hasErrors()) {
+			List<FieldError> allErrors = result.getFieldErrors();
+			List<ErrorMessage> errorMesages = res.getResult();
+			for (FieldError objectError : allErrors) {
+				errorMesages.add(new ErrorMessage(objectError.getField(),
+						objectError.getDefaultMessage()));
+			}
+		} else {
+			// validate version
+			AppVersions latestVersion = appVersionsService
+					.latestVersion(appVersions.getAppId());
+			if (latestVersion != null && compareVersions(latestVersion.getVersion(),
+					appVersions.getVersion()) >= 0) {
+				List<ErrorMessage> errorMesages = res.getResult();
+				errorMesages.add(new ErrorMessage("version", messageSource
+						.getMessage("validation.version.Smaller.message",
+								new Object[] { latestVersion.getVersion() },
+								locale)));
+				return res;
+			}
+			// get the file from the request object
+			Iterator<String> itr = request.getFileNames();
+			if (!itr.hasNext()) {
+				List<ErrorMessage> errorMesages = res.getResult();
+				errorMesages.add(new ErrorMessage("appDownloadUrl",
+						messageSource.getMessage(
+								"validation.file.NotEmpty.message",
+								new Object[] {}, locale)));
+				return res;
+			}
+			MultipartFile mpf = request.getFile(itr.next());
+			String originalName = mpf.getOriginalFilename();
+			if (UploadUtil.isValidAndroid(originalName)) {
+				res.setStatus("SUCCESS");
+			} else {
+				List<ErrorMessage> errorMesages = res.getResult();
+				errorMesages.add(new ErrorMessage("appDownloadUrl",
+						messageSource.getMessage(
+								"validation.file.InvalidType.message",
+								new Object[] {ANDROID_TYPE}, locale)));
+			}
+		}
+
+		return res;
+	}
+
+	@RequestMapping(value = "/version", params = "createAjax", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ValidationResponse createVersionAjax(
+			@ModelAttribute(value = "appVersions") @Valid AppVersions appVersions,
+			BindingResult result, MultipartHttpServletRequest request,
+			Locale locale) {
+		ValidationResponse res = new ValidationResponse();
+		res.setStatus("FAIL");
+		if (result.hasErrors()) {
+			List<FieldError> allErrors = result.getFieldErrors();
+			List<ErrorMessage> errorMesages = res.getResult();
+			for (FieldError objectError : allErrors) {
+				errorMesages.add(new ErrorMessage(objectError.getField(),
+						objectError.getDefaultMessage()));
+			}
+		} else {
+			// get the file from the request object
+			Iterator<String> itr = request.getFileNames();
 			if (itr.hasNext()) {
 				MultipartFile mpf = request.getFile(itr.next());
 				try {
 					String type = mpf.getContentType();
-					if (PhotoUtil.isValidType(type)) {
+					long size = mpf.getSize();
+					if (UploadUtil.isValidAndroid(type)) {
 						String rootDirectory = mUploadRootDirectory;
 						UploadUtil.createUploadFolder(rootDirectory);
-						String iconUrl = UploadUtil.saveIconFile(rootDirectory,
-								mpf.getInputStream());
-						app.setIconUrl(iconUrl);
-						appService.save(app);
+						String downloadUrl = UploadUtil.saveAndroidFile(
+								rootDirectory, mpf.getInputStream());
+						appVersions.setAppDownloadUrl(downloadUrl);
+						appVersions.setAppSize(size);
+						appVersionsService.save(appVersions);
 						res.setStatus("SUCCESS");
 					} else {
 						List<ErrorMessage> errorMesages = res.getResult();
-						errorMesages.add(new ErrorMessage("iconUrl", messageSource
-								.getMessage("validation.icon.InvalidType.message",
-										new Object[] {}, locale)));
+						errorMesages.add(new ErrorMessage("appDownloadUrl",
+								messageSource.getMessage(
+										"validation.file.InvalidType.message",
+										new Object[] {ANDROID_TYPE}, locale)));
 					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			} else {
 				List<ErrorMessage> errorMesages = res.getResult();
-				errorMesages.add(new ErrorMessage("iconUrl", messageSource
-						.getMessage("validation.icon.NotEmpty.message",
+				errorMesages.add(new ErrorMessage("appDownloadUrl",
+						messageSource.getMessage(
+								"validation.file.NotEmpty.message",
 								new Object[] {}, locale)));
 			}
 		}
 
 		return res;
 	}
-	
+
 	@RequestMapping(value = "/listgrid", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
 	public DataGrid<App> listGrid(
@@ -218,5 +375,40 @@ public class AppsController extends AbstractAdminController {
 		platformGrid.setData(userPage.getContent());
 
 		return platformGrid;
+	}
+
+	/**
+	 * Compare version. Pattern: x.x.x.x
+	 * 
+	 * @return 0: equal <br/>
+	 *         1: lager <br/>
+	 *         -1: smaller
+	 */
+	public int compareVersions(String oldVersion, String newVersion) {
+		int compare = 0;
+		String[] path1 = oldVersion.split(".");
+		String[] path2 = newVersion.split(".");
+		int length = path1.length > path2.length ? path2.length : path1.length;
+		for (int i = 0; i < length; i++) {
+			int num1 = Integer.parseInt(path1[i]);
+			int num2 = Integer.parseInt(path2[i]);
+			if (num1 > num2) {
+				compare = 1;
+				break;
+			} else if (num1 < num2) {
+				compare = -1;
+				break;
+			}
+		}
+		// case: 1.2.1 < 1.2.1.100
+		if (compare == 0) {
+			if (path1.length < path2.length) {
+				compare = -1;
+			} else if (path1.length > path2.length) {
+				compare = 1;
+			}
+		}
+
+		return compare;
 	}
 }

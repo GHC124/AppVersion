@@ -5,7 +5,14 @@
  */
 package com.ghc.appversion.service.jpa.admin.app;
 
+import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_ID;
+import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_LASTEST_VERSION_QUERY;
+
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ghc.appversion.domain.admin.AppVersions;
 import com.ghc.appversion.repository.jpa.admin.AppVersionsRepository;
+import com.ghc.appversion.util.JpaUtil;
 import com.ghc.appversion.util.ListUtil;
 
 /**
@@ -26,6 +34,9 @@ import com.ghc.appversion.util.ListUtil;
 @Transactional
 public class AppVersionsServiceImpl implements AppVersionsService {
 
+	@PersistenceContext
+	private EntityManager entityManager;
+	
 	@Autowired
 	private AppVersionsRepository appVersionsRepository;
 
@@ -81,5 +92,23 @@ public class AppVersionsServiceImpl implements AppVersionsService {
 	@Override
 	public long count() {
 		return appVersionsRepository.count();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.ghc.appversion.service.jpa.admin.app.AppVersionsService#latestVersion(java.lang.Long)
+	 */
+	@Override
+	public AppVersions latestVersion(Long appId) {
+		// TODO use setParameter
+		String sql = APP_LASTEST_VERSION_QUERY;
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter(APP_ID, appId);
+		
+		List<AppVersions> result = JpaUtil.getResultList(query,
+				AppVersions.class);
+		if(result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
 	}
 }

@@ -3,7 +3,7 @@
  *
  *	
  */
-package com.ghc.appversion.web.form.admin;
+package com.ghc.appversion.web.form;
 
 import java.util.List;
 

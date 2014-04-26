@@ -8,6 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Type;
@@ -23,8 +25,23 @@ public class AppVersions implements Serializable {
 	private DateTime mReleaseDate;
 	private String mReleaseNote;
 	private Long mAppId;
-	private String mAppDowloadUrl;
+	private String mAppDownloadUrl;
 	private Long mAppSize;
+	
+	public AppVersions() {
+		
+	}
+	
+	public AppVersions(Long id, String version, DateTime releaseDate,
+			String releaseNote, Long appId, String appDownloadUrl, Long appSize) {
+		mId = id;
+		mVersion = version;
+		mReleaseDate = releaseDate;
+		mReleaseNote = releaseNote;
+		mAppId = appId;
+		mAppDownloadUrl = appDownloadUrl;
+		mAppSize = appSize;
+	}
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +56,7 @@ public class AppVersions implements Serializable {
 
 	@NotEmpty(message = "{validation.version.NotEmpty.message}")
 	@Size(min = 1, max = 255, message = "{validation.version.Size.message}")
+	@Pattern(regexp="^(\\d+\\.)*\\d+$", message="{validation.version.Pattern.message}")
 	@Column(name="version")
 	public String getVersion() {
 		return mVersion;
@@ -48,6 +66,7 @@ public class AppVersions implements Serializable {
 		mVersion = version;
 	}
 
+	@NotNull(message = "{validation.releaseDate.NotNull.message}")
 	@Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	@Column(name = "release_date")
 	public DateTime getReleaseDate() {
@@ -78,12 +97,12 @@ public class AppVersions implements Serializable {
 	}
 
 	@Column(name="app_download_url")
-	public String getAppDowloadUrl() {
-		return mAppDowloadUrl;
+	public String getAppDownloadUrl() {
+		return mAppDownloadUrl;
 	}
 
-	public void setAppDowloadUrl(String appDowloadUrl) {
-		mAppDowloadUrl = appDowloadUrl;
+	public void setAppDownloadUrl(String appDownloadUrl) {
+		mAppDownloadUrl = appDownloadUrl;
 	}
 
 	@Column(name="app_size")

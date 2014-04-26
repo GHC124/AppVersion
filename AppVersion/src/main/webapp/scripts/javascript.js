@@ -65,8 +65,13 @@ function removeInputError(formId){
 	$form.find('.alert').remove();		
 }
 
-function formAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMethod, errorMethod){
+function formAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMethod, errorMethod, replaceData){
 	var data = collectFormData(formId);
+	if(replaceData){
+		for(var key in replaceData){
+			data[key]=replaceData[key];
+		}
+	}
 	$.ajax({
 	    url: validateUrl,
 	    data: data,
@@ -86,23 +91,28 @@ function formAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMeth
 				}
 			} else {
 				if(successMethod){
-					successMethod();
+					successMethod(response);
 				}
 			}
 	    }
 	}).done(function(){
 		if(doneMethod){
-			doneMethod();
+			doneMethod(response);
 		}
 	}).fail(function(){
 		if(errorMethod){
-			errorMethod();
+			errorMethod(response);
 		}
 	});
 }
 
-function fileAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMethod, errorMethod){
+function fileAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMethod, errorMethod, replaceData){
 	var data = collectFormData(formId);
+	if(replaceData){
+		for(var key in replaceData){
+			data[key]=replaceData[key];
+		}
+	}
 	var formData = new FormData();
 	for(var key in data){
 		formData.append(key, data[key]);
@@ -132,17 +142,17 @@ function fileAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMeth
 				}
 			} else {
 				if(successMethod){
-					successMethod();
+					successMethod(response);
 				}
 			}
 	    }
 	}).done(function(){
 		if(doneMethod){
-			doneMethod();
+			doneMethod(response);
 		}
 	}).fail(function(){
 		if(errorMethod){
-			errorMethod();
+			errorMethod(response);
 		}
 	});
 }

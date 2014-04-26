@@ -6,6 +6,7 @@ import java.util.List;
 public class ValidationResponse {
 	private String mStatus = "FAIL";
 	private List<ErrorMessage> mResult = new ArrayList<>();
+	private String mExtraData;
 
 	public String getStatus() {
 		return mStatus;
@@ -21,5 +22,13 @@ public class ValidationResponse {
 
 	public void setResult(List<ErrorMessage> result) {
 		this.mResult = result;
+	}
+
+	public String getExtraData() {
+		return mExtraData;
+	}
+
+	public void setExtraData(String extraData) {
+		mExtraData = extraData;
 	}
 }

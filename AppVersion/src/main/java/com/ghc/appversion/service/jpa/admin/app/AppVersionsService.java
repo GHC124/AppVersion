@@ -27,4 +27,11 @@ public interface AppVersionsService {
 	void delete(Long id);
 
 	long count();
+	
+	/**
+	 * Get latest version by Release Date
+	 * @param appId
+	 * @return
+	 */
+	AppVersions latestVersion(Long appId);
 }

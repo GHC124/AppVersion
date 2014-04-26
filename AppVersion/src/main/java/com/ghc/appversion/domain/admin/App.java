@@ -31,7 +31,7 @@ public class App extends BaseEntity implements Serializable {
 	private String mName;
 	private String mIconUrl;
 	private String mDescription;
-	private String mLastestVersion;
+	private String mLatestVersion;
 	private Long mPlatformId;
 
 	@Id
@@ -75,13 +75,13 @@ public class App extends BaseEntity implements Serializable {
 		mDescription = description;
 	}
 
-	@Column(name="lastest_version")
-	public String getLastestVersion() {
-		return mLastestVersion;
+	@Column(name="latest_version")
+	public String getLatestVersion() {
+		return mLatestVersion;
 	}
 	
-	public void setLastestVersion(String lastestVersion) {
-		mLastestVersion = lastestVersion;
+	public void setLatestVersion(String latestVersion) {
+		mLatestVersion = latestVersion;
 	}
 
 	@NotNull(message="{validation.platform.NotNull.message}")

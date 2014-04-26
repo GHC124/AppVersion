@@ -26,5 +26,5 @@ public interface AppService {
 
 	void delete(Long id);
 
-	long count();
+	long count();	
 }

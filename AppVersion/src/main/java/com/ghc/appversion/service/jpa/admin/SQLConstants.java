@@ -60,4 +60,11 @@ public interface SQLConstants {
 	 */
 	String USER_GROUP_CHECK_QUERY = "SELECT ID, EMAIL,(SELECT ID FROM user_group WHERE USER_ID = u.ID AND GROUP_ID = :groupId LIMIT 1) as USER_GROUP_ID " +
 			"FROM users as u WHERE 1 ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
+	
+	String APP_ID = "appId";
+	/**
+	 * Select the lastest version of app 
+	 */
+	String APP_LASTEST_VERSION_QUERY = "SELECT ID,VERSION,MAX(RELEASE_DATE),RELEASE_NOTE,APP_ID,APP_DOWNLOAD_URL,APP_SIZE FROM app_versions " +
+			"WHERE APP_ID = :appId GROUP BY APP_ID";
 }

@@ -31,10 +31,10 @@ import com.ghc.appversion.service.jpa.user.UserGroupCheckService;
 import com.ghc.appversion.service.jpa.user.UserGroupService;
 import com.ghc.appversion.service.jpa.user.UserService;
 import com.ghc.appversion.service.jpa.user.UserSummaryService;
+import com.ghc.appversion.web.form.DataGrid;
 import com.ghc.appversion.web.form.ErrorMessage;
 import com.ghc.appversion.web.form.Message;
 import com.ghc.appversion.web.form.ValidationResponse;
-import com.ghc.appversion.web.form.admin.DataGrid;
 import com.ghc.appversion.web.util.UrlUtil;
 
 @RequestMapping("/admin/users")

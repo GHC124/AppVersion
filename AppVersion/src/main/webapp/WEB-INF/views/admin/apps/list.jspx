@@ -15,14 +15,13 @@
 	<spring:message code="label_admin_platform_type" var="labelPlatformType" />
 	<spring:message code="label_admin_app_name" var="labelAppName"/>
 	<spring:message code="label_admin_app_platform" var="labelAppPlatform"/>
-	<spring:message code="label_admin_app_lastest_version" var="labelAppVersion"/>
+	<spring:message code="label_admin_app_latest_version" var="labelAppVersion"/>
 	<spring:message code="label_admin_app_description" var="labelAppDescription"/>
 	<spring:message code="label_admin_app_icon" var="labelAppIcon"/>
 	<spring:message code="label_admin_app_file" var="labelAppFile"/>
 	<spring:message code="label_admin_app_new" var="labelNewApp"/>
 	<spring:message code="admin_app_save_fail" var="messageAppSaveFail"/>	
-	<spring:url value="/admin/apps" var="showAppUrl"/>
-	<spring:url value="/admin/apps?createAjax" var="addAppAjax"/>	
+	<spring:url value="/admin/apps" var="showAppUrl"/>		
 	<!-- Platform -->
 	<spring:message code="label_admin_platform_new" var="labelNewPlatform"/>
 	<spring:message code="admin_platform_save_fail" var="messagePlatformSaveFail"/>
@@ -33,6 +32,7 @@
 	<spring:message code="label_admin_version_release_date" var="labelVersionReleaseDate"/>
 	<spring:message code="label_admin_version_release_note" var="labelVersionReleaseNote"/>
 	<spring:message code="label_admin_version_file" var="labelVersionFile"/>
+	<spring:message code="admin_version_save_fail" var="labelVersionSaveFail"/>
 	
 	<div style="float:left">
 		<div> 
@@ -63,16 +63,16 @@
     		</html:selectField>
     		<html:fileField label="${labelAppIcon}" name="iconUrl" require="true"/>    		
     		<html:areaField label="${labelAppDescription}" name="description"/>
-    		<form:hidden path="lastestVersion" />
+    		<form:hidden path="latestVersion" />
     		<form:hidden path="version" />    		  		    		
     	</html:uploadForm>   
 	</div>
 	<div id="newVersionDialog" title="${labelNewVersion}" class="dialog add-dialog version-dialog" style="display: none">
     	<html:uploadForm formUrl="/admin/apps/version?createAjax" modelAttribute="appVersions" id="versionNewForm" method="POST">
     		<html:inputField label="${labelVersionVersion}" name="version" require="true"/>
-   			<html:dateField label="${labelVersionReleaseDate}" name="releaseDate"/>
+   			<html:dateField label="${labelVersionReleaseDate}" name="releaseDate" require="true"/>
    			<html:areaField label="${labelVersionReleaseNote}" name="releaseNote"/>
-    		<html:fileField label="${labelVersionFile}" name="appDowloadUrl" require="true"/>	
+    		<html:fileField label="${labelVersionFile}" name="appDownloadUrl" require="true"/>	
     	</html:uploadForm>   
 	</div>
 	<div id="newPlatformDialog" title="${labelNewPlatform}" class="dialog add-dialog" style="display: none">
@@ -111,16 +111,15 @@
 		        sortname: 'name', 
 		        sortorder: 'asc', 
 		        gridview: true, 
-		        height: 250, 
-		        width: 300, 
+		        height: 500, 
+		        width: 600, 
 		        onSelectRow: function(id){  
 		        	
 		        }, 
 		        beforeRequest: function(){
 		        },
 		        loadComplete: function() {
-		        	var grid = $(this);
-		        	moveJQGridPagerInfo2Bottom(grid);		           	
+		        	var grid = $(this);			        		           	
 		        }
 		      }); 
 	    	$("#listPlatform").jqGrid({ 
@@ -167,7 +166,13 @@
 			      resizable: false,
 			      buttons: {
 			        "${labelNewVersion}": function() {
-			        	
+			        	// Validate app information
+			        	fileAjaxSubmit("#appNewForm","${showAppUrl}?validateAjax", function(response){
+			        		showNewVersionDialog();	
+		            	}, null, null, function(response){
+		            		removeInputError('#newAppDialog #div_name');
+		              		addInputError('#newAppDialog #div_name','${messageAppSaveFail}');
+		              	});				        	
 			        },
 			        "${labelActionCancel}":function(){
 			        	$("#newAppDialog").dialog("close");
@@ -182,7 +187,32 @@
 			      resizable: false,
 			      buttons: {
 			        "${labelActionSave}": function() {
-									        	
+			        	// Validate version information
+			        	fileAjaxSubmit("#versionNewForm","${showAppUrl}/version?validateAjax", function(){
+			        		var version = $("#versionNewForm #version").val();
+			        		var versionData = {latestVersion:version};
+			        		// Save new app, replace latestVersion by new version
+			        		fileAjaxSubmit("#appNewForm","${showAppUrl}?createAjax", function(response){
+				        		// Save new version, replace appId by new appId
+				        		var id = response.extraData;
+				        		var appData = {appId:id};
+				        		fileAjaxSubmit("#versionNewForm","${showAppUrl}/version?createAjax", function(response){
+					        		console.log('success');
+					        		refreshJQGrid("#list");
+					        		$("#newVersionDialog").dialog("close");
+					        		$("#newAppDialog").dialog("close");
+				            	}, null, null, function(response){
+				            		removeInputError('#newVersionDialog #div_version');
+				              		addInputError('#newVersionDialog #div_version','${labelVersionSaveFail}');				              		
+				              	}, appData);					        		
+			            	}, null, null, function(response){
+			            		removeInputError('#newAppDialog #div_name');
+			              		addInputError('#newAppDialog #div_name','${labelAppSaveFail}');
+			              	}, versionData);			        		
+		            	}, null, null, function(response){
+		            		removeInputError('#newVersionDialog #div_version');
+		              		addInputError('#newVersionDialog #div_version','${labelVersionSaveFail}');
+		              	});			        	
 			        },
 			        "${labelActionCancel}":function(){
 			        	$("#newVersionDialog").dialog("close");
@@ -197,10 +227,10 @@
 			      resizable: false,
 			      buttons: {
 			        "${labelActionSave}": function() {
-			        	formAjaxSubmit("#platformNewForm","${addPlatformAjax}", function(){
+			        	formAjaxSubmit("#platformNewForm","${addPlatformAjax}", function(response){
 			        		refreshJQGrid("#listPlatform");
 		            		$("#newPlatformDialog").dialog("close");
-		            	}, null, null, function(){
+		            	}, null, null, function(response){
 		            		removeInputError('#newPlatformDialog #div_name');
 		              		addInputError('#newPlatformDialog #div_name','${messagePlatformSaveFail}');
 		              	});
@@ -216,19 +246,15 @@
 			    dialog.dialog("open");	
 			    removeInputError("#appNewForm");
 			}
+			function showNewVersionDialog(){
+				var dialog = $("#newVersionDialog");
+			    dialog.dialog("open");	
+			    removeInputError("#versionNewForm");
+			}
 			function showNewPlatformDialog(){
 				var dialog = $("#newPlatformDialog");
 			    dialog.dialog("open");
 			    removeInputError("#platformNewForm");
-			}
-			function submitNewApp(){
-				fileAjaxSubmit("#appNewForm","${addAppAjax}", function(){
-	        		refreshJQGrid("#list");
-            		$("#newAppDialog").dialog("close");
-            	}, null, null, function(){
-            		removeInputError('#newAppDialog #div_name');
-              		addInputError('#newAppDialog #div_name','${messageAppSaveFail}');
-              	});
-			}
+			}			
     </script>
 </div>
