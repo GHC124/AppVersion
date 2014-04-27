@@ -33,7 +33,7 @@ function cancelDefaultAction(e) {
 function collectFormData(formId) {
 	var data = {};
 	var form = $(formId);
-	var inputs = form.find('input[type=text],select,textarea');
+	var inputs = form.find('input[type=text],input[type=hidden],select,textarea');
 	for (var i = 0; i < inputs.length; i++) {
 		var $item = $(inputs[i]);
 		data[$item.attr('name')] = $item.val(); 
@@ -43,7 +43,7 @@ function collectFormData(formId) {
 
 function populateFormData(formId, data) {
 	var form = $(formId);
-	var inputs = form.find('input[type=text],select,textarea');
+	var inputs = form.find('input[type=text],input[type=hidden],select,textarea');
 	for (var i = 0; i < inputs.length; i++) {
 		var $item = $(inputs[i]);
 		 $item.val(data[$item.attr('name')]);
@@ -97,11 +97,11 @@ function formAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMeth
 	    }
 	}).done(function(){
 		if(doneMethod){
-			doneMethod(response);
+			doneMethod();
 		}
 	}).fail(function(){
 		if(errorMethod){
-			errorMethod(response);
+			errorMethod();
 		}
 	});
 }
@@ -148,11 +148,11 @@ function fileAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMeth
 	    }
 	}).done(function(){
 		if(doneMethod){
-			doneMethod(response);
+			doneMethod();
 		}
 	}).fail(function(){
 		if(errorMethod){
-			errorMethod(response);
+			errorMethod();
 		}
 	});
 }

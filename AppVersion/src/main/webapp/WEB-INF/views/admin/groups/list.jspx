@@ -11,7 +11,7 @@
 	<spring:message code="label_action_actions" var="labelActions"/>
 	<spring:message code="label_admin_group_name" var="labelGroupName" />	
 	<spring:message code="label_admin_group_new" var="labelGroupNew"/>
-	<spring:message code="label_action_edit" var="labelGroupEdit"/>
+	<spring:message code="label_action_edit" var="labelActionEdit"/>
 	<spring:url value="/admin/groups" var="showGroupUrl"/>
 	<!-- Group Info -->
 	<spring:message code="label_admin_group_info" var="labelGroupInfo"/>
@@ -34,6 +34,7 @@
 	<!-- Edit -->
 	<spring:message code="label_action_edit" var="labelActionEdit" />	
 	<spring:message code="admin_group_get_fail" var="messageGetGroupFail"/>
+	<spring:message code="label_action_close" var="lableActionClose"/>
 	
 	<div style="float:left">
 		<div> 
@@ -63,7 +64,7 @@
     		<form:hidden path="version" />    		    		
     	</html:form>    	
 	</div>
-	<div id="editGroupDialog" title="${labelGroupEdit}" class="dialog edit-dialog group-dialog" style="display: none">
+	<div id="editGroupDialog" title="${labelActionEdit}" class="dialog edit-dialog group-dialog" style="display: none">
     	<html:form formUrl="/admin/groups?ajax" modelAttribute="group" id="groupEditForm" method="POST">
     		<html:inputField label="${labelGroupName}" name="name" require="true"/>    		
     		<form:hidden path="version" />    		    		
@@ -121,7 +122,7 @@
 	        },
 	        loadComplete: function () {
 	            var grid = $(this);
-	            addAction2JQGrid(grid,'name','act','${labelGroupEdit}','ui-icon-pencil',function(id, value){
+	            addAction2JQGrid(grid,'name','act','${labelActionEdit}','ui-icon-pencil',function(id, value){
 	            	showEditGroupDialog(id, value);
        			});                
 		        addAction2JQGrid(grid,'name','act','${labelActionDelete}','ui-icon-trash',function(id, value){
@@ -290,6 +291,11 @@
 	          width: 500,
 	          modal: true,
 	          resizable: false,
+	          buttons:{
+	        		'${lableActionClose}':function(){
+	        			$("#addMemberDialog").dialog("close");	
+	        		}  
+	          },
 	          close: function(){
 	        	  refreshJQGrid("#list", {datatype:"json"});	        	  
 	          }

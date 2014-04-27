@@ -10,6 +10,9 @@
 	<spring:message code="label_action_save" var="labelActionSave" />
 	<spring:message code="label_action_cancel" var="labelActionCancel" />
 	<!-- List -->
+	<spring:message code="label_action_actions" var="labelActions"/>
+	<spring:message code="label_action_edit" var="labelActionEdit"/>
+	<spring:message code="label_action_delete" var="labelActionDelete"/>
 	<spring:message code="label_admin_platform" var="labelPlatform" />
 	<spring:message code="label_admin_platform_name" var="labelPlatformName" />
 	<spring:message code="label_admin_platform_type" var="labelPlatformType" />
@@ -25,7 +28,11 @@
 	<!-- Platform -->
 	<spring:message code="label_admin_platform_new" var="labelNewPlatform"/>
 	<spring:message code="admin_platform_save_fail" var="messagePlatformSaveFail"/>
-	<spring:url value="/admin/apps/platform?createAjax" var="addPlatformAjax"/>
+	<spring:url value="/admin/apps/platform" var="showPlatformUrl"/>
+	<spring:message code="label_admin_platform_delete" var="labelPlatformDelete"/>
+	<spring:message code="admin_platform_delete_confirm" var="messagePlatformDelete"/>
+	<spring:message code="admin_platform_delete_error" var="messagePlatformDeleteError"/>
+	<spring:message code="admin_platform_get_fail" var="messageGetPlatformFail"/>	
 	<!-- Version -->
 	<spring:message code="label_admin_version_new" var="labelNewVersion"/>
 	<spring:message code="label_admin_version_version" var="labelVersionVersion"/>
@@ -59,7 +66,7 @@
     	<html:uploadForm formUrl="/admin/apps?createAjax" modelAttribute="app" id="appNewForm" method="POST">
     		<html:inputField label="${labelAppName}" name="name" require="true"/>
     		<html:selectField label="${labelAppPlatform}" name="platformId" require="true">
-    			<form:select path="platformId" items="${listPlatforms}"/>
+    			<select id="platformId" name="platformId"><option></option></select>    			
     		</html:selectField>
     		<html:fileField label="${labelAppIcon}" name="iconUrl" require="true"/>    		
     		<html:areaField label="${labelAppDescription}" name="description"/>
@@ -84,8 +91,26 @@
     		<form:hidden path="version" />    		    		
     	</html:form>    
 	</div>
+	<div id="editPlatformDialog" title="${labelActionEdit}" class="dialog edit-dialog platform-dialog" style="display: none">
+    	<html:form formUrl="/admin/apps/platform?ajax" modelAttribute="platform" id="platformEditForm" method="POST">
+    		<html:inputField label="${labelPlatformName}" name="name" require="true"/>
+    		<form:hidden path="platformType"/>
+    		<form:hidden path="version" />        		
+    	</html:form>
+    	<br/>
+    	<span id="editPlatformError" class="error" style="display: none"></span>    	
+	</div>		
+	<div id="deletePlatformDialog" title="${labelPlatformDelete}" class="dialog delete-dialog" style="display: none">   
+		<span id="deletePlatformMessage">${messagePlatformDelete}</span> 	  
+		<br/>
+		<span id="deletePlatformError" class="error" style="display: none"></span>	
+	</div>
     <script type="text/javascript">
-    	$(function(){    
+    	<![CDATA[
+    	var globalUpdatePlatforms = true;
+    	var globalPlatforms = {};
+    	$(function(){
+    		globalPlatforms = JSON.parse('${jsonPlatforms}');    		
     		$("#list").jqGrid({ 
 		        url:'${showAppUrl}/listgrid', 
 		        datatype: 'json', 
@@ -94,7 +119,7 @@
 		        colModel :[  
 		          {name:'name', index:'name', width:150},
 		          {name:'platformId', index:'platformId', width:100, formatter: platformFormatter},
-		          {name:'lastestVersion', index:'lastestVersion', width:50}
+		          {name:'latestVersion', index:'latestVersion', width:50}
 		        ], 
 		        jsonReader : { 
 		            root:"data", 
@@ -126,10 +151,11 @@
 		        url:'${showAppUrl}/platform', 
 		        datatype: 'json', 
 		        mtype: 'GET', 
-		        colNames:['${labelPlatformName}','${labelPlatformType}'], 
+		        colNames:['${labelPlatformName}','${labelPlatformType}','${labelActions}'], 
 		        colModel :[  
-		          {name:'name', index:'name', width:150},
-		          {name:'platformType', index:'platformType', width:50}
+		          {name:'name', index:'name', width:120},
+		          {name:'platformType', index:'platformType', width:50},
+		          {name:'act', index:'act', width:40}
 		        ], 
 		        jsonReader : { 
 		            root:"data", 
@@ -155,6 +181,13 @@
 		        },
 		        loadComplete: function() {
 		        	var grid = $(this);
+		        	var grid = $(this);
+		            addAction2JQGrid(grid,'name','act','${labelActionEdit}','ui-icon-pencil',function(id, value){
+		            	showEditPlatformDialog(id, value);
+	       			});                
+			        addAction2JQGrid(grid,'name','act','${labelActionDelete}','ui-icon-trash',function(id, value){
+		        		showDeletePlatformDialog(id, value);
+		    		});	
 		        	moveJQGridPagerInfo2Bottom(grid);		           	
 		        }
 		      }); 
@@ -169,7 +202,7 @@
 			        	// Validate app information
 			        	fileAjaxSubmit("#appNewForm","${showAppUrl}?validateAjax", function(response){
 			        		showNewVersionDialog();	
-		            	}, null, null, function(response){
+		            	}, null, null, function(){
 		            		removeInputError('#newAppDialog #div_name');
 		              		addInputError('#newAppDialog #div_name','${messageAppSaveFail}');
 		              	});				        	
@@ -201,15 +234,15 @@
 					        		refreshJQGrid("#list");
 					        		$("#newVersionDialog").dialog("close");
 					        		$("#newAppDialog").dialog("close");
-				            	}, null, null, function(response){
+				            	}, null, null, function(){
 				            		removeInputError('#newVersionDialog #div_version');
 				              		addInputError('#newVersionDialog #div_version','${labelVersionSaveFail}');				              		
 				              	}, appData);					        		
-			            	}, null, null, function(response){
+			            	}, null, null, function(){
 			            		removeInputError('#newAppDialog #div_name');
 			              		addInputError('#newAppDialog #div_name','${labelAppSaveFail}');
 			              	}, versionData);			        		
-		            	}, null, null, function(response){
+		            	}, null, null, function(){
 		            		removeInputError('#newVersionDialog #div_version');
 		              		addInputError('#newVersionDialog #div_version','${labelVersionSaveFail}');
 		              	});			        	
@@ -227,21 +260,87 @@
 			      resizable: false,
 			      buttons: {
 			        "${labelActionSave}": function() {
-			        	formAjaxSubmit("#platformNewForm","${addPlatformAjax}", function(response){
+			        	formAjaxSubmit("#platformNewForm","${showPlatformUrl}?createAjax", function(response){
 			        		refreshJQGrid("#listPlatform");
 		            		$("#newPlatformDialog").dialog("close");
-		            	}, null, null, function(response){
+		            	}, null, null, function(){
+		            		console.log('error');
 		            		removeInputError('#newPlatformDialog #div_name');
 		              		addInputError('#newPlatformDialog #div_name','${messagePlatformSaveFail}');
 		              	});
 			        }	            
 			      }
 			    });
+			 $( "#editPlatformDialog" ).dialog({
+		          autoOpen: false,
+		          height: 350,
+		          width: 400,
+		          modal: true,
+		          resizable: false,
+		          buttons: {
+		            "${labelActionEdit}": function() {
+		            	var id = $(this).data('id');
+		            	formAjaxSubmit("#platformEditForm","${showPlatformUrl}/" + id + "?updateAjax", function(){
+		            		var name = $('#editPlatformDialog #name').val();
+		            		globalPlatforms[id] = name;
+		            		refreshJQGrid("#list");
+		            		refreshJQGrid("#listPlatform");
+		            		$("#editPlatformDialog").dialog("close");
+		            	}, null, null, function(){
+		            		removeInputError('#editPlatformDialog');
+		              		addInputError('#editPlatformDialog #div_name','${messagePlatformSaveFail}');
+		              	});
+		            }	            
+		          }
+		        });
+		      $( "#deletePlatformDialog" ).dialog({
+		          autoOpen: false,
+		          height: 350,
+		          width: 400,
+		          modal: true,
+		          resizable: false,
+		          buttons: {
+		            "${labelActionDelete}": function() {
+		            	var id = $(this).data('id');
+		            	var data = {};
+		            	$.post('${showPlatformUrl}' + '/' + id + '?deleteAjax', data, function(response) {
+		            		
+		            	}, 'json').done(function(){
+		            		deleteJQGridRow($('#listPlatform'), id);		            		
+		            		$("#deletePlatformDialog").dialog("close");
+		            	}).fail(function(){
+		            		var error = $("#deletePlatformDialog").find("#deletePlatformError");
+		            		error.css({"display": "block"});
+		            		error.html('${messagePlatformDeleteError}');
+		            	});	            		
+		            }	            
+		          }
+		        });
 			});	 
     		function platformFormatter(cellvalue, options, rowObject){
-    			
+    			var platform = '';
+    			for(var key in globalPlatforms){
+    				if(key == cellvalue){
+    					platform = globalPlatforms[key];
+    					break;
+    				}
+    			}
+    			return '<span>' + platform + '</span>';	
+    		}
+    		function populatePlatformDropdown(selectId){
+    			var select = $(selectId);
+    			select.html('');
+    			for(var key in globalPlatforms){
+    				select.append($("<option></option>")
+    				         .attr("value",key)
+    				         .text(globalPlatforms[key])); 
+    			}
     		}
 			function showNewAppDialog(){
+				if(globalUpdatePlatforms){
+					globalUpdatePlatforms = false;
+					populatePlatformDropdown('#platformId');
+				}
 				var dialog = $("#newAppDialog");
 			    dialog.dialog("open");	
 			    removeInputError("#appNewForm");
@@ -255,6 +354,29 @@
 				var dialog = $("#newPlatformDialog");
 			    dialog.dialog("open");
 			    removeInputError("#platformNewForm");
-			}			
+			}	
+			function showEditPlatformDialog(id, value){
+		    	removeInputError("#platformEditForm");
+		    	$.get('${showPlatformUrl}/' + id + '?showAjax', {}, function(response) {
+	    			populateFormData('#platformEditForm', response);
+	    		}, 'json').done(function(data){
+	    			        			
+	    		}).fail(function(){
+	   				var error = $("#editPlatformError");
+	        		error.css({"display": "block"});
+	        		error.find('span').html('${messageGetPlatformFail}');
+	        	});	    
+		    	
+		    	var dialog = $("#editPlatformDialog");	        
+		        dialog.data('id',id).dialog("open");
+		    }
+		    function showDeletePlatformDialog(id, value){
+		    	var dialog = $("#deletePlatformDialog");
+		    	var message = '${messagePlatformDelete}' + ' ' + value + "?";
+		    	dialog.find("#deletePlatformMessage").html(message);
+		    	dialog.find("#deletePlatformError").css({"display": "none"});
+		        dialog.data('id',id).dialog("open");	        
+		    }
+		]]>
     </script>
 </div>

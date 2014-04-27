@@ -38,15 +38,15 @@ public class App extends BaseEntity implements Serializable {
 		super();
 	}
 
-	public App(Long id, String name, String iconUrl, String description,
-			String latestVersion, Long platformId, Long version) {
-		super(version);
-		mId = id;
+	public App(Integer id, String name, String iconUrl, String description,
+			String latestVersion, Integer platformId, Integer version) {
+		super(version.longValue());
+		mId = id.longValue();
 		mName = name;
 		mIconUrl = iconUrl;
 		mDescription = description;
 		mLatestVersion = latestVersion;
-		mPlatformId = platformId;
+		mPlatformId = platformId.longValue();
 	}
 
 	@Id

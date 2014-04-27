@@ -66,6 +66,7 @@
     	</html:form>    	
 	</div>
     <script type="text/javascript">
+    	<![CDATA[
     	var refreshUserList = false;
     	$(function(){       
 	    	$("#list").jqGrid({ 
@@ -216,5 +217,6 @@
 	        	$('#confirmPassword').val("");
 			    removeInputError("#userUpdateForm");
 			}
+		]]>
     </script>
 </div>

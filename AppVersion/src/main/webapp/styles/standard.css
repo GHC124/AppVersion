@@ -560,6 +560,10 @@ span.error {
 	height: 80px !important;
 }
 
+.platform-dialog{
+	height: 80px !important;
+}
+
 #divPagerInfo div{
 	text-align: center !important;
 }

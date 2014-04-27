@@ -52,7 +52,7 @@ public class UploadUtil {
 		}
 		if (!Files.exists(binaryPath)) {
 			Files.createDirectories(binaryPath);
-		}
+		}		
 	}
 
 	/**

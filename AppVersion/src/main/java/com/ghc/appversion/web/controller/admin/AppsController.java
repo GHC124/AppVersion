@@ -20,6 +20,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,6 +45,7 @@ import com.ghc.appversion.domain.admin.Platform;
 import com.ghc.appversion.service.jpa.admin.app.AppService;
 import com.ghc.appversion.service.jpa.admin.app.AppVersionsService;
 import com.ghc.appversion.service.jpa.admin.app.PlatformService;
+import com.ghc.appversion.util.LogUtil;
 import com.ghc.appversion.web.form.DataGrid;
 import com.ghc.appversion.web.form.ErrorMessage;
 import com.ghc.appversion.web.form.ValidationResponse;
@@ -80,8 +83,14 @@ public class AppsController extends AbstractAdminController {
 		for (Platform p : listPlatforms) {
 			platforms.put(p.getId(), p.getName());
 		}
-		model.addAttribute("listPlatforms", platforms);
-
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			String jsonPlatforms = objectMapper.writeValueAsString(platforms);
+			model.addAttribute("jsonPlatforms", jsonPlatforms);
+		} catch (IOException e) {
+			LogUtil.error("error parsing platforms to JSON");
+		}	
+		
 		Map<String, String> platformTypes = new HashMap<>();
 		platformTypes.put(PLATFORM_TYPE_ANDROID, PLATFORM_TYPE_ANDROID);
 		platformTypes.put(PLATFORM_TYPE_IOS, PLATFORM_TYPE_IOS);
@@ -90,6 +99,14 @@ public class AppsController extends AbstractAdminController {
 		return "admin/apps/list";
 	}
 
+	@RequestMapping(value = "/platform/{id}", params = "showAjax", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public Platform showPlatformAjax(@PathVariable(value = "id") Long id) {
+		Platform platform = platformService.findById(id);
+		
+		return platform;
+	}
+	
 	@RequestMapping(value = "/platform", params = "createAjax", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ValidationResponse createPlatformAjax(Model model,
@@ -331,6 +348,29 @@ public class AppsController extends AbstractAdminController {
 
 		return res;
 	}
+	
+	@RequestMapping(value = "/platform/{id}", params = "updateAjax", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ValidationResponse updatePlatformAjax(Model model,
+			@ModelAttribute(value = "platform") @Valid Platform platform,
+			BindingResult result) {
+		ValidationResponse res = new ValidationResponse();
+		if (result.hasErrors()) {
+			res.setStatus("FAIL");
+			List<FieldError> allErrors = result.getFieldErrors();
+			List<ErrorMessage> errorMesages = new ArrayList<ErrorMessage>();
+			for (FieldError objectError : allErrors) {
+				errorMesages.add(new ErrorMessage(objectError.getField(),
+						objectError.getDefaultMessage()));
+			}
+			res.setResult(errorMesages);
+		} else {
+			res.setStatus("SUCCESS");
+			platformService.save(platform);
+		}
+
+		return res;
+	}
 
 	@RequestMapping(value = "/listgrid", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
@@ -396,6 +436,12 @@ public class AppsController extends AbstractAdminController {
 		return platformGrid;
 	}
 
+	@RequestMapping(value="/platform/{id}", params="deleteAjax", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public void deletePlatformAjax(@PathVariable("id") Long id) {
+		platformService.delete(id);		
+	}
+	
 	/**
 	 * Compare version. Pattern: x.x.x.x
 	 * 
