@@ -7,8 +7,6 @@ package com.ghc.appversion.web.controller.admin;
 
 import static com.ghc.appversion.service.jpa.admin.SQLConstants.PLATFORM_TYPE_ANDROID;
 import static com.ghc.appversion.service.jpa.admin.SQLConstants.PLATFORM_TYPE_IOS;
-import static com.ghc.appversion.web.Constants.ANDROID_TYPE;
-import static com.ghc.appversion.web.Constants.PHOTO_TYPE;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -205,7 +203,7 @@ public class AppsController extends AbstractAdminController {
 					res.addErrorMessage(new ErrorMessage("iconUrl",
 							messageSource.getMessage(
 									"validation.icon.InvalidType.message",
-									new Object[] { PHOTO_TYPE }, locale)));
+									new Object[] { mPhotoType }, locale)));
 				}
 			} else {
 				res.addErrorMessage(new ErrorMessage("iconUrl", messageSource
@@ -265,7 +263,7 @@ public class AppsController extends AbstractAdminController {
 					res.addErrorMessage(new ErrorMessage("iconUrl",
 							messageSource.getMessage(
 									"validation.icon.InvalidType.message",
-									new Object[] { PHOTO_TYPE }, locale)));
+									new Object[] { mPhotoType }, locale)));
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -348,7 +346,7 @@ public class AppsController extends AbstractAdminController {
 				res.addErrorMessage(new ErrorMessage("appDownloadUrl",
 						messageSource.getMessage(
 								"validation.file.InvalidType.message",
-								new Object[] { ANDROID_TYPE }, locale)));
+								new Object[] { mAndroidType }, locale)));
 			}
 		}
 
@@ -408,7 +406,7 @@ public class AppsController extends AbstractAdminController {
 					res.addErrorMessage(new ErrorMessage("appDownloadUrl",
 							messageSource.getMessage(
 									"validation.file.InvalidType.message",
-									new Object[] { ANDROID_TYPE }, locale)));
+									new Object[] { mAndroidType }, locale)));
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -710,7 +708,7 @@ public class AppsController extends AbstractAdminController {
 			} else {
 				res.addErrorMessage(new ErrorMessage("iconUrl", messageSource
 						.getMessage("validation.icon.InvalidType.message",
-								new Object[] { PHOTO_TYPE }, locale)));
+								new Object[] { mPhotoType }, locale)));
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

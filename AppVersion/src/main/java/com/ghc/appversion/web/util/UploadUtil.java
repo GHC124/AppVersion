@@ -1,8 +1,5 @@
 package com.ghc.appversion.web.util;
 
-import static com.ghc.appversion.web.Constants.ANDROID_TYPE;
-import static com.ghc.appversion.web.Constants.PHOTO_TYPE;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,30 +13,31 @@ import java.util.Calendar;
 import org.apache.commons.io.IOUtils;
 
 import com.ghc.appversion.util.LogUtil;
+import com.ghc.appversion.web.GlobalVariables;
 
 public class UploadUtil {
 	private static final long KILOBYTES = 1024;
 	private static final long MEGABYTES = (KILOBYTES * 1024);
 	private static final long GIGABYTES = (MEGABYTES * 1024);
-	
+
 	public static String getFileSize(long bytes) {
 		String fileSizeString = "";
-		if(bytes > GIGABYTES) {
+		if (bytes > GIGABYTES) {
 			fileSizeString = (bytes / GIGABYTES) + " GB";
-		}else if(bytes > MEGABYTES) {
+		} else if (bytes > MEGABYTES) {
 			fileSizeString = (bytes / MEGABYTES) + " MB";
-		}else if(bytes > KILOBYTES) {
+		} else if (bytes > KILOBYTES) {
 			fileSizeString = (bytes / KILOBYTES) + " KB";
-		}else {
+		} else {
 			fileSizeString = bytes + " b";
 		}
-		
+
 		return fileSizeString;
 	}
-	
+
 	public static boolean isValidPhoto(String type) {
 		boolean valid = false;
-		if (PHOTO_TYPE.contains(type)) {
+		if (GlobalVariables.getInstance().getPhotoType().contains(type)) {
 			valid = true;
 		}
 		return valid;
@@ -52,7 +50,7 @@ public class UploadUtil {
 		if (index != -1) {
 			String type = originalName.substring(index);
 			LogUtil.error("Type %s", type);
-			if (ANDROID_TYPE.contains(type)) {
+			if (GlobalVariables.getInstance().getAndroidType().contains(type)) {
 				valid = true;
 			}
 		}
@@ -111,7 +109,7 @@ public class UploadUtil {
 		String filePath = String.format("%s\\AppBinary\\%s", rootDirectory,
 				fileName);
 		OutputStream outputStream = new FileOutputStream(filePath);
-		IOUtils.copy(inputStream, outputStream);		
+		IOUtils.copy(inputStream, outputStream);
 		outputStream.flush();
 		outputStream.close();
 		inputStream.close();
@@ -119,20 +117,21 @@ public class UploadUtil {
 		return iconUrl;
 	}
 
-	public static byte[] getIconFile(String rootDirectory, String iconUrl) throws IOException {
+	public static byte[] getIconFile(String rootDirectory, String iconUrl)
+			throws IOException {
 		String filePath = String.format("%s%s", rootDirectory, iconUrl);
 		Path path = Paths.get(filePath);
 		if (Files.exists(path)) {
 			InputStream inputStream = new FileInputStream(filePath);
 			byte[] data = IOUtils.toByteArray(inputStream);
 			inputStream.close();
-			
+
 			return data;
 		}
-		
+
 		return null;
 	}
-	
+
 	public static void deleteIconFile(String rootDirectory, String iconUrl)
 			throws IOException {
 		String filePath = String.format("%s%s", rootDirectory, iconUrl);
@@ -141,7 +140,7 @@ public class UploadUtil {
 			Files.delete(path);
 		}
 	}
-	
+
 	public static void deleteAndroidFile(String rootDirectory, String appUrl)
 			throws IOException {
 		String filePath = String.format("%s%s", rootDirectory, appUrl);

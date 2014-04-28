@@ -46,7 +46,7 @@
 				<table>
 					<tr>
 						<td>
-							<img id="imgAppIconUrl" style="width: 150px; height: 200px;" alt="image" src="${showAppUrl}/icon?url=${app.iconUrl}"></img>
+							<img id="imgAppIconUrl" style="width: 200px; height: 200px;" alt="image" src="${showAppUrl}/icon?url=${app.iconUrl}"></img>
 							<input id="appIconUrl" type="hidden" value="${app.iconUrl}"/>
 						</td>
 						<td valign="top">
@@ -175,10 +175,10 @@
 		        colNames:['${labelVersionVersion}', '${labelVersionReleaseDate}', '${labelVersionReleaseNote}', '${labelVersionSize}', '${labelActions}'], 
 		        colModel :[  
 		          {name:'version', index:'version', width:50},
-		          {name:'releaseDateString', index:'releaseDate', width:100},
-		          {name:'releaseNote', index:'releaseNote'},
-		          {name:'appSizeString', index:'appSize', width:50},
-		          {name:'act', index:'act', width:50}
+		          {name:'releaseDateString', index:'release_date', width:100},
+		          {name:'releaseNote', index:'releaseNote', sortable:false},
+		          {name:'appSizeString', index:'app_size', width:50},
+		          {name:'act', index:'act', sortable:false, width:50}
 		        ], 
 		        jsonReader : { 
 		            root:"data", 
@@ -357,6 +357,8 @@
     		error.css({"display": "none"});
     		error.find('span').html('');
 			removeInputError("#versionNewForm");
+			$('#versionNewForm #appDownloadUrl').val('');
+			$('#versionNewForm #version').val('');
 			var dialog = $("#newVersionDialog");
 			dialog.data('id',id).dialog("open");    
 		}
