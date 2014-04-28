@@ -539,7 +539,7 @@ span.error {
 	width: 200px !important;
 }
 
-.add-dialog textarea{
+.add-dialog textarea, .edit-dialog textarea{
 	width: 192px !important;
 	height: 145px !important;
 }

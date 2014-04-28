@@ -23,7 +23,11 @@
 	<spring:message code="label_admin_app_icon" var="labelAppIcon"/>
 	<spring:message code="label_admin_app_file" var="labelAppFile"/>
 	<spring:message code="label_admin_app_new" var="labelNewApp"/>
-	<spring:message code="admin_app_save_fail" var="messageAppSaveFail"/>	
+	<spring:message code="admin_app_save_fail" var="messageAppSaveFail"/>
+	<spring:message code="label_admin_app_delete" var="labelAppDelete"/>
+	<spring:message code="admin_app_delete_confirm" var="messageAppDelete"/>
+	<spring:message code="admin_app_delete_error" var="messageAppDeleteError"/>
+	<spring:message code="admin_app_get_fail" var="messageGetAppFail"/>		
 	<spring:url value="/admin/apps" var="showAppUrl"/>		
 	<!-- Platform -->
 	<spring:message code="label_admin_platform_new" var="labelNewPlatform"/>
@@ -99,6 +103,11 @@
     	</html:form>
     	<br/>
     	<span id="editPlatformError" class="error" style="display: none"></span>    	
+	</div>
+	<div id="deleteAppDialog" title="${labelAppDelete}" class="dialog delete-dialog" style="display: none">   
+		<span id="deleteAppMessage">${messageAppDelete}</span> 	  
+		<br/>
+		<span id="deleteAppError" class="error" style="display: none"></span>	
 	</div>		
 	<div id="deletePlatformDialog" title="${labelPlatformDelete}" class="dialog delete-dialog" style="display: none">   
 		<span id="deletePlatformMessage">${messagePlatformDelete}</span> 	  
@@ -115,11 +124,12 @@
 		        url:'${showAppUrl}/listgrid', 
 		        datatype: 'json', 
 		        mtype: 'GET', 
-		        colNames:['${labelAppName}','${labelAppPlatform}','${labelAppVersion}'], 
+		        colNames:['${labelAppName}','${labelAppPlatform}','${labelAppVersion}','${labelActions}'], 
 		        colModel :[  
 		          {name:'name', index:'name', width:150},
-		          {name:'platformId', index:'platformId', width:100, formatter: platformFormatter},
-		          {name:'latestVersion', index:'latestVersion', width:50}
+		          {name:'platformId', index:'platformId', width:50, formatter: platformFormatter},
+		          {name:'latestVersion', index:'latestVersion', width:45},
+		          {name:'act', index:'act', width:25}
 		        ], 
 		        jsonReader : { 
 		            root:"data", 
@@ -139,12 +149,15 @@
 		        height: 500, 
 		        width: 600, 
 		        onSelectRow: function(id){  
-		        	
+		        	 document.location.href ="${showAppUrl}/" + id; 	
 		        }, 
 		        beforeRequest: function(){
 		        },
 		        loadComplete: function() {
-		        	var grid = $(this);			        		           	
+		        	var grid = $(this);		
+		            addAction2JQGrid(grid,'name','act','${labelActionDelete}','ui-icon-trash',function(id, value){
+		        		showDeleteAppDialog(id, value);
+		    		});	
 		        }
 		      }); 
 	    	$("#listPlatform").jqGrid({ 
@@ -261,6 +274,9 @@
 			      buttons: {
 			        "${labelActionSave}": function() {
 			        	formAjaxSubmit("#platformNewForm","${showPlatformUrl}?createAjax", function(response){
+			        		var id = response.extraData;
+			        		globalPlatforms[id] = $('#newPlatformDialog #name').val();
+			        		globalUpdatePlatforms = true;
 			        		refreshJQGrid("#listPlatform");
 		            		$("#newPlatformDialog").dialog("close");
 		            	}, null, null, function(){
@@ -283,6 +299,7 @@
 		            	formAjaxSubmit("#platformEditForm","${showPlatformUrl}/" + id + "?updateAjax", function(){
 		            		var name = $('#editPlatformDialog #name').val();
 		            		globalPlatforms[id] = name;
+		            		globalUpdatePlatforms = true;
 		            		refreshJQGrid("#list");
 		            		refreshJQGrid("#listPlatform");
 		            		$("#editPlatformDialog").dialog("close");
@@ -290,6 +307,35 @@
 		            		removeInputError('#editPlatformDialog');
 		              		addInputError('#editPlatformDialog #div_name','${messagePlatformSaveFail}');
 		              	});
+		            }	            
+		          }
+		        });
+			 $( "#deleteAppDialog" ).dialog({
+		          autoOpen: false,
+		          height: 350,
+		          width: 400,
+		          modal: true,
+		          resizable: false,
+		          buttons: {
+		            "${labelActionDelete}": function() {
+		            	var id = $(this).data('id');
+		            	var data = {};
+		            	$.post('${showAppUrl}' + '/' + id + '?deleteAjax', data, function(response) {
+		            		if (response.status == 'FAIL') {
+		        				for (var i = 0; i < response.result.length; i++) {
+		        					var item = response.result[i];
+		        					addInputError("#deleteAppDialog #" + item.fieldName, item.message+"<br/>");								
+		        				}		        				
+		        			} else {
+		        				deleteJQGridRow($('#list'), id);		            		
+			            		$("#deleteAppDialog").dialog("close");
+		        			}
+		            	}, 'json').done(function(){		            		
+		            	}).fail(function(){
+		            		var error = $("#deleteAppDialog").find("#deleteAppError");
+		            		error.css({"display": "block"});
+		            		error.html('${messageAppDeleteError}');
+		            	});	            		
 		            }	            
 		          }
 		        });
@@ -306,6 +352,8 @@
 		            	$.post('${showPlatformUrl}' + '/' + id + '?deleteAjax', data, function(response) {
 		            		
 		            	}, 'json').done(function(){
+		            		spliceArray(globalPlatforms, id);
+		            		globalUpdatePlatforms = true;
 		            		deleteJQGridRow($('#listPlatform'), id);		            		
 		            		$("#deletePlatformDialog").dialog("close");
 		            	}).fail(function(){
@@ -358,7 +406,7 @@
 			function showEditPlatformDialog(id, value){
 		    	removeInputError("#platformEditForm");
 		    	$.get('${showPlatformUrl}/' + id + '?showAjax', {}, function(response) {
-	    			populateFormData('#platformEditForm', response);
+	    			populateFormData('#platformEditForm', response);			    	
 	    		}, 'json').done(function(data){
 	    			        			
 	    		}).fail(function(){
@@ -366,7 +414,6 @@
 	        		error.css({"display": "block"});
 	        		error.find('span').html('${messageGetPlatformFail}');
 	        	});	    
-		    	
 		    	var dialog = $("#editPlatformDialog");	        
 		        dialog.data('id',id).dialog("open");
 		    }
@@ -375,6 +422,13 @@
 		    	var message = '${messagePlatformDelete}' + ' ' + value + "?";
 		    	dialog.find("#deletePlatformMessage").html(message);
 		    	dialog.find("#deletePlatformError").css({"display": "none"});
+		        dialog.data('id',id).dialog("open");	        
+		    }
+		    function showDeleteAppDialog(id, value){
+		    	var dialog = $("#deleteAppDialog");
+		    	var message = '${messageAppDelete}' + ' ' + value + "?";
+		    	dialog.find("#deleteAppMessage").html(message);
+		    	dialog.find("#deleteAppError").css({"display": "none"});
 		        dialog.data('id',id).dialog("open");	        
 		    }
 		]]>

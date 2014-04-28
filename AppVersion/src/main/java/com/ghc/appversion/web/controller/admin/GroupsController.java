@@ -1,6 +1,5 @@
 package com.ghc.appversion.web.controller.admin;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -82,16 +81,14 @@ public class GroupsController extends AbstractAdminController {
 			BindingResult result) {
 		ValidationResponse res = new ValidationResponse();
 		if (result.hasErrors()) {
-			res.setStatus("FAIL");
+			res.setStatus(ValidationResponse.FAIL);
 			List<FieldError> allErrors = result.getFieldErrors();
-			List<ErrorMessage> errorMesages = new ArrayList<ErrorMessage>();
 			for (FieldError objectError : allErrors) {
-				errorMesages.add(new ErrorMessage(objectError.getField(),
+				res.addErrorMessage(new ErrorMessage(objectError.getField(),
 						objectError.getDefaultMessage()));
 			}
-			res.setResult(errorMesages);
 		} else {
-			res.setStatus("SUCCESS");
+			res.setStatus(ValidationResponse.SUCCESS);
 			groupService.save(group);
 		}
 
@@ -105,16 +102,14 @@ public class GroupsController extends AbstractAdminController {
 			BindingResult result) {
 		ValidationResponse res = new ValidationResponse();
 		if (result.hasErrors()) {
-			res.setStatus("FAIL");
+			res.setStatus(ValidationResponse.FAIL);
 			List<FieldError> allErrors = result.getFieldErrors();
-			List<ErrorMessage> errorMesages = new ArrayList<ErrorMessage>();
 			for (FieldError objectError : allErrors) {
-				errorMesages.add(new ErrorMessage(objectError.getField(),
+				res.addErrorMessage(new ErrorMessage(objectError.getField(),
 						objectError.getDefaultMessage()));
 			}
-			res.setResult(errorMesages);
 		} else {
-			res.setStatus("SUCCESS");
+			res.setStatus(ValidationResponse.SUCCESS);
 			groupService.save(group);
 		}
 

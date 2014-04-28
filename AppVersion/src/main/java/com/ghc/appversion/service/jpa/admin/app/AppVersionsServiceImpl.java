@@ -7,6 +7,7 @@ package com.ghc.appversion.service.jpa.admin.app;
 
 import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_ID;
 import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_LASTEST_VERSION_QUERY;
+import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_SELECT_ALL_VERSIONS_QUERY;
 
 import java.util.List;
 
@@ -110,5 +111,21 @@ public class AppVersionsServiceImpl implements AppVersionsService {
 			return null;
 		}
 		return result.get(0);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.ghc.appversion.service.jpa.admin.app.AppVersionsService#findAllByAppId(java.lang.Long)
+	 */
+	@Override
+	public List<AppVersions> findAllByAppId(Long appId) {
+		// TODO use setParameter
+		String sql = APP_SELECT_ALL_VERSIONS_QUERY;
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter(APP_ID, appId);
+		
+		List<AppVersions> result = JpaUtil.getResultList(query,
+				AppVersions.class);
+		
+		return result;
 	}
 }

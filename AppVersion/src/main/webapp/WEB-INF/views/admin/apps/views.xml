@@ -4,5 +4,8 @@
 <tiles-definitions>
 	<definition extends="admin" name="admin/apps/list">
 		<put-attribute name="body" value="/WEB-INF/views/admin/apps/list.jspx" />
-	</definition>	
+	</definition>
+	<definition extends="admin" name="admin/apps/show">
+		<put-attribute name="body" value="/WEB-INF/views/admin/apps/show.jspx" />
+	</definition>		
 </tiles-definitions> 

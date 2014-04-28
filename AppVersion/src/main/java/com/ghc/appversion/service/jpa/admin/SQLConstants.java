@@ -68,6 +68,11 @@ public interface SQLConstants {
 	String APP_LASTEST_VERSION_QUERY = "SELECT ID,VERSION,MAX(RELEASE_DATE),RELEASE_NOTE,APP_ID,APP_DOWNLOAD_URL,APP_SIZE FROM app_versions " +
 			"WHERE APP_ID = :appId GROUP BY APP_ID";
 	
+	/**
+	 * Select all versions of app
+	 */
+	String APP_SELECT_ALL_VERSIONS_QUERY = "SELECT ID,VERSION,RELEASE_DATE,RELEASE_NOTE,APP_ID,APP_DOWNLOAD_URL,APP_SIZE FROM app_versions WHERE APP_ID = :appId";
+	
 	String APP_NAME = "appName";
 	/**
 	 * Select app by name

@@ -7,11 +7,15 @@ package com.ghc.appversion.util;
 
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Query;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 /**
  * 
@@ -23,6 +27,9 @@ public class JpaUtil {
 			if (tuple[i] != null) {
 				if (tuple[i] instanceof BigInteger) {
 					tuple[i] = new Long(((BigInteger) tuple[i]).longValue());
+				}
+				if (tuple[i] instanceof Date) {
+					tuple[i] = new DateTime(tuple[i], DateTimeZone.UTC);
 				}
 				tupleTypes.add(tuple[i].getClass());
 			} else {

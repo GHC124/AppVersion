@@ -23,6 +23,10 @@ $(function(){
  	$('input').addClass("ui-corner-all");
 });
 
+function spliceArray(data, id){
+	delete data[id];
+}
+
 function cancelDefaultAction(e) {
 	 var evt = e ? e:window.event;
 	 if (evt.preventDefault) evt.preventDefault();

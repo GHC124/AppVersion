@@ -11,7 +11,6 @@ import static com.ghc.appversion.web.Constants.ANDROID_TYPE;
 import static com.ghc.appversion.web.Constants.PHOTO_TYPE;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -89,8 +88,8 @@ public class AppsController extends AbstractAdminController {
 			model.addAttribute("jsonPlatforms", jsonPlatforms);
 		} catch (IOException e) {
 			LogUtil.error("error parsing platforms to JSON");
-		}	
-		
+		}
+
 		Map<String, String> platformTypes = new HashMap<>();
 		platformTypes.put(PLATFORM_TYPE_ANDROID, PLATFORM_TYPE_ANDROID);
 		platformTypes.put(PLATFORM_TYPE_IOS, PLATFORM_TYPE_IOS);
@@ -99,14 +98,43 @@ public class AppsController extends AbstractAdminController {
 		return "admin/apps/list";
 	}
 
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	public String show(@PathVariable(value = "id") Long id, Model model) {
+		App app = appService.findById(id);
+		model.addAttribute("app", app);
+
+		List<Platform> listPlatforms = platformService.findAll();
+		Map<Long, String> platforms = new HashMap<>();
+		for (Platform p : listPlatforms) {
+			platforms.put(p.getId(), p.getName());
+		}
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			String jsonPlatforms = objectMapper.writeValueAsString(platforms);
+			model.addAttribute("jsonPlatforms", jsonPlatforms);
+		} catch (IOException e) {
+			LogUtil.error("error parsing platforms to JSON");
+		}
+
+		return "admin/apps/show";
+	}
+
+	@RequestMapping(value = "/{id}", params = "showAjax", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public App showAjax(@PathVariable(value = "id") Long id) {
+		App app = appService.findById(id);
+
+		return app;
+	}
+
 	@RequestMapping(value = "/platform/{id}", params = "showAjax", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
 	public Platform showPlatformAjax(@PathVariable(value = "id") Long id) {
 		Platform platform = platformService.findById(id);
-		
+
 		return platform;
 	}
-	
+
 	@RequestMapping(value = "/platform", params = "createAjax", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ValidationResponse createPlatformAjax(Model model,
@@ -114,17 +142,16 @@ public class AppsController extends AbstractAdminController {
 			BindingResult result) {
 		ValidationResponse res = new ValidationResponse();
 		if (result.hasErrors()) {
-			res.setStatus("FAIL");
+			res.setStatus(ValidationResponse.FAIL);
 			List<FieldError> allErrors = result.getFieldErrors();
-			List<ErrorMessage> errorMesages = new ArrayList<ErrorMessage>();
 			for (FieldError objectError : allErrors) {
-				errorMesages.add(new ErrorMessage(objectError.getField(),
+				res.addErrorMessage(new ErrorMessage(objectError.getField(),
 						objectError.getDefaultMessage()));
 			}
-			res.setResult(errorMesages);
 		} else {
-			res.setStatus("SUCCESS");
-			platformService.save(platform);
+			Platform savePlatform = platformService.save(platform);
+			res.setExtraData(savePlatform.getId().toString());
+			res.setStatus(ValidationResponse.SUCCESS);
 		}
 
 		return res;
@@ -137,20 +164,18 @@ public class AppsController extends AbstractAdminController {
 			BindingResult result, MultipartHttpServletRequest request,
 			Locale locale) {
 		ValidationResponse res = new ValidationResponse();
-		res.setStatus("FAIL");
+		res.setStatus(ValidationResponse.FAIL);
 		if (result.hasErrors()) {
 			List<FieldError> allErrors = result.getFieldErrors();
-			List<ErrorMessage> errorMesages = res.getResult();
 			for (FieldError objectError : allErrors) {
-				errorMesages.add(new ErrorMessage(objectError.getField(),
+				res.addErrorMessage(new ErrorMessage(objectError.getField(),
 						objectError.getDefaultMessage()));
 			}
 		} else {
 			// Check name
 			App exitApp = appService.findByName(app.getName());
 			if (exitApp != null) {
-				List<ErrorMessage> errorMesages = res.getResult();
-				errorMesages.add(new ErrorMessage("name", messageSource
+				res.addErrorMessage(new ErrorMessage("name", messageSource
 						.getMessage("validation.appName.Exist.message",
 								new Object[] {}, locale)));
 				return res;
@@ -161,16 +186,15 @@ public class AppsController extends AbstractAdminController {
 				MultipartFile mpf = request.getFile(itr.next());
 				String type = mpf.getContentType();
 				if (UploadUtil.isValidPhoto(type)) {
-					res.setStatus("SUCCESS");
+					res.setStatus(ValidationResponse.SUCCESS);
 				} else {
-					List<ErrorMessage> errorMesages = res.getResult();
-					errorMesages.add(new ErrorMessage("iconUrl", messageSource
-							.getMessage("validation.icon.InvalidType.message",
+					res.addErrorMessage(new ErrorMessage("iconUrl",
+							messageSource.getMessage(
+									"validation.icon.InvalidType.message",
 									new Object[] { PHOTO_TYPE }, locale)));
 				}
 			} else {
-				List<ErrorMessage> errorMesages = res.getResult();
-				errorMesages.add(new ErrorMessage("iconUrl", messageSource
+				res.addErrorMessage(new ErrorMessage("iconUrl", messageSource
 						.getMessage("validation.icon.NotEmpty.message",
 								new Object[] {}, locale)));
 			}
@@ -186,20 +210,18 @@ public class AppsController extends AbstractAdminController {
 			BindingResult result, MultipartHttpServletRequest request,
 			Locale locale) {
 		ValidationResponse res = new ValidationResponse();
-		res.setStatus("FAIL");
+		res.setStatus(ValidationResponse.FAIL);
 		if (result.hasErrors()) {
 			List<FieldError> allErrors = result.getFieldErrors();
-			List<ErrorMessage> errorMesages = res.getResult();
 			for (FieldError objectError : allErrors) {
-				errorMesages.add(new ErrorMessage(objectError.getField(),
+				res.addErrorMessage(new ErrorMessage(objectError.getField(),
 						objectError.getDefaultMessage()));
 			}
 		} else {
 			// Check name
 			App exitApp = appService.findByName(app.getName());
 			if (exitApp != null) {
-				List<ErrorMessage> errorMesages = res.getResult();
-				errorMesages.add(new ErrorMessage("name", messageSource
+				res.addErrorMessage(new ErrorMessage("name", messageSource
 						.getMessage("validation.appName.Exist.message",
 								new Object[] {}, locale)));
 				return res;
@@ -207,8 +229,7 @@ public class AppsController extends AbstractAdminController {
 			// get the file from the request object
 			Iterator<String> itr = request.getFileNames();
 			if (!itr.hasNext()) {
-				List<ErrorMessage> errorMesages = res.getResult();
-				errorMesages.add(new ErrorMessage("iconUrl", messageSource
+				res.addErrorMessage(new ErrorMessage("iconUrl", messageSource
 						.getMessage("validation.icon.NotEmpty.message",
 								new Object[] {}, locale)));
 				return res;
@@ -225,16 +246,44 @@ public class AppsController extends AbstractAdminController {
 					App saveApp = appService.save(app);
 					// Return new AppId
 					res.setExtraData(saveApp.getId().toString());
-					res.setStatus("SUCCESS");
+					res.setStatus(ValidationResponse.SUCCESS);
 				} else {
-					List<ErrorMessage> errorMesages = res.getResult();
-					errorMesages.add(new ErrorMessage("iconUrl", messageSource
-							.getMessage("validation.icon.InvalidType.message",
+					res.addErrorMessage(new ErrorMessage("iconUrl",
+							messageSource.getMessage(
+									"validation.icon.InvalidType.message",
 									new Object[] { PHOTO_TYPE }, locale)));
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+		}
+
+		return res;
+	}
+
+	@RequestMapping(value = "/{id}", params = "updateAjax", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ValidationResponse updateAjax(Model model,
+			@ModelAttribute(value = "app") @Valid App app, BindingResult result, Locale locale) {
+		ValidationResponse res = new ValidationResponse();
+		res.setStatus(ValidationResponse.FAIL);
+		if (result.hasErrors()) {
+			List<FieldError> allErrors = result.getFieldErrors();
+			for (FieldError objectError : allErrors) {
+				res.addErrorMessage(new ErrorMessage(objectError.getField(),
+						objectError.getDefaultMessage()));
+			}
+		} else {
+			// Check name
+			App exitApp = appService.findByName(app.getName());
+			if (exitApp != null && exitApp.getId() != app.getId()) {
+				res.addErrorMessage(new ErrorMessage("name", messageSource
+						.getMessage("validation.appName.Exist.message",
+								new Object[] {}, locale)));
+				return res;
+			}
+			res.setStatus(ValidationResponse.SUCCESS);
+			appService.save(app);
 		}
 
 		return res;
@@ -247,12 +296,11 @@ public class AppsController extends AbstractAdminController {
 			BindingResult result, MultipartHttpServletRequest request,
 			Locale locale) {
 		ValidationResponse res = new ValidationResponse();
-		res.setStatus("FAIL");
+		res.setStatus(ValidationResponse.FAIL);
 		if (result.hasErrors()) {
 			List<FieldError> allErrors = result.getFieldErrors();
-			List<ErrorMessage> errorMesages = res.getResult();
 			for (FieldError objectError : allErrors) {
-				errorMesages.add(new ErrorMessage(objectError.getField(),
+				res.addErrorMessage(new ErrorMessage(objectError.getField(),
 						objectError.getDefaultMessage()));
 			}
 		} else {
@@ -262,8 +310,7 @@ public class AppsController extends AbstractAdminController {
 			if (latestVersion != null
 					&& compareVersions(latestVersion.getVersion(),
 							appVersions.getVersion()) >= 0) {
-				List<ErrorMessage> errorMesages = res.getResult();
-				errorMesages.add(new ErrorMessage("version", messageSource
+				res.addErrorMessage(new ErrorMessage("version", messageSource
 						.getMessage("validation.version.Smaller.message",
 								new Object[] { latestVersion.getVersion() },
 								locale)));
@@ -272,8 +319,7 @@ public class AppsController extends AbstractAdminController {
 			// get the file from the request object
 			Iterator<String> itr = request.getFileNames();
 			if (!itr.hasNext()) {
-				List<ErrorMessage> errorMesages = res.getResult();
-				errorMesages.add(new ErrorMessage("appDownloadUrl",
+				res.addErrorMessage(new ErrorMessage("appDownloadUrl",
 						messageSource.getMessage(
 								"validation.file.NotEmpty.message",
 								new Object[] {}, locale)));
@@ -282,10 +328,9 @@ public class AppsController extends AbstractAdminController {
 			MultipartFile mpf = request.getFile(itr.next());
 			String originalName = mpf.getOriginalFilename();
 			if (UploadUtil.isValidAndroid(originalName)) {
-				res.setStatus("SUCCESS");
+				res.setStatus(ValidationResponse.SUCCESS);
 			} else {
-				List<ErrorMessage> errorMesages = res.getResult();
-				errorMesages.add(new ErrorMessage("appDownloadUrl",
+				res.addErrorMessage(new ErrorMessage("appDownloadUrl",
 						messageSource.getMessage(
 								"validation.file.InvalidType.message",
 								new Object[] { ANDROID_TYPE }, locale)));
@@ -302,20 +347,18 @@ public class AppsController extends AbstractAdminController {
 			BindingResult result, MultipartHttpServletRequest request,
 			Locale locale) {
 		ValidationResponse res = new ValidationResponse();
-		res.setStatus("FAIL");
+		res.setStatus(ValidationResponse.FAIL);
 		if (result.hasErrors()) {
 			List<FieldError> allErrors = result.getFieldErrors();
-			List<ErrorMessage> errorMesages = res.getResult();
 			for (FieldError objectError : allErrors) {
-				errorMesages.add(new ErrorMessage(objectError.getField(),
+				res.addErrorMessage(new ErrorMessage(objectError.getField(),
 						objectError.getDefaultMessage()));
 			}
 		} else {
 			// get the file from the request object
 			Iterator<String> itr = request.getFileNames();
 			if (!itr.hasNext()) {
-				List<ErrorMessage> errorMesages = res.getResult();
-				errorMesages.add(new ErrorMessage("appDownloadUrl",
+				res.addErrorMessage(new ErrorMessage("appDownloadUrl",
 						messageSource.getMessage(
 								"validation.file.NotEmpty.message",
 								new Object[] {}, locale)));
@@ -333,10 +376,9 @@ public class AppsController extends AbstractAdminController {
 					appVersions.setAppDownloadUrl(downloadUrl);
 					appVersions.setAppSize(size);
 					appVersionsService.save(appVersions);
-					res.setStatus("SUCCESS");
+					res.setStatus(ValidationResponse.SUCCESS);
 				} else {
-					List<ErrorMessage> errorMesages = res.getResult();
-					errorMesages.add(new ErrorMessage("appDownloadUrl",
+					res.addErrorMessage(new ErrorMessage("appDownloadUrl",
 							messageSource.getMessage(
 									"validation.file.InvalidType.message",
 									new Object[] { ANDROID_TYPE }, locale)));
@@ -348,7 +390,7 @@ public class AppsController extends AbstractAdminController {
 
 		return res;
 	}
-	
+
 	@RequestMapping(value = "/platform/{id}", params = "updateAjax", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ValidationResponse updatePlatformAjax(Model model,
@@ -356,16 +398,14 @@ public class AppsController extends AbstractAdminController {
 			BindingResult result) {
 		ValidationResponse res = new ValidationResponse();
 		if (result.hasErrors()) {
-			res.setStatus("FAIL");
+			res.setStatus(ValidationResponse.FAIL);
 			List<FieldError> allErrors = result.getFieldErrors();
-			List<ErrorMessage> errorMesages = new ArrayList<ErrorMessage>();
 			for (FieldError objectError : allErrors) {
-				errorMesages.add(new ErrorMessage(objectError.getField(),
+				res.addErrorMessage(new ErrorMessage(objectError.getField(),
 						objectError.getDefaultMessage()));
 			}
-			res.setResult(errorMesages);
 		} else {
-			res.setStatus("SUCCESS");
+			res.setStatus(ValidationResponse.SUCCESS);
 			platformService.save(platform);
 		}
 
@@ -436,12 +476,86 @@ public class AppsController extends AbstractAdminController {
 		return platformGrid;
 	}
 
-	@RequestMapping(value="/platform/{id}", params="deleteAjax", method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "/{id}", params = "deleteAjax", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ValidationResponse deleteAjax(@PathVariable("id") Long id,
+			Locale locale) {
+		ValidationResponse res = new ValidationResponse();
+		res.setStatus(ValidationResponse.SUCCESS);
+
+		App app = appService.findById(id);
+		String iconUrl = app.getIconUrl();
+		// remove icon
+		String rootDirectory = mUploadRootDirectory;
+		try {
+			UploadUtil.deleteIconFile(rootDirectory, iconUrl);
+		} catch (IOException e) {
+			e.printStackTrace();
+			res.setStatus(ValidationResponse.FAIL);
+			res.addErrorMessage(new ErrorMessage("deleteAppError",
+					messageSource.getMessage("admin_icon_delete_fail",
+							new Object[] {}, locale)));
+		}
+
+		List<AppVersions> appVersions = appVersionsService.findAllByAppId(id);
+		for (AppVersions version : appVersions) {
+			String downloadUrl = version.getAppDownloadUrl();
+			// remove version
+			try {
+				UploadUtil.deleteAndroidFile(rootDirectory, downloadUrl);
+			} catch (IOException e) {
+				e.printStackTrace();
+				res.setStatus(ValidationResponse.FAIL);
+				res.addErrorMessage(new ErrorMessage("deleteAppError",
+						messageSource.getMessage("admin_icon_delete_file",
+								new Object[] {}, locale)));
+			}
+		}
+
+		appService.delete(id);
+
+		return res;
+	}
+
+	@RequestMapping(value = "/platform/{id}", params = "deleteAjax", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public void deletePlatformAjax(@PathVariable("id") Long id) {
-		platformService.delete(id);		
+		platformService.delete(id);
 	}
-	
+
+	@RequestMapping(value = "/icon/{id}", method = RequestMethod.GET)
+	@ResponseBody
+	public byte[] downloadIcon(@PathVariable("id") Long id) {
+		App app = appService.findById(id);
+		if (app.getIconUrl() != null) {
+			String rootDirectory = mUploadRootDirectory;
+			try {
+				byte[] data = UploadUtil.getIconFile(rootDirectory,
+						app.getIconUrl());
+				return data;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	@RequestMapping(value = "/icon", method = RequestMethod.GET)
+	@ResponseBody
+	public byte[] downloadIcon(
+			@RequestParam(value = "url", required = true) String iconUrl) {
+		if (iconUrl != null) {
+			String rootDirectory = mUploadRootDirectory;
+			try {
+				byte[] data = UploadUtil.getIconFile(rootDirectory, iconUrl);
+				return data;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Compare version. Pattern: x.x.x.x
 	 * 

@@ -34,4 +34,9 @@ public interface AppVersionsService {
 	 * @return
 	 */
 	AppVersions latestVersion(Long appId);
+	
+	/**
+	 * Find all version of app
+	 */
+	List<AppVersions> findAllByAppId(Long appId);
 }

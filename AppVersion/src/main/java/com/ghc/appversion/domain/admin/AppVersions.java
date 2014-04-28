@@ -27,11 +27,11 @@ public class AppVersions implements Serializable {
 	private Long mAppId;
 	private String mAppDownloadUrl;
 	private Long mAppSize;
-	
+
 	public AppVersions() {
-		
+
 	}
-	
+
 	public AppVersions(Long id, String version, DateTime releaseDate,
 			String releaseNote, Long appId, String appDownloadUrl, Long appSize) {
 		mId = id;
@@ -43,9 +43,16 @@ public class AppVersions implements Serializable {
 		mAppSize = appSize;
 	}
 
+	public AppVersions(Integer id, String version, DateTime releaseDate,
+			String releaseNote, Integer appId, String appDownloadUrl,
+			Integer appSize) {
+		this(id.longValue(), version, releaseDate, releaseNote, appId
+				.longValue(), appDownloadUrl, appSize.longValue());
+	}
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="id")
+	@Column(name = "id")
 	public Long getId() {
 		return mId;
 	}
@@ -56,8 +63,8 @@ public class AppVersions implements Serializable {
 
 	@NotEmpty(message = "{validation.version.NotEmpty.message}")
 	@Size(min = 1, max = 255, message = "{validation.version.Size.message}")
-	@Pattern(regexp="^(\\d+\\.)*\\d+$", message="{validation.version.Pattern.message}")
-	@Column(name="version")
+	@Pattern(regexp = "^(\\d+\\.)*\\d+$", message = "{validation.version.Pattern.message}")
+	@Column(name = "version")
 	public String getVersion() {
 		return mVersion;
 	}
@@ -78,7 +85,7 @@ public class AppVersions implements Serializable {
 	}
 
 	@Size(min = 0, max = 4000, message = "{validation.note.Size.message}")
-	@Column(name="release_note")
+	@Column(name = "release_note")
 	public String getReleaseNote() {
 		return mReleaseNote;
 	}
@@ -87,7 +94,7 @@ public class AppVersions implements Serializable {
 		mReleaseNote = releaseNote;
 	}
 
-	@Column(name="app_id")
+	@Column(name = "app_id")
 	public Long getAppId() {
 		return mAppId;
 	}
@@ -96,7 +103,7 @@ public class AppVersions implements Serializable {
 		mAppId = appId;
 	}
 
-	@Column(name="app_download_url")
+	@Column(name = "app_download_url")
 	public String getAppDownloadUrl() {
 		return mAppDownloadUrl;
 	}
@@ -105,7 +112,7 @@ public class AppVersions implements Serializable {
 		mAppDownloadUrl = appDownloadUrl;
 	}
 
-	@Column(name="app_size")
+	@Column(name = "app_size")
 	public Long getAppSize() {
 		return mAppSize;
 	}

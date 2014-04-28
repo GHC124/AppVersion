@@ -6,7 +6,6 @@
 	xmlns:joda="http://www.joda.org/joda/time/tags" version="2.0">
 	<jsp:directive.page contentType="text/html;charset=UTF-8" />
 	<jsp:output omit-xml-declaration="yes" />
-	<spring:message code="label_loading" var="labelLoading"/>
 	<spring:message code="label_admin_user_info" var="labelUserInfo" />
 	<spring:message code="label_admin_user_email" var="labelUserEmail" />	
 	<spring:message code="label_admin_user_first_name"

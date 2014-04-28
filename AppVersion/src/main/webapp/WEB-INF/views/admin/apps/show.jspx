@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<div xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:spring="http://www.springframework.org/tags"
+	xmlns:form="http://www.springframework.org/tags/form"
+	xmlns:joda="http://www.joda.org/joda/time/tags" version="2.0"
+	xmlns:html="urn:jsptagdir:/WEB-INF/tags/html" 
+	xmlns:ajax="urn:jsptagdir:/WEB-INF/tags/ajax">
+	<jsp:directive.page contentType="text/html;charset=UTF-8" />
+	<jsp:output omit-xml-declaration="yes" />
+	<spring:message code="label_action_save" var="labelActionSave" />
+	<spring:message code="label_action_cancel" var="labelActionCancel" />
+	<spring:message code="label_admin_app_info" var="labelAppInfo" />
+	<spring:message code="label_admin_app_update" var="labelAppUpdate"/>
+	<spring:message code="label_admin_app_icon_update" var="labelAppIconUpdate"/>
+	<spring:message code="label_admin_app_name" var="labelAppName" />
+	<spring:message code="label_admin_app_icon" var="labelAppIcon" />
+	<spring:message code="label_admin_app_description"	var="labelAppDescription" />
+	<spring:message code="label_admin_app_platform" var="labelAppPlatform"/>
+	<spring:message code="label_admin_app_latest_version" var="labelAppVersion"/>
+	<spring:message code="admin_app_save_fail" var="messageAppSaveFail"/>
+	<spring:url value="/admin/apps" var="showAppUrl"/>
+
+	<div id="appInfo" style="width:500px;">
+		<fieldset>
+			<legend>${labelAppInfo}</legend>
+			<table>
+				<tr>
+					<td>
+						<img style="width: 200px;" alt="image" src="${showAppUrl}/icon?url=${app.iconUrl}"></img>
+					</td>
+					<td valign="top">
+						<table>
+							<tr>
+								<td>${labelAppName}</td>
+								<td id="appName">${app.name}</td>
+							</tr>
+							<tr>
+								<td>${labelAppVersion}</td>
+								<td>${app.latestVersion}</td>
+							</tr>
+							<tr>
+								<td>${labelAppPlatform}</td>
+								<td id="appPlatform"></td>
+							</tr>
+							<tr>
+								<td>${labelAppDescription}</td>
+								<td id="appDescription">${app.description}</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br />
+			<button onclick="showEditAppDialog(${app.id});">${labelAppUpdate}</button>			
+			<button style="margin-left: 5px;" onclick="showEditAppIconDialog(${app.id});">${labelAppIconUpdate}</button>
+		</fieldset>
+	</div>
+	<div id="updateAppDialog" title="${labelAppUpdate}" class="dialog edit-dialog app-dialog" style="display: none">
+    	<html:form formUrl="/admin/apps?updateAjax" modelAttribute="app" id="appEditForm" method="POST">
+    		<html:inputField label="${labelAppName}" name="name" require="true"/>
+    		<html:areaField label="${labelAppDescription}" name="description"/>
+    		<form:hidden path="platformId" />
+    		<form:hidden path="iconUrl" />
+    		<form:hidden path="latestVersion" />
+    		<form:hidden path="version" />    		  		    		
+    	</html:form>   
+    	<br/>
+    	<span id="editAppError" class="error" style="display: none"></span>    
+	</div>
+	<div id="updateAppIconDialog" title="${labelAppIconUpdate}" class="dialog edit-dialog app-dialog" style="display: none">
+    	<html:uploadForm formUrl="/admin/apps?updateAjax" modelAttribute="app" id="appIconEditForm" method="POST">
+    		<html:fileField label="${labelAppIcon}" name="iconUrl" require="true"/>
+    	</html:uploadForm>
+    	<br/>
+    	<span id="editAppIconError" class="error" style="display: none"></span>       
+	</div>
+	<script type="text/javascript">
+		<![CDATA[
+		var globalPlatforms = {};
+		$(function() {
+			globalPlatforms = JSON.parse('${jsonPlatforms}');
+			$('#appPlatform').html(globalPlatforms['${app.platformId}']);
+			$( "#updateAppDialog" ).dialog({
+			      autoOpen: false,
+			      height: 380,
+			      width: 500,
+			      modal: true,
+			      resizable: false,
+			      buttons: {
+			        "${labelActionSave}": function() {
+			        	var id = $(this).data('id');
+			        	// Validate app information
+			        	formAjaxSubmit("#appEditForm","${showAppUrl}/" + id + "?updateAjax", function(response){
+			        		var name = $('#appEditForm #name').val();
+			        		var description = $('#appEditForm #description').val();
+			        		$('#appName').html(name);
+			        		$('#appDescription').html(description);
+			        		$("#updateAppDialog").dialog("close");
+		            	}, null, null, function(){
+		            		removeInputError('#updateAppDialog #div_name');
+		              		addInputError('#updateAppDialog #div_name','${messageAppSaveFail}');
+		              	});			        	
+			        },
+			        "${labelActionCancel}":function(){
+			        	$("#updateAppDialog").dialog("close");
+			        }
+			      }
+			    });
+			$( "#updateAppIconDialog" ).dialog({
+			      autoOpen: false,
+			      height: 220,
+			      width: 500,
+			      modal: true,
+			      resizable: false,
+			      buttons: {
+			        "${labelActionSave}": function() {
+			        	// Validate app information
+			        		        	
+			        },
+			        "${labelActionCancel}":function(){
+			        	$("#updateAppIconDialog").dialog("close");
+			        }
+			      }
+			    });
+		});
+		function showEditAppDialog(id){
+	    	removeInputError("#appEditForm");
+	    	$.get('${showAppUrl}/' + id + '?showAjax', {}, function(response) {
+    			populateFormData('#appEditForm', response);
+    	   }, 'json').done(function(data){
+    		}).fail(function(){
+   				var error = $("#editAppError");
+        		error.css({"display": "block"});
+        		error.find('span').html('${messageGetAppFail}');
+        	});
+	    	var dialog = $("#updateAppDialog");	        
+	        dialog.data('id',id).dialog("open");  
+	    }
+		function showEditAppIconDialog(id){
+	    	removeInputError("#appEditIconForm");
+	    	var dialog = $("#updateAppIconDialog");	        
+	        dialog.data('id',id).dialog("open");    	
+	    }
+		]]>
+	</script>
+</div>

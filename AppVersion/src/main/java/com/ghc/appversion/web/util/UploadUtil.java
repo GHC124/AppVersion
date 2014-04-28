@@ -3,6 +3,7 @@ package com.ghc.appversion.web.util;
 import static com.ghc.appversion.web.Constants.ANDROID_TYPE;
 import static com.ghc.appversion.web.Constants.PHOTO_TYPE;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
+
+import org.apache.commons.io.IOUtils;
 
 import com.ghc.appversion.util.LogUtil;
 
@@ -27,13 +30,13 @@ public class UploadUtil {
 		LogUtil.error("Name %s", originalName);
 		boolean valid = false;
 		int index = originalName.lastIndexOf(".");
-		if(index != -1) {
+		if (index != -1) {
 			String type = originalName.substring(index);
 			LogUtil.error("Type %s", type);
 			if (ANDROID_TYPE.contains(type)) {
 				valid = true;
 			}
-		}		
+		}
 		return valid;
 	}
 
@@ -52,7 +55,7 @@ public class UploadUtil {
 		}
 		if (!Files.exists(binaryPath)) {
 			Files.createDirectories(binaryPath);
-		}		
+		}
 	}
 
 	/**
@@ -68,11 +71,7 @@ public class UploadUtil {
 		String filePath = String.format("%s\\AppIcon\\%s", rootDirectory,
 				fileName);
 		OutputStream outputStream = new FileOutputStream(filePath);
-		byte[] data = new byte[1024];
-		int read = 0;
-		while ((read = inputStream.read(data, 0, data.length)) != -1) {
-			outputStream.write(data, 0, read);
-		}
+		IOUtils.copy(inputStream, outputStream);
 		outputStream.flush();
 		outputStream.close();
 		inputStream.close();
@@ -88,20 +87,45 @@ public class UploadUtil {
 	 */
 	public static String saveAndroidFile(String rootDirectory,
 			InputStream inputStream) throws IOException {
-		String fileName = String.format("android_%s.png", Calendar
+		String fileName = String.format("android_%s.apk", Calendar
 				.getInstance().getTimeInMillis());
 		String filePath = String.format("%s\\AppBinary\\%s", rootDirectory,
 				fileName);
 		OutputStream outputStream = new FileOutputStream(filePath);
-		byte[] data = new byte[1024];
-		int read = 0;
-		while ((read = inputStream.read(data, 0, data.length)) != -1) {
-			outputStream.write(data, 0, read);
-		}
+		IOUtils.copy(inputStream, outputStream);		
 		outputStream.flush();
 		outputStream.close();
 		inputStream.close();
 		String iconUrl = String.format("\\AppBinary\\%s", fileName);
 		return iconUrl;
+	}
+
+	public static byte[] getIconFile(String rootDirectory, String iconUrl) throws IOException {
+		String filePath = String.format("%s%s", rootDirectory, iconUrl);
+		Path path = Paths.get(filePath);
+		if (Files.exists(path)) {
+			InputStream inputStream = new FileInputStream(filePath);
+			return IOUtils.toByteArray(inputStream);
+		}
+		
+		return null;
+	}
+	
+	public static void deleteIconFile(String rootDirectory, String iconUrl)
+			throws IOException {
+		String filePath = String.format("%s%s", rootDirectory, iconUrl);
+		Path path = Paths.get(filePath);
+		if (Files.exists(path)) {
+			Files.delete(path);
+		}
+	}
+	
+	public static void deleteAndroidFile(String rootDirectory, String appUrl)
+			throws IOException {
+		String filePath = String.format("%s%s", rootDirectory, appUrl);
+		Path path = Paths.get(filePath);
+		if (Files.exists(path)) {
+			Files.delete(path);
+		}
 	}
 }

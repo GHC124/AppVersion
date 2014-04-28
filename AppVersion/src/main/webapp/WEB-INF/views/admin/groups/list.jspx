@@ -358,8 +358,7 @@
    				var error = $("#editGroupError");
         		error.css({"display": "block"});
         		error.find('span').html('${messageGetGroupFail}');
-        	});	    
-	    	
+        	});
 	    	var dialog = $("#editGroupDialog");	        
 	        dialog.data('id',id).dialog("open");
 	    }
