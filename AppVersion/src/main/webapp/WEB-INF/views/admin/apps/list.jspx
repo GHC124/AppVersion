@@ -128,8 +128,8 @@
 		        colModel :[  
 		          {name:'name', index:'name', width:150},
 		          {name:'platformId', index:'platformId', width:50, formatter: platformFormatter},
-		          {name:'latestVersion', index:'latestVersion', width:45},
-		          {name:'act', index:'act', width:25}
+		          {name:'latestVersion', index:'latestVersion', sortable:false, width:45},
+		          {name:'act', index:'act', sortable:false, width:25}
 		        ], 
 		        jsonReader : { 
 		            root:"data", 
@@ -168,7 +168,7 @@
 		        colModel :[  
 		          {name:'name', index:'name', width:120},
 		          {name:'platformType', index:'platformType', width:50},
-		          {name:'act', index:'act', width:40}
+		          {name:'act', index:'act', sortable:false, width:40}
 		        ], 
 		        jsonReader : { 
 		            root:"data", 
@@ -193,7 +193,6 @@
 		        beforeRequest: function(){
 		        },
 		        loadComplete: function() {
-		        	var grid = $(this);
 		        	var grid = $(this);
 		            addAction2JQGrid(grid,'name','act','${labelActionEdit}','ui-icon-pencil',function(id, value){
 		            	showEditPlatformDialog(id, value);
@@ -227,7 +226,7 @@
 			    });
 			 $( "#newVersionDialog" ).dialog({
 			      autoOpen: false,
-			      height: 400,
+			      height: 430,
 			      width: 400,
 			      modal: true,
 			      resizable: false,
@@ -243,7 +242,6 @@
 				        		var id = response.extraData;
 				        		var appData = {appId:id};
 				        		fileAjaxSubmit("#versionNewForm","${showAppUrl}/version?createAjax", function(response){
-					        		console.log('success');
 					        		refreshJQGrid("#list");
 					        		$("#newVersionDialog").dialog("close");
 					        		$("#newAppDialog").dialog("close");
@@ -389,14 +387,14 @@
 					globalUpdatePlatforms = false;
 					populatePlatformDropdown('#platformId');
 				}
+				removeInputError("#appNewForm");
 				var dialog = $("#newAppDialog");
-			    dialog.dialog("open");	
-			    removeInputError("#appNewForm");
+			    dialog.dialog("open");				    
 			}
 			function showNewVersionDialog(){
+				removeInputError("#versionNewForm");
 				var dialog = $("#newVersionDialog");
-			    dialog.dialog("open");	
-			    removeInputError("#versionNewForm");
+			    dialog.dialog("open");				    
 			}
 			function showNewPlatformDialog(){
 				var dialog = $("#newPlatformDialog");

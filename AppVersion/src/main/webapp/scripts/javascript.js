@@ -23,6 +23,12 @@ $(function(){
  	$('input').addClass("ui-corner-all");
 });
 
+function log(message){
+	if(console){
+		console.log(message);
+	}
+}
+
 function spliceArray(data, id){
 	delete data[id];
 }

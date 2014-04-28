@@ -15,11 +15,13 @@ public class GroupSummary implements Serializable {
 	private Long mId;
 	private String mName;
 	private Long mMembers;
+	private Long mApps;
 
-	public GroupSummary(Integer id, String name, Long members) {
+	public GroupSummary(Integer id, String name, Long members, Long apps) {
 		mId = id.longValue();
 		mName = name;
 		mMembers = members;
+		mApps = apps;
 	}
 
 	public Long getId() {
@@ -44,6 +46,14 @@ public class GroupSummary implements Serializable {
 
 	public void setMembers(Long members) {
 		mMembers = members;
+	}
+
+	public Long getApps() {
+		return mApps;
+	}
+
+	public void setApps(Long apps) {
+		mApps = apps;
 	}
 
 }

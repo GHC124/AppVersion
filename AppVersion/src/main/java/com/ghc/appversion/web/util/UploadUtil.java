@@ -18,6 +18,25 @@ import org.apache.commons.io.IOUtils;
 import com.ghc.appversion.util.LogUtil;
 
 public class UploadUtil {
+	private static final long KILOBYTES = 1024;
+	private static final long MEGABYTES = (KILOBYTES * 1024);
+	private static final long GIGABYTES = (MEGABYTES * 1024);
+	
+	public static String getFileSize(long bytes) {
+		String fileSizeString = "";
+		if(bytes > GIGABYTES) {
+			fileSizeString = (bytes / GIGABYTES) + " GB";
+		}else if(bytes > MEGABYTES) {
+			fileSizeString = (bytes / MEGABYTES) + " MB";
+		}else if(bytes > KILOBYTES) {
+			fileSizeString = (bytes / KILOBYTES) + " KB";
+		}else {
+			fileSizeString = bytes + " b";
+		}
+		
+		return fileSizeString;
+	}
+	
 	public static boolean isValidPhoto(String type) {
 		boolean valid = false;
 		if (PHOTO_TYPE.contains(type)) {
@@ -105,7 +124,10 @@ public class UploadUtil {
 		Path path = Paths.get(filePath);
 		if (Files.exists(path)) {
 			InputStream inputStream = new FileInputStream(filePath);
-			return IOUtils.toByteArray(inputStream);
+			byte[] data = IOUtils.toByteArray(inputStream);
+			inputStream.close();
+			
+			return data;
 		}
 		
 		return null;

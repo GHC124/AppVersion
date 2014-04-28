@@ -8,8 +8,11 @@
 	xmlns:ajax="urn:jsptagdir:/WEB-INF/tags/ajax">
 	<jsp:directive.page contentType="text/html;charset=UTF-8" />
 	<jsp:output omit-xml-declaration="yes" />
+	<spring:message code="label_action_actions" var="labelActions" />
 	<spring:message code="label_action_save" var="labelActionSave" />
 	<spring:message code="label_action_cancel" var="labelActionCancel" />
+	<spring:message code="label_action_edit" var="labelActionEdit"/>
+	<spring:message code="label_action_delete" var="labelActionDelete"/>
 	<spring:message code="label_admin_app_info" var="labelAppInfo" />
 	<spring:message code="label_admin_app_update" var="labelAppUpdate"/>
 	<spring:message code="label_admin_app_icon_update" var="labelAppIconUpdate"/>
@@ -18,43 +21,82 @@
 	<spring:message code="label_admin_app_description"	var="labelAppDescription" />
 	<spring:message code="label_admin_app_platform" var="labelAppPlatform"/>
 	<spring:message code="label_admin_app_latest_version" var="labelAppVersion"/>
-	<spring:message code="admin_app_save_fail" var="messageAppSaveFail"/>
+	<!-- Groups -->
+	<spring:message code="label_admin_groups" var="labelGroups"/>
+	<spring:message code="label_admin_group_name" var="labelGroupName"/>
+	<spring:message code="admin_app_save_fail" var="messageAppSaveFail"/>	
+	<spring:message code="admin_app_group_update_error" var="labelAppGroupUpdate"/>
+	<spring:url value="/admin/groups" var="showGroupUrl"/>	
 	<spring:url value="/admin/apps" var="showAppUrl"/>
-
-	<div id="appInfo" style="width:500px;">
+	<!-- Versions -->
+	<spring:message code="label_admin_versions" var="labelVersions"/>
+	<spring:message code="label_admin_version_new" var="labelNewVersion"/>
+	<spring:message code="label_admin_version_version" var="labelVersionVersion"/>
+	<spring:message code="label_admin_version_release_date" var="labelVersionReleaseDate"/>
+	<spring:message code="label_admin_version_release_note" var="labelVersionReleaseNote"/>
+	<spring:message code="label_admin_version_file" var="labelVersionFile"/>
+	<spring:message code="label_admin_version_size" var="labelVersionSize"/>
+	<spring:message code="admin_version_save_fail" var="labelVersionSaveFail"/>
+	<spring:message code="admin_app_version_update_fail" var="labelAppVersionUpdateFail"/>
+	
+	<div style="float:left; width:650px;">
+		<div id="appInfo">
+			<fieldset>
+				<legend>${labelAppInfo}</legend>
+				<table>
+					<tr>
+						<td>
+							<img id="imgAppIconUrl" style="width: 150px; height: 200px;" alt="image" src="${showAppUrl}/icon?url=${app.iconUrl}"></img>
+							<input id="appIconUrl" type="hidden" value="${app.iconUrl}"/>
+						</td>
+						<td valign="top">
+							<table>
+								<tr>
+									<td>${labelAppName}</td>
+									<td id="appName">${app.name}</td>
+								</tr>
+								<tr>
+									<td>${labelAppVersion}</td>
+									<td id="appLatestVersion">${app.latestVersion}</td>
+								</tr>
+								<tr>
+									<td>${labelAppPlatform}</td>
+									<td id="appPlatform"></td>
+								</tr>
+								<tr>
+									<td>${labelAppDescription}</td>
+									<td id="appDescription">${app.description}</td>
+								</tr>								
+							</table>
+						</td>
+					</tr>
+				</table>
+				<br />
+				<button onclick="showEditAppDialog(${app.id});">${labelAppUpdate}</button>			
+				<button style="margin-left: 5px;" onclick="showEditAppIconDialog(${app.id});">${labelAppIconUpdate}</button>			
+			</fieldset>
+		</div>
+		<div id="versions">
+			<fieldset>
+				<legend>${labelVersions}</legend>
+				<div id="versionMessage" style="display: none" class="error"><span></span></div> 
+				<div>
+			    	<table id="listVersion" class="table table-bordered"><tr><td></td></tr></table> 
+			    	<span id="pagerVersion"></span> 
+				</div>
+				<button onclick="showNewVersionDialog(${app.id});">${labelNewVersion}</button>			
+		    </fieldset>
+		</div>
+	</div>
+	<div id="groups" style="float:right; width: 270px;">
 		<fieldset>
-			<legend>${labelAppInfo}</legend>
-			<table>
-				<tr>
-					<td>
-						<img style="width: 200px;" alt="image" src="${showAppUrl}/icon?url=${app.iconUrl}"></img>
-					</td>
-					<td valign="top">
-						<table>
-							<tr>
-								<td>${labelAppName}</td>
-								<td id="appName">${app.name}</td>
-							</tr>
-							<tr>
-								<td>${labelAppVersion}</td>
-								<td>${app.latestVersion}</td>
-							</tr>
-							<tr>
-								<td>${labelAppPlatform}</td>
-								<td id="appPlatform"></td>
-							</tr>
-							<tr>
-								<td>${labelAppDescription}</td>
-								<td id="appDescription">${app.description}</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-			</table>
-			<br />
-			<button onclick="showEditAppDialog(${app.id});">${labelAppUpdate}</button>			
-			<button style="margin-left: 5px;" onclick="showEditAppIconDialog(${app.id});">${labelAppIconUpdate}</button>
-		</fieldset>
+			<legend>${labelGroups}</legend>
+			<div id="groupMessage" style="display: none" class="error"><span></span></div> 
+			<div>
+		    	<table id="listGroup" class="table table-bordered"><tr><td></td></tr></table> 
+		    	<span id="pagerGroup"></span> 
+			</div>			
+	    </fieldset>
 	</div>
 	<div id="updateAppDialog" title="${labelAppUpdate}" class="dialog edit-dialog app-dialog" style="display: none">
     	<html:form formUrl="/admin/apps?updateAjax" modelAttribute="app" id="appEditForm" method="POST">
@@ -75,12 +117,99 @@
     	<br/>
     	<span id="editAppIconError" class="error" style="display: none"></span>       
 	</div>
+	<div id="newVersionDialog" title="${labelNewVersion}" class="dialog add-dialog version-dialog" style="display: none">
+    	<html:uploadForm formUrl="/admin/apps/version?createAjax" modelAttribute="appVersions" id="versionNewForm" method="POST">
+    		<html:inputField label="${labelVersionVersion}" name="version" require="true"/>
+   			<html:dateField label="${labelVersionReleaseDate}" name="releaseDate" require="true"/>
+   			<html:areaField label="${labelVersionReleaseNote}" name="releaseNote"/>
+    		<html:fileField label="${labelVersionFile}" name="appDownloadUrl" require="true"/>	
+    	</html:uploadForm>   
+	</div>
 	<script type="text/javascript">
 		<![CDATA[
 		var globalPlatforms = {};
 		$(function() {
 			globalPlatforms = JSON.parse('${jsonPlatforms}');
 			$('#appPlatform').html(globalPlatforms['${app.platformId}']);
+			$("#listGroup").jqGrid({ 
+		        url:'${showGroupUrl}/listgrid?app', 
+		        datatype: 'json', 
+		        mtype: 'GET', 
+		        postData:{appId:'${app.id}'},
+		        colNames:['${labelGroupName}'], 
+		        colModel :[  
+		          {name:'name', index:'name', width:150, formatter: checkboxFormatter} 
+		        ], 
+		        jsonReader : { 
+		            root:"data", 
+		            page: "currentPage", 
+		            total: "totalPages", 
+		            records: "totalRecords", 
+		            repeatitems: false, 
+		            id: "id" 
+		        },       
+		        pager: '#pagerGroup',
+		        viewrecords: true,
+		        rowNum:10, 
+		        rowList:[10,20,30,50], 
+		        sortname: 'name', 
+		        sortorder: 'asc', 
+		        gridview: true, 
+		        height: 250, 
+		        width: 250, 
+		        onSelectRow: function(id){  
+		        	filterGroupClick(id, true);
+		        }, 
+		        beforeRequest: function(){		        	
+		        },
+		        loadComplete: function() {
+		        	var grid = $(this);
+			    	moveJQGridPagerInfo2Bottom(grid);		           			           	
+		        }
+		      });
+			$("#listVersion").jqGrid({ 
+		        url:'${showAppUrl}/versions', 
+		        datatype: 'json', 
+		        mtype: 'GET', 
+		        postData:{appId:'${app.id}'},
+		        colNames:['${labelVersionVersion}', '${labelVersionReleaseDate}', '${labelVersionReleaseNote}', '${labelVersionSize}', '${labelActions}'], 
+		        colModel :[  
+		          {name:'version', index:'version', width:50},
+		          {name:'releaseDateString', index:'releaseDate', width:100},
+		          {name:'releaseNote', index:'releaseNote'},
+		          {name:'appSizeString', index:'appSize', width:50},
+		          {name:'act', index:'act', width:50}
+		        ], 
+		        jsonReader : { 
+		            root:"data", 
+		            page: "currentPage", 
+		            total: "totalPages", 
+		            records: "totalRecords", 
+		            repeatitems: false, 
+		            id: "id" 
+		        },       
+		        pager: '#pagerVersion',
+		        viewrecords: true,
+		        rowNum:10, 
+		        rowList:[10,20,30,50], 
+		        sortname: 'version', 
+		        sortorder: 'asc', 
+		        gridview: true, 
+		        height: 250, 
+		        width: 620, 
+		        onSelectRow: function(id){  
+		        	
+		        }, 
+		        beforeRequest: function(){		        	
+		        },
+		        loadComplete: function() {
+		        	var grid = $(this);
+		        	addAction2JQGrid(grid,'name','act','${labelActionEdit}','ui-icon-pencil',function(id, value){
+	       			});                
+			        addAction2JQGrid(grid,'name','act','${labelActionDelete}','ui-icon-trash',function(id, value){
+		    		});		           			           	
+		        }
+		      }); 
 			$( "#updateAppDialog" ).dialog({
 			      autoOpen: false,
 			      height: 380,
@@ -115,15 +244,95 @@
 			      resizable: false,
 			      buttons: {
 			        "${labelActionSave}": function() {
-			        	// Validate app information
-			        		        	
+			        	var id = $(this).data('id');
+			        	var oldUrl = $('#appIconUrl').val();
+			        	fileAjaxSubmit("#appIconEditForm","${showAppUrl}/updateIcon?appId=" + id + "&oldUrl=" + oldUrl, function(response){
+			        		var iconUrl = response.extraData;
+			        		$('#appIconUrl').val(iconUrl);
+			        		$('#imgAppIconUrl').attr('src','${showAppUrl}/icon?url=' + iconUrl);
+			        		$("#updateAppIconDialog").dialog("close");
+		            	}, null, null, function(){
+		            		removeInputError('#updateAppIconDialog #div_iconUrl');
+		              		addInputError('#updateAppIconDialog #div_iconUrl','${messageAppSaveFail}');
+		              	});			        	
 			        },
 			        "${labelActionCancel}":function(){
 			        	$("#updateAppIconDialog").dialog("close");
 			        }
 			      }
 			    });
+			$( "#newVersionDialog" ).dialog({
+			      autoOpen: false,
+			      height: 430,
+			      width: 400,
+			      modal: true,
+			      resizable: false,
+			      buttons: {
+			        "${labelActionSave}": function() {
+			        		var id = $(this).data('id');
+			        		// Save new version, replace appId by new appId
+			        		var appData = {appId:id};
+			        		fileAjaxSubmit("#versionNewForm","${showAppUrl}/version?createAjax", function(response){
+			        			// Update app latest version			        			
+			        			var version = $('#versionNewForm #version').val();
+			        			$.post('${showAppUrl}/updateLatestVersion?appId=' + id + '&version=' + version, {}, function(response) {
+					            	}, 'json').done(function(){
+					            		$('#appLatestVersion').html(version);		
+					            	}).fail(function(){
+					            		var error = $("#versionMessage");
+						        		error.css({"display": "block"});
+						        		error.find('span').html('${labelAppVersionUpdateFail}');
+					            	});	            	
+			        			refreshJQGrid("#listVersion");
+				        		$("#newVersionDialog").dialog("close");				        		
+			            	}, null, null, function(){
+			            		removeInputError('#newVersionDialog #div_version');
+			              		addInputError('#newVersionDialog #div_version','${labelVersionSaveFail}');				              		
+			              	}, appData);					        		
+	            	},			        	
+			        "${labelActionCancel}":function(){
+			        	$("#newVersionDialog").dialog("close");
+			        }
+			      }
+			    });
 		});
+		function checkboxFormatter(cellvalue, options, rowObject) {
+			var s = $('<div><input id="filterGroup_'+ rowObject.id +'" type="checkbox" onclick="filterGroupClick('+ rowObject.id +');" style="height: auto; margin: 5px"/><span>'+ cellvalue +'</span></div>');
+	    	if(rowObject.appGroupId){
+	    		var checkbox = s.find("#filterGroup_" + rowObject.id);
+	    		checkbox.attr('appgroup', rowObject.appGroupId);
+	    		checkbox.attr('checked', 'checked');
+	    	}
+	    	return s.html();
+    	}
+	    function filterGroupClick(id, check){
+	    	var error = $("#groupMessage");
+    		error.css({"display": "none"});
+    		error.find('span').html('');
+    		
+	    	var checkbox = $('#filterGroup_' + id);
+	    	if(check){	
+	    		checkbox.prop('checked', !checkbox.prop('checked'));
+	    	}	
+	    	var checked = checkbox.prop('checked');
+	    	var data = {};
+	    	var url = '';
+	    	if(checked){
+	    		url = '${showAppUrl}/appgroup' + '?appId=' + '${app.id}' + '&groupId=' + id;
+	    	}else{
+	    		url = '${showAppUrl}/appgroup' + '?appGroupId=' + checkbox.attr('appgroup');
+	    	}
+	    	disableInputs('#groups','checkbox');
+        	$.post(url, data, function(response) {
+        			enableInputs('#groups','checkbox');
+        		}, 'json').done(function(data){
+        			checkbox.attr('appgroup', data);        			
+        		}).fail(function(){
+       				var error = $("#groupMessage");
+	        		error.css({"display": "block"});
+	        		error.find('span').html('${labelAppGroupUpdate}');
+	        	});	      
+	    }
 		function showEditAppDialog(id){
 	    	removeInputError("#appEditForm");
 	    	$.get('${showAppUrl}/' + id + '?showAjax', {}, function(response) {
@@ -138,10 +347,19 @@
 	        dialog.data('id',id).dialog("open");  
 	    }
 		function showEditAppIconDialog(id){
-	    	removeInputError("#appEditIconForm");
+	    	removeInputError("#appIconEditForm");
+	    	$('#appIconEditForm #iconUrl').val('');
 	    	var dialog = $("#updateAppIconDialog");	        
 	        dialog.data('id',id).dialog("open");    	
 	    }
+		function showNewVersionDialog(id){
+			var error = $("#versionMessage");
+    		error.css({"display": "none"});
+    		error.find('span').html('');
+			removeInputError("#versionNewForm");
+			var dialog = $("#newVersionDialog");
+			dialog.data('id',id).dialog("open");    
+		}
 		]]>
 	</script>
 </div>

@@ -5,6 +5,11 @@
  */
 package com.ghc.appversion.service.jpa.admin.app;
 
+import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_ICON_UPDATE_QUERY;
+import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_ICON_URL;
+import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_ID;
+import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_LATEST_VERSION;
+import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_LATEST_VERSION_UPDATE_QUERY;
 import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_NAME;
 import static com.ghc.appversion.service.jpa.admin.SQLConstants.APP_SELECT_BY_NAME_QUERY;
 
@@ -103,7 +108,6 @@ public class AppServiceImpl implements AppService {
 	 */
 	@Override
 	public App findByName(String name) {
-		// TODO use setParameter
 		String sql = APP_SELECT_BY_NAME_QUERY;
 		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter(APP_NAME, "%" + name + "%");
@@ -114,5 +118,33 @@ public class AppServiceImpl implements AppService {
 		}
 
 		return result.get(0);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.ghc.appversion.service.jpa.admin.app.AppService#updateIcon(java.lang
+	 * .String, java.lang.Long)
+	 */
+	@Override
+	public int updateIcon(String iconUrl, Long id) {
+		String sql = APP_ICON_UPDATE_QUERY;
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter(APP_ICON_URL, iconUrl);
+		query.setParameter(APP_ID, id);
+		return query.executeUpdate();		
+	}
+
+	/* (non-Javadoc)
+	 * @see com.ghc.appversion.service.jpa.admin.app.AppService#updateLatestVersion(java.lang.String, java.lang.Long)
+	 */
+	@Override
+	public int updateLatestVersion(String version, Long id) {
+		String sql = APP_LATEST_VERSION_UPDATE_QUERY;
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter(APP_LATEST_VERSION, version);
+		query.setParameter(APP_ID, id);
+		return query.executeUpdate();
 	}
 }

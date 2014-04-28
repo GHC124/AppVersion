@@ -1,5 +1,7 @@
 package com.ghc.appversion.domain.admin;
 
+import static com.ghc.appversion.web.Constants.DATE_FORMAT_PATTERN;
+
 import java.io.Serializable;
 
 import javax.persistence.Column;
@@ -15,6 +17,8 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
+
+import com.ghc.appversion.web.util.UploadUtil;
 
 @Entity
 @Table(name = "app_versions")
@@ -40,7 +44,7 @@ public class AppVersions implements Serializable {
 		mReleaseNote = releaseNote;
 		mAppId = appId;
 		mAppDownloadUrl = appDownloadUrl;
-		mAppSize = appSize;
+		mAppSize = appSize;		
 	}
 
 	public AppVersions(Integer id, String version, DateTime releaseDate,
@@ -121,4 +125,22 @@ public class AppVersions implements Serializable {
 		mAppSize = appSize;
 	}
 
+	@javax.persistence.Transient
+	public String getReleaseDateString() {
+		String releaseDateString = "";
+		if (mReleaseDate != null) {
+			releaseDateString = org.joda.time.format.DateTimeFormat.forPattern(
+					DATE_FORMAT_PATTERN).print(mReleaseDate);
+		}
+		return releaseDateString;
+	}
+	
+	@javax.persistence.Transient
+	public String getAppSizeString() {
+		String appSizeString = "";
+		if (mAppSize != null) {
+			appSizeString = UploadUtil.getFileSize(mAppSize);
+		}
+		return appSizeString;
+	}
 }

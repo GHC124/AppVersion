@@ -23,7 +23,7 @@ public interface AppVersionsService {
 	AppVersions save(AppVersions appVersion);
 
 	Page<AppVersions> findAllByPage(Pageable pageable);
-
+	
 	void delete(Long id);
 
 	long count();
@@ -39,4 +39,9 @@ public interface AppVersionsService {
 	 * Find all version of app
 	 */
 	List<AppVersions> findAllByAppId(Long appId);
+	
+	/**
+	 * Find all version of app
+	 */
+	Page<AppVersions> findAllByAppId(Pageable pageable, Long appId, long total);
 }

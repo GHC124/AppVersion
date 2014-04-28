@@ -16,14 +16,22 @@
 	<!-- Group Info -->
 	<spring:message code="label_admin_group_info" var="labelGroupInfo"/>
 	<spring:message code="label_admin_group_members" var="labelGroupMembers"/>
+	<spring:message code="label_admin_group_apps" var="labelGroupApps"/>
 	<!-- Members -->
 	<spring:message code="label_admin_user_email" var="labelUserEmail" />
 	<spring:message code="label_admin_group_add_member" var="labelAddMember"/>
 	<spring:message code="admin_user_group_update_error" var="labelUserGroupUpdate"/>
 	<spring:url value="/admin/users" var="showUserUrl"/>
 	<spring:url value="/admin/users/usergroup" var="editUserGroupUrl" />
+	<!-- Apps -->
+	<spring:message code="label_admin_app_name" var="labelAppName" />
+	<spring:message code="label_admin_group_add_app" var="labelAddApp"/>
+	<spring:message code="admin_app_group_update_error" var="labelAppGroupUpdate"/>
+	<spring:url value="/admin/apps" var="showAppUrl"/>
+	<spring:url value="/admin/apps/appgroup" var="editAppGroupUrl" />
 	<!-- Add Group -->
 	<spring:message code="label_action_save" var="labelActionSave" />
+	<spring:message code="label_admin_app_name" var="labelAppName" />
 	<spring:message code="admin_group_save_fail" var="messageGroupSaveFail"/>
 	<spring:url value="/admin/groups?createAjax" var="addGroupAjax"/>		
 	<!-- Delete -->
@@ -57,6 +65,18 @@
 		    	<button id="btnAddMember" onclick="showAddMemberDialog();" disabled="disabled">${labelAddMember}</button>
 		    </div>			    
    		</fieldset>
+   		<br/>
+   		<fieldset>
+   			<legend>${labelGroupApps}</legend>
+   			<div id="appMessage" style="display: none" class="error"><span></span></div>
+   			<div> 
+		    	<table id="listApp" class="table table-bordered"><tr><td></td></tr></table> 
+		    	<span id="pagerApp"></span> 
+		    </div>
+		    <div>
+		    	<button id="btnAddApp" onclick="showAddAppDialog();" disabled="disabled">${labelAddApp}</button>
+		    </div>			    
+   		</fieldset>
 	</div>
     <div id="newGroupDialog" title="${labelGroupNew}" class="dialog add-dialog group-dialog" style="display: none">
     	<html:form formUrl="/admin/groups?createAjax" modelAttribute="group" id="groupNewForm" method="POST">
@@ -84,6 +104,13 @@
     		<span id="pagerUser"></span>
     	</div> 
 	</div>
+	<div id="addAppDialog" title="${labelAddApp}" class="dialog apps-dialog" style="display: none">
+    	<div id="appsMessage" style="display: none" class="error"><span></span></div>
+    	<div>
+    		<table id="listApps" class="table table-bordered"><tr><td></td></tr></table> 
+    		<span id="pagerApps"></span>
+    	</div> 
+	</div>
     <script type="text/javascript"> 
     	<![CDATA[
     	var globalSelectedGroupId = -1;         
@@ -92,10 +119,11 @@
 	        url:'${showGroupUrl}/listSummary', 
 	        datatype: 'json', 
 	        mtype: 'GET', 
-	        colNames:['${labelGroupName}', '${labelGroupMembers}', '${labelActions}'], 
+	        colNames:['${labelGroupName}', '${labelGroupMembers}', '${labelGroupApps}', '${labelActions}'], 
 	        colModel:[  
 	          {name:'name', index:'name', width:150},
 	          {name:'members', index:'members', width:30},
+	          {name:'apps', index:'apps', width:30},
 	          {name:'act', index:'act', sortable:false, width:25}
 	        ], 
 	        jsonReader: { 
@@ -118,7 +146,9 @@
 	        onSelectRow: function(id){  
 	        	globalSelectedGroupId = id;
 	        	refreshJQGrid('#listMember', { page: 1, postData: {groupId:id}, datatype: "json" });
+	        	refreshJQGrid('#listApp', { page: 1, postData: {groupId:id}, datatype: "json" });
 	        	enableInput($('#btnAddMember'));
+	        	enableInput($('#btnAddApp'));
 	        },
 	        loadComplete: function () {
 	            var grid = $(this);
@@ -186,6 +216,55 @@
 		    	moveJQGridPagerInfo2Bottom(grid);
 		    }
 		  });
+	      $("#listApp").jqGrid({ 
+			    url:'${showGroupUrl}/listgrid?apps', 
+			    datatype: 'local', 
+			    mtype: 'GET', 
+			    colNames:['${labelAppName}', '${labelActions}'], 
+			    colModel :[  
+			      {name:'name', index:'name', width:120},
+			      {name:'act', index:'act', sortable:false, width:25}
+			    ], 
+			    jsonReader : { 
+			        root:"data", 
+			        page: "currentPage", 
+			        total: "totalPages", 
+			        records: "totalRecords", 
+			        repeatitems: false, 
+			        id: "appGroupId" 
+			    },       
+			    pager: '#pagerApp', 
+			    rowNum:10, 
+			    rowList:[10,20,30,50], 
+			    sortname: 'name', 
+			    sortorder: 'asc', 
+			    viewrecords: true, 
+			    gridview: true, 
+			    height: 280, 
+			    width: 300, 
+			    onSelectRow: function(id){  
+			        
+			    },
+			    loadComplete: function() {	
+			    	var grid = $(this);
+			    	addAction2JQGrid(grid,'name','act','${labelActionDelete}','ui-icon-trash',function(id, value){
+			    		var error = $("#appMessage");
+			    		error.css({"display": "none"});
+			    		error.find('span').html('');
+				    	var url = '${editAppGroupUrl}' + '?appGroupId=' + id;
+				    	var data={};
+				    	$.post(url, data, function(response) {
+				    	}, 'json').done(function(data){
+			    			refreshJQGrid('#list');
+			    		}).fail(function(){
+			   				var error = $("#appMessage");
+			        		error.css({"display": "block"});
+			        		error.find('span').html('${labelAppGroupUpdate}');
+			        	});	      
+			    	});
+			    	moveJQGridPagerInfo2Bottom(grid);
+			    }
+			  });
 	      $("#listUser").jqGrid({ 
 			    url:'${showUserUrl}/listGroupCheck', 
 			    datatype: 'local', 
@@ -193,7 +272,7 @@
 			    postData:{groupId:getSelectedGroupId},
 			    colNames:['${labelUserEmail}'], 
 			    colModel :[  
-			      {name:'email', index:'email', width:160, formatter: checkboxFormatter}			      
+			      {name:'email', index:'email', width:160, formatter: userCheckboxFormatter}			      
 			    ], 
 			    jsonReader : { 
 			        root:"data", 
@@ -214,6 +293,40 @@
 			    width: 410, 
 			    onSelectRow: function(id){  
 			    	filterUserClick(id, true);
+			    },
+			    loadComplete: function() {	
+			    	var grid = $(this);
+			    	moveJQGridPagerInfo2Bottom(grid);
+			    }
+			  });
+	      $("#listApps").jqGrid({ 
+			    url:'${showAppUrl}/listGroupCheck', 
+			    datatype: 'local', 
+			    mtype: 'GET', 
+			    postData:{groupId:getSelectedGroupId},
+			    colNames:['${labelAppName}'], 
+			    colModel :[  
+			      {name:'name', index:'name', width:160, formatter: appCheckboxFormatter}			      
+			    ], 
+			    jsonReader : { 
+			        root:"data", 
+			        page: "currentPage", 
+			        total: "totalPages", 
+			        records: "totalRecords", 
+			        repeatitems: false, 
+			        id: "id" 
+			    },       
+			    pager: '#pagerApps', 
+			    rowNum:10, 
+			    rowList:[10,20,30,50], 
+			    sortname: 'name', 
+			    sortorder: 'asc', 
+			    viewrecords: true, 
+			    gridview: true, 
+			    height: 280, 
+			    width: 410, 
+			    onSelectRow: function(id){  
+			    	filterAppClick(id, true);
 			    },
 			    loadComplete: function() {	
 			    	var grid = $(this);
@@ -300,13 +413,37 @@
 	        	  refreshJQGrid("#list", {datatype:"json"});	        	  
 	          }
 	        });
+	      $( "#addAppDialog" ).dialog({
+	          autoOpen: false,
+	          height: 480,
+	          width: 500,
+	          modal: true,
+	          resizable: false,
+	          buttons:{
+	        		'${lableActionClose}':function(){
+	        			$("#addAppDialog").dialog("close");	
+	        		}  
+	          },
+	          close: function(){
+	        	  refreshJQGrid("#list", {datatype:"json"});	        	  
+	          }
+	        });
 	    });
 
-    	function checkboxFormatter(cellvalue, options, rowObject) {
+    	function userCheckboxFormatter(cellvalue, options, rowObject) {
 			var s = $('<div><input id="filterUser_'+ rowObject.id +'" type="checkbox" onclick="filterUserClick('+ rowObject.id +');" style="height: auto; margin: 5px"/><span>'+ cellvalue +'</span></div>');
 			if(rowObject.userGroupId){
 	    		var checkbox = s.find("#filterUser_" + rowObject.id);
 	    		checkbox.attr('usergroup', rowObject.userGroupId);
+	    		checkbox.attr('checked', 'checked');
+	    	}
+	    	return s.html();
+    	}
+    	function appCheckboxFormatter(cellvalue, options, rowObject) {
+			var s = $('<div><input id="filterApp_'+ rowObject.id +'" type="checkbox" onclick="filterAppClick('+ rowObject.id +');" style="height: auto; margin: 5px"/><span>'+ cellvalue +'</span></div>');
+			if(rowObject.appGroupId){
+	    		var checkbox = s.find("#filterApp_" + rowObject.id);
+	    		checkbox.attr('appgroup', rowObject.appGroupId);
 	    		checkbox.attr('checked', 'checked');
 	    	}
 	    	return s.html();
@@ -338,6 +475,35 @@
        				var error = $("#userMessage");
 	        		error.css({"display": "block"});
 	        		error.find('span').html('${labelUserGroupUpdate}');
+	        	});	      
+	    }
+	    function filterAppClick(id, check){
+	    	var error = $("#appMessage");
+    		error.css({"display": "none"});
+    		error.find('span').html('');
+    		
+	    	var checkbox = $('#filterApp_' + id);
+	    	if(check){	
+	    		checkbox.prop('checked', !checkbox.prop('checked'));
+	    	}	
+	    	var checked = checkbox.prop('checked');
+	    	var data = {};
+	    	var url = '';
+	    	if(checked){
+	    		var groupId = getSelectedGroupId();
+	    		url = '${editAppGroupUrl}' + '?appId=' + id + '&groupId=' + groupId;
+	    	}else{
+	    		url = '${editAppGroupUrl}' + '?appGroupId=' + checkbox.attr('appgroup');
+	    	}
+	    	disableInputs('#addAppDialog','checkbox');
+        	$.post(url, data, function(response) {
+        			enableInputs('#addAppDialog','checkbox');
+        		}, 'json').done(function(data){
+        			checkbox.attr('appgroup', data);        			
+        		}).fail(function(){
+       				var error = $("#appMessage");
+	        		error.css({"display": "block"});
+	        		error.find('span').html('${labelAppGroupUpdate}');
 	        	});	      
 	    }
 	    function getSelectedGroupId(){
@@ -373,7 +539,12 @@
 	    	var dialog = $("#addMemberDialog");
 	        dialog.dialog("open");
 	        refreshJQGrid('#listUser', { page: 1, datatype: "json" });
-	    }	    
+	    }
+	    function showAddAppDialog(){
+	    	var dialog = $("#addAppDialog");
+	        dialog.dialog("open");
+	        refreshJQGrid('#listApps', { page: 1, datatype: "json" });
+	    }	 
     ]]>
     </script>
 </div>

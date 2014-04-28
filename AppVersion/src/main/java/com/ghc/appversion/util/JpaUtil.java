@@ -29,7 +29,7 @@ public class JpaUtil {
 					tuple[i] = new Long(((BigInteger) tuple[i]).longValue());
 				}
 				if (tuple[i] instanceof Date) {
-					tuple[i] = new DateTime(tuple[i], DateTimeZone.UTC);
+					tuple[i] = new DateTime(tuple[i], DateTimeZone.getDefault());					
 				}
 				tupleTypes.add(tuple[i].getClass());
 			} else {

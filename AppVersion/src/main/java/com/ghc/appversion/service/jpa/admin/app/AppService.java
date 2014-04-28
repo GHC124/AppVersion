@@ -29,4 +29,8 @@ public interface AppService {
 	long count();	
 	
 	App findByName(String name);
+	
+	int updateIcon(String iconUrl, Long id);
+	
+	int updateLatestVersion(String version, Long id);
 }

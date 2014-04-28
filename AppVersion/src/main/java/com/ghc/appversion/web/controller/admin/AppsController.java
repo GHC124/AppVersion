@@ -39,8 +39,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.ghc.appversion.domain.admin.App;
+import com.ghc.appversion.domain.admin.AppGroup;
+import com.ghc.appversion.domain.admin.AppGroupCheck;
 import com.ghc.appversion.domain.admin.AppVersions;
 import com.ghc.appversion.domain.admin.Platform;
+import com.ghc.appversion.service.jpa.admin.app.AppGroupCheckService;
+import com.ghc.appversion.service.jpa.admin.app.AppGroupService;
 import com.ghc.appversion.service.jpa.admin.app.AppService;
 import com.ghc.appversion.service.jpa.admin.app.AppVersionsService;
 import com.ghc.appversion.service.jpa.admin.app.PlatformService;
@@ -64,6 +68,12 @@ public class AppsController extends AbstractAdminController {
 
 	@Autowired
 	private PlatformService platformService;
+
+	@Autowired
+	private AppGroupService appGroupService;
+
+	@Autowired
+	private AppGroupCheckService appGroupCheckService;
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String list(Model model) {
@@ -115,6 +125,10 @@ public class AppsController extends AbstractAdminController {
 		} catch (IOException e) {
 			LogUtil.error("error parsing platforms to JSON");
 		}
+
+		AppVersions appVersions = new AppVersions();
+		appVersions.setReleaseDate(new DateTime());
+		model.addAttribute("appVersions", appVersions);
 
 		return "admin/apps/show";
 	}
@@ -264,7 +278,8 @@ public class AppsController extends AbstractAdminController {
 	@RequestMapping(value = "/{id}", params = "updateAjax", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ValidationResponse updateAjax(Model model,
-			@ModelAttribute(value = "app") @Valid App app, BindingResult result, Locale locale) {
+			@ModelAttribute(value = "app") @Valid App app,
+			BindingResult result, Locale locale) {
 		ValidationResponse res = new ValidationResponse();
 		res.setStatus(ValidationResponse.FAIL);
 		if (result.hasErrors()) {
@@ -355,6 +370,18 @@ public class AppsController extends AbstractAdminController {
 						objectError.getDefaultMessage()));
 			}
 		} else {
+			// validate version
+			AppVersions latestVersion = appVersionsService
+					.latestVersion(appVersions.getAppId());
+			if (latestVersion != null
+					&& compareVersions(latestVersion.getVersion(),
+							appVersions.getVersion()) >= 0) {
+				res.addErrorMessage(new ErrorMessage("version", messageSource
+						.getMessage("validation.version.Smaller.message",
+								new Object[] { latestVersion.getVersion() },
+								locale)));
+				return res;
+			}
 			// get the file from the request object
 			Iterator<String> itr = request.getFileNames();
 			if (!itr.hasNext()) {
@@ -476,6 +503,82 @@ public class AppsController extends AbstractAdminController {
 		return platformGrid;
 	}
 
+	/**
+	 * Select all apps and show that app joined a specific group or not
+	 */
+	@RequestMapping(value = "/listGroupCheck", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public DataGrid<AppGroupCheck> listGridGroupCheck(
+			@RequestParam(value = "groupId", required = false) Long groupId,
+			@RequestParam(value = "page", required = false) Integer page,
+			@RequestParam(value = "rows", required = false) Integer rows,
+			@RequestParam(value = "sidx", required = false) String sortBy,
+			@RequestParam(value = "sord", required = false) String order) {
+		Sort sort = null;
+		String orderBy = sortBy;
+		if (orderBy != null && order != null) {
+			if (order.equals("desc")) {
+				sort = new Sort(Sort.Direction.DESC, orderBy);
+			} else {
+				sort = new Sort(Sort.Direction.ASC, orderBy);
+			}
+		}
+		PageRequest pageRequest = null;
+		if (sort != null) {
+			pageRequest = new PageRequest(page - 1, rows, sort);
+		} else {
+			pageRequest = new PageRequest(page - 1, rows);
+		}
+		long total = appService.count();
+		Page<AppGroupCheck> appPage = appGroupCheckService.findAllByPage(
+				pageRequest, groupId, total);
+		DataGrid<AppGroupCheck> appGrid = new DataGrid<>();
+		appGrid.setCurrentPage(appPage.getNumber() + 1);
+		appGrid.setTotalPages(appPage.getTotalPages());
+		appGrid.setTotalRecords(appPage.getTotalElements());
+		appGrid.setData(appPage.getContent());
+
+		return appGrid;
+	}
+
+	/**
+	 * Select all apps and show that app joined a specific group or not
+	 */
+	@RequestMapping(value = "/versions", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public DataGrid<AppVersions> listVersion(
+			@RequestParam(value = "appId", required = false) Long appId,
+			@RequestParam(value = "page", required = false) Integer page,
+			@RequestParam(value = "rows", required = false) Integer rows,
+			@RequestParam(value = "sidx", required = false) String sortBy,
+			@RequestParam(value = "sord", required = false) String order) {
+		Sort sort = null;
+		String orderBy = sortBy;
+		if (orderBy != null && order != null) {
+			if (order.equals("desc")) {
+				sort = new Sort(Sort.Direction.DESC, orderBy);
+			} else {
+				sort = new Sort(Sort.Direction.ASC, orderBy);
+			}
+		}
+		PageRequest pageRequest = null;
+		if (sort != null) {
+			pageRequest = new PageRequest(page - 1, rows, sort);
+		} else {
+			pageRequest = new PageRequest(page - 1, rows);
+		}
+		long total = appService.count();
+		Page<AppVersions> appPage = appVersionsService.findAllByAppId(
+				pageRequest, appId, total);
+		DataGrid<AppVersions> appGrid = new DataGrid<>();
+		appGrid.setCurrentPage(appPage.getNumber() + 1);
+		appGrid.setTotalPages(appPage.getTotalPages());
+		appGrid.setTotalRecords(appPage.getTotalElements());
+		appGrid.setData(appPage.getContent());
+
+		return appGrid;
+	}
+
 	@RequestMapping(value = "/{id}", params = "deleteAjax", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ValidationResponse deleteAjax(@PathVariable("id") Long id,
@@ -556,6 +659,74 @@ public class AppsController extends AbstractAdminController {
 		return null;
 	}
 
+	@RequestMapping(value = "/appgroup", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Long updateAppGroup(
+			@RequestParam(value = "appId", required = false) Long appId,
+			@RequestParam(value = "groupId", required = false) Long groupId,
+			@RequestParam(value = "appGroupId", required = false) Long appGroupId) {
+		if (appId != null && groupId != null) {
+			AppGroup appGroup = new AppGroup();
+			appGroup.setAppId(appId);
+			appGroup.setGroupId(groupId);
+			AppGroup data = appGroupService.save(appGroup);
+			return data.getId();
+		} else if (appGroupId != null && appGroupId > 0) {
+			appGroupService.delete(appGroupId);
+		}
+		return 0l;
+	}
+
+	@RequestMapping(value = "/updateIcon", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ValidationResponse updateIconAjax(
+			@RequestParam(value = "appId", required = false) Long appId,
+			@RequestParam(value = "oldUrl", required = false) String oldUrl,
+			MultipartHttpServletRequest request, Locale locale) {
+		ValidationResponse res = new ValidationResponse();
+		res.setStatus(ValidationResponse.FAIL);
+
+		// get the file from the request object
+		Iterator<String> itr = request.getFileNames();
+		if (!itr.hasNext()) {
+			res.addErrorMessage(new ErrorMessage("iconUrl", messageSource
+					.getMessage("validation.icon.NotEmpty.message",
+							new Object[] {}, locale)));
+			return res;
+		}
+		MultipartFile mpf = request.getFile(itr.next());
+		try {
+			String type = mpf.getContentType();
+			if (UploadUtil.isValidPhoto(type)) {
+				String rootDirectory = mUploadRootDirectory;
+				UploadUtil.createUploadFolder(rootDirectory);
+				String iconUrl = UploadUtil.saveIconFile(rootDirectory,
+						mpf.getInputStream());
+				appService.updateIcon(iconUrl, appId);
+				// Remove old icon file
+				UploadUtil.deleteIconFile(rootDirectory, oldUrl);
+				res.setExtraData(iconUrl);
+				res.setStatus(ValidationResponse.SUCCESS);
+			} else {
+				res.addErrorMessage(new ErrorMessage("iconUrl", messageSource
+						.getMessage("validation.icon.InvalidType.message",
+								new Object[] { PHOTO_TYPE }, locale)));
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		return res;
+	}
+
+	@RequestMapping(value = "/updateLatestVersion", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public void updateLatestVersionAjax(
+			@RequestParam(value = "appId", required = false) Long appId,
+			@RequestParam(value = "version", required = false) String version) {
+		appService.updateLatestVersion(version, appId);
+	}
+
 	/**
 	 * Compare version. Pattern: x.x.x.x
 	 * 
@@ -565,8 +736,8 @@ public class AppsController extends AbstractAdminController {
 	 */
 	public int compareVersions(String oldVersion, String newVersion) {
 		int compare = 0;
-		String[] path1 = oldVersion.split(".");
-		String[] path2 = newVersion.split(".");
+		String[] path1 = oldVersion.split("\\.");
+		String[] path2 = newVersion.split("\\.");
 		int length = path1.length > path2.length ? path2.length : path1.length;
 		for (int i = 0; i < length; i++) {
 			int num1 = Integer.parseInt(path1[i]);
