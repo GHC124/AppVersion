@@ -19,6 +19,7 @@
 	<spring:message code="label_admin_app_name" var="labelAppName"/>
 	<spring:message code="label_admin_app_platform" var="labelAppPlatform"/>
 	<spring:message code="label_admin_app_latest_version" var="labelAppVersion"/>
+	<spring:message code="label_admin_app_versions" var="labelAppVersions"/>
 	<spring:message code="label_admin_app_description" var="labelAppDescription"/>
 	<spring:message code="label_admin_app_icon" var="labelAppIcon"/>
 	<spring:message code="label_admin_app_file" var="labelAppFile"/>
@@ -124,11 +125,12 @@
 		        url:'${showAppUrl}/listgrid', 
 		        datatype: 'json', 
 		        mtype: 'GET', 
-		        colNames:['${labelAppName}','${labelAppPlatform}','${labelAppVersion}','${labelActions}'], 
+		        colNames:['${labelAppName}','${labelAppPlatform}','${labelAppVersions}','${labelAppVersion}','${labelActions}'], 
 		        colModel :[  
-		          {name:'name', index:'name', width:150},
-		          {name:'platformId', index:'platformId', width:50, formatter: platformFormatter},
-		          {name:'latestVersion', index:'latestVersion', sortable:false, width:45},
+		          {name:'name', index:'name', width:130},
+		          {name:'platformId', index:'platform_id', width:50, formatter: platformFormatter},
+		          {name:'versions', index:'versions', width:35},
+		          {name:'latestVersion', index:'latest_version', sortable:false, width:45},
 		          {name:'act', index:'act', sortable:false, width:25}
 		        ], 
 		        jsonReader : { 

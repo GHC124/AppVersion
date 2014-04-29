@@ -80,6 +80,12 @@ public interface SQLConstants {
 			"FROM users as u WHERE 1 ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
 	
 	/**
+	 * Select all apps
+	 */
+	String APP_SUMMARY_QUERY = "SELECT ID,NAME,LATEST_VERSION,PLATFORM_ID,(SELECT COUNT(ID) FROM APP_VERSIONS WHERE APP_ID = a.ID) AS VERSIONS " +
+			"FROM apps a WHERE 1 ORDER BY :orderBy :sort LIMIT :limit OFFSET :offset";
+	
+	/**
 	 * Select all apps and show that app joined a specific group or not
 	 */
 	String APP_GROUP_CHECK_QUERY = "SELECT ID, NAME,(SELECT ID FROM app_group WHERE APP_ID = u.ID AND GROUP_ID = :groupId LIMIT 1) as APP_GROUP_ID " +
@@ -87,10 +93,9 @@ public interface SQLConstants {
 	
 	String APP_ID = "appId";
 	/**
-	 * Select the lastest version of app 
+	 * Select the lastest versions of app 
 	 */
-	String APP_LASTEST_VERSION_QUERY = "SELECT ID,VERSION,MAX(RELEASE_DATE),RELEASE_NOTE,APP_ID,APP_DOWNLOAD_URL,APP_SIZE FROM app_versions " +
-			"WHERE APP_ID = :appId GROUP BY APP_ID";
+	String APP_LASTEST_VERSION_QUERY = "select a.* from app_versions a where app_id = :appId and release_date = (SELECT MAX(RELEASE_DATE) FROM app_versions WHERE app_id = :appId)";
 	
 	/**
 	 * Select all versions of app

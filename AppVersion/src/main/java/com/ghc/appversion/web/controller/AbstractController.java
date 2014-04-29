@@ -4,14 +4,16 @@ import java.beans.PropertyEditorSupport;
 
 import javax.annotation.PostConstruct;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
+import com.ghc.appversion.util.LogUtil;
 import com.ghc.appversion.web.GlobalVariables;
 
 public abstract class AbstractController {
@@ -25,7 +27,7 @@ public abstract class AbstractController {
 	
 	@InitBinder
 	protected void initBinder(WebDataBinder binder) {
-		binder.registerCustomEditor(DateTime.class, new DateTimeEditor());
+		binder.registerCustomEditor(LocalDateTime.class, new DateTimeEditor());
 	}
 
 	@PostConstruct
@@ -42,25 +44,24 @@ public abstract class AbstractController {
 
 		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
+			LogUtil.error("Text "  + text);
 			if (StringUtils.hasText(text)) {
-				DateTime dateTime = org.joda.time.format.DateTimeFormat
-						.forPattern(mDateFormatPattern)
-						.withZone(DateTimeZone.getDefault())
-						.parseDateTime(text);
-				setValue(dateTime);
+				DateTimeFormatter dtf = DateTimeFormat.forPattern(mDateFormatPattern);
+				LocalDateTime jodatime = dtf.parseLocalDateTime(text);
+				setValue(jodatime);
 			} else {
 				setValue(null);
 			}
+			LogUtil.error("Date "  + getValue());
 		}
 
 		@Override
 		public String getAsText() throws IllegalArgumentException {
+			LogUtil.error("Value "  + getValue());
 			String s = "";
 			if (getValue() != null) {
-				s = org.joda.time.format.DateTimeFormat
-						.forPattern(mDateFormatPattern)
-						.withZone(DateTimeZone.getDefault())
-						.print((DateTime) getValue());
+				DateTimeFormatter dtfOut = DateTimeFormat.forPattern(mDateFormatPattern);
+				s = dtfOut.print((LocalDateTime) getValue());
 			}
 			return s;
 		}

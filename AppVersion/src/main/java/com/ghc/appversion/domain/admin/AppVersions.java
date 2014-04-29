@@ -14,8 +14,9 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import com.ghc.appversion.web.GlobalVariables;
 import com.ghc.appversion.web.util.UploadUtil;
@@ -26,7 +27,7 @@ public class AppVersions implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private Long mId;
 	private String mVersion;
-	private DateTime mReleaseDate;
+	private LocalDateTime mReleaseDate;
 	private String mReleaseNote;
 	private Long mAppId;
 	private String mAppDownloadUrl;
@@ -36,7 +37,7 @@ public class AppVersions implements Serializable {
 
 	}
 
-	public AppVersions(Long id, String version, DateTime releaseDate,
+	public AppVersions(Long id, String version, LocalDateTime releaseDate,
 			String releaseNote, Long appId, String appDownloadUrl, Long appSize) {
 		mId = id;
 		mVersion = version;
@@ -47,7 +48,7 @@ public class AppVersions implements Serializable {
 		mAppSize = appSize;
 	}
 
-	public AppVersions(Integer id, String version, DateTime releaseDate,
+	public AppVersions(Integer id, String version, LocalDateTime releaseDate,
 			String releaseNote, Integer appId, String appDownloadUrl,
 			Integer appSize) {
 		this(id.longValue(), version, releaseDate, releaseNote, appId
@@ -78,13 +79,13 @@ public class AppVersions implements Serializable {
 	}
 
 	@NotNull(message = "{validation.releaseDate.NotNull.message}")
-	@Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@Type(type = "org.jadira.usertype.dateandtime.joda.PersistentLocalDateTime")
 	@Column(name = "release_date")
-	public DateTime getReleaseDate() {
+	public LocalDateTime getReleaseDate() {
 		return mReleaseDate;
 	}
 
-	public void setReleaseDate(DateTime releaseDate) {
+	public void setReleaseDate(LocalDateTime releaseDate) {
 		mReleaseDate = releaseDate;
 	}
 
@@ -130,9 +131,9 @@ public class AppVersions implements Serializable {
 		String releaseDateString = "";
 		if (mReleaseDate != null) {
 			String dateFormatPattern = GlobalVariables.getInstance().getDateFormatPattern();
-			releaseDateString = org.joda.time.format.DateTimeFormat
-					.forPattern(dateFormatPattern)
-					.withZone(DateTimeZone.getDefault()).print(mReleaseDate);
+			DateTimeFormatter dtfOut = DateTimeFormat.forPattern(dateFormatPattern);
+			releaseDateString = dtfOut.print(mReleaseDate);
+			
 		}
 		return releaseDateString;
 	}

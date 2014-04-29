@@ -111,7 +111,7 @@ public class AppVersionsServiceImpl implements AppVersionsService {
 	 * (java.lang.Long)
 	 */
 	@Override
-	public AppVersions latestVersion(Long appId) {
+	public List<AppVersions> latestVersion(Long appId) {
 		// TODO use setParameter
 		String sql = APP_LASTEST_VERSION_QUERY;
 		Query query = entityManager.createNativeQuery(sql);
@@ -119,10 +119,8 @@ public class AppVersionsServiceImpl implements AppVersionsService {
 
 		List<AppVersions> result = JpaUtil.getResultList(query,
 				AppVersions.class);
-		if (result == null || result.size() == 0) {
-			return null;
-		}
-		return result.get(0);
+		
+		return result;
 	}
 
 	/*

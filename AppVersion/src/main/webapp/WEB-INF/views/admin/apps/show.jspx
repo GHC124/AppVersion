@@ -193,7 +193,7 @@
 		        rowNum:10, 
 		        rowList:[10,20,30,50], 
 		        sortname: 'version', 
-		        sortorder: 'asc', 
+		        sortorder: 'desc', 
 		        gridview: true, 
 		        height: 250, 
 		        width: 620, 
@@ -207,6 +207,7 @@
 		        	addAction2JQGrid(grid,'name','act','${labelActionEdit}','ui-icon-pencil',function(id, value){
 	       			});                
 			        addAction2JQGrid(grid,'name','act','${labelActionDelete}','ui-icon-trash',function(id, value){
+			        	
 		    		});		           			           	
 		        }
 		      }); 

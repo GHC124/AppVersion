@@ -33,7 +33,7 @@ public interface AppVersionsService {
 	 * @param appId
 	 * @return
 	 */
-	AppVersions latestVersion(Long appId);
+	List<AppVersions> latestVersion(Long appId);
 	
 	/**
 	 * Find all version of app

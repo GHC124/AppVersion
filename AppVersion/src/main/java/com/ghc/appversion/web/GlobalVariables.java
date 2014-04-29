@@ -10,7 +10,6 @@ import org.springframework.context.MessageSource;
  */
 public class GlobalVariables {
 	private static GlobalVariables INSTANCE;
-	private static boolean isInit = false;
 
 	private String mUploadRootDirectory;
 	private String mDateFormatPattern;
@@ -30,9 +29,6 @@ public class GlobalVariables {
 	 * Init data
 	 */
 	public static void init(MessageSource messageSource) {
-		if (isInit) {
-			return;
-		}
 		GlobalVariables globalVariables = getInstance();
 
 		// Load global variables
@@ -46,8 +42,6 @@ public class GlobalVariables {
 				new Object[] {}, Locale.US);
 		globalVariables.mIOSType = messageSource.getMessage("ios_type",
 				new Object[] {}, Locale.US);
-
-		isInit = true;
 	}
 
 	public static GlobalVariables getInstance() {

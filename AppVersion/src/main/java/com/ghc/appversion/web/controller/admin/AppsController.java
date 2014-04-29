@@ -18,7 +18,7 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,11 +39,13 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import com.ghc.appversion.domain.admin.App;
 import com.ghc.appversion.domain.admin.AppGroup;
 import com.ghc.appversion.domain.admin.AppGroupCheck;
+import com.ghc.appversion.domain.admin.AppSummary;
 import com.ghc.appversion.domain.admin.AppVersions;
 import com.ghc.appversion.domain.admin.Platform;
 import com.ghc.appversion.service.jpa.admin.app.AppGroupCheckService;
 import com.ghc.appversion.service.jpa.admin.app.AppGroupService;
 import com.ghc.appversion.service.jpa.admin.app.AppService;
+import com.ghc.appversion.service.jpa.admin.app.AppSummaryService;
 import com.ghc.appversion.service.jpa.admin.app.AppVersionsService;
 import com.ghc.appversion.service.jpa.admin.app.PlatformService;
 import com.ghc.appversion.util.LogUtil;
@@ -60,6 +62,9 @@ import com.ghc.appversion.web.util.UploadUtil;
 public class AppsController extends AbstractAdminController {
 	@Autowired
 	private AppService appService;
+
+	@Autowired
+	private AppSummaryService appSummaryService;
 
 	@Autowired
 	private AppVersionsService appVersionsService;
@@ -79,7 +84,7 @@ public class AppsController extends AbstractAdminController {
 		model.addAttribute("app", app);
 
 		AppVersions appVersions = new AppVersions();
-		appVersions.setReleaseDate(new DateTime());
+		appVersions.setReleaseDate(new LocalDateTime());
 		model.addAttribute("appVersions", appVersions);
 
 		Platform platform = new Platform();
@@ -125,7 +130,7 @@ public class AppsController extends AbstractAdminController {
 		}
 
 		AppVersions appVersions = new AppVersions();
-		appVersions.setReleaseDate(new DateTime());
+		appVersions.setReleaseDate(new LocalDateTime());
 		model.addAttribute("appVersions", appVersions);
 
 		return "admin/apps/show";
@@ -318,8 +323,9 @@ public class AppsController extends AbstractAdminController {
 			}
 		} else {
 			// validate version
-			AppVersions latestVersion = appVersionsService
-					.latestVersion(appVersions.getAppId());
+			List<AppVersions> latestVersions = appVersionsService
+					.latestVersion(appVersions.getAppId()); 
+			AppVersions latestVersion = latestVersion(latestVersions);
 			if (latestVersion != null
 					&& compareVersions(latestVersion.getVersion(),
 							appVersions.getVersion()) >= 0) {
@@ -369,8 +375,9 @@ public class AppsController extends AbstractAdminController {
 			}
 		} else {
 			// validate version
-			AppVersions latestVersion = appVersionsService
-					.latestVersion(appVersions.getAppId());
+			List<AppVersions> latestVersions = appVersionsService
+					.latestVersion(appVersions.getAppId()); 
+			AppVersions latestVersion = latestVersion(latestVersions);
 			if (latestVersion != null
 					&& compareVersions(latestVersion.getVersion(),
 							appVersions.getVersion()) >= 0) {
@@ -439,7 +446,7 @@ public class AppsController extends AbstractAdminController {
 
 	@RequestMapping(value = "/listgrid", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	public DataGrid<App> listGrid(
+	public DataGrid<AppSummary> listGrid(
 			@RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "rows", required = false) Integer rows,
 			@RequestParam(value = "sidx", required = false) String sortBy,
@@ -459,12 +466,14 @@ public class AppsController extends AbstractAdminController {
 		} else {
 			pageRequest = new PageRequest(page - 1, rows);
 		}
-		Page<App> userPage = appService.findAllByPage(pageRequest);
-		DataGrid<App> appGrid = new DataGrid<>();
-		appGrid.setCurrentPage(userPage.getNumber() + 1);
-		appGrid.setTotalPages(userPage.getTotalPages());
-		appGrid.setTotalRecords(userPage.getTotalElements());
-		appGrid.setData(userPage.getContent());
+		long total = appService.count();
+		Page<AppSummary> appPage = appSummaryService.findAllByPage(pageRequest,
+				total);
+		DataGrid<AppSummary> appGrid = new DataGrid<>();
+		appGrid.setCurrentPage(appPage.getNumber() + 1);
+		appGrid.setTotalPages(appPage.getTotalPages());
+		appGrid.setTotalRecords(appPage.getTotalElements());
+		appGrid.setData(appPage.getContent());
 
 		return appGrid;
 	}
@@ -726,6 +735,25 @@ public class AppsController extends AbstractAdminController {
 	}
 
 	/**
+	 * Get latest version
+	 */
+	public AppVersions latestVersion(List<AppVersions> versions) {
+		if (versions == null || versions.size() == 0) {
+			return null;
+		}
+		AppVersions latest = versions.get(0);
+		if (versions.size() > 1) {
+			for (int i = 1; i < versions.size(); i++) {
+				AppVersions version = versions.get(i);
+				if (compareVersions(latest.getVersion(), version.getVersion()) < 0) {
+					latest = version;
+				}
+			}
+		}
+		return latest;
+	}
+
+	/**
 	 * Compare version. Pattern: x.x.x.x
 	 * 
 	 * @return 0: equal <br/>
@@ -736,6 +764,7 @@ public class AppsController extends AbstractAdminController {
 		int compare = 0;
 		String[] path1 = oldVersion.split("\\.");
 		String[] path2 = newVersion.split("\\.");
+
 		int length = path1.length > path2.length ? path2.length : path1.length;
 		for (int i = 0; i < length; i++) {
 			int num1 = Integer.parseInt(path1[i]);

@@ -14,8 +14,7 @@ import java.util.List;
 
 import javax.persistence.Query;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
 
 /**
  * 
@@ -29,7 +28,7 @@ public class JpaUtil {
 					tuple[i] = new Long(((BigInteger) tuple[i]).longValue());
 				}
 				if (tuple[i] instanceof Date) {
-					tuple[i] = new DateTime(tuple[i], DateTimeZone.getDefault());					
+					tuple[i] = new LocalDateTime(tuple[i]);					
 				}
 				tupleTypes.add(tuple[i].getClass());
 			} else {
