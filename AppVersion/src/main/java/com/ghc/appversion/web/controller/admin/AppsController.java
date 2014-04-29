@@ -633,6 +633,43 @@ public class AppsController extends AbstractAdminController {
 		platformService.delete(id);
 	}
 
+	@RequestMapping(value = "/version/{id}", params = "deleteAjax", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ValidationResponse deleteVersionAjax(@PathVariable("id") Long id,
+			@RequestParam(value = "appId", required = false) Long appId, Locale locale) {
+		ValidationResponse res = new ValidationResponse();
+		res.setStatus(ValidationResponse.SUCCESS);
+		
+		// remove version file
+		AppVersions appVersion = appVersionsService.findById(id);
+		String downloadUrl = appVersion.getAppDownloadUrl();
+		try {
+			String rootDirectory = mUploadRootDirectory;
+			UploadUtil.deleteAndroidFile(rootDirectory, downloadUrl);
+		} catch (IOException e) {
+			e.printStackTrace();
+			res.setStatus(ValidationResponse.FAIL);
+			res.addErrorMessage(new ErrorMessage("deleteAppError",
+					messageSource.getMessage("admin_icon_delete_file",
+							new Object[] {}, locale)));
+		}
+		
+		appVersionsService.delete(id);
+		
+		//
+		List<AppVersions> latestVersions = appVersionsService
+				.latestVersion(appId); 
+		AppVersions latestVersion = latestVersion(latestVersions);
+		if (latestVersion != null) {
+			// Update app latest version
+			String version = latestVersion.getVersion();
+			appService.updateLatestVersion(version, appId);
+			
+			res.setExtraData(version);
+		}	
+		return res;
+	}
+	
 	@RequestMapping(value = "/icon/{id}", method = RequestMethod.GET)
 	@ResponseBody
 	public byte[] downloadIcon(@PathVariable("id") Long id) {

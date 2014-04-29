@@ -38,6 +38,9 @@
 	<spring:message code="label_admin_version_size" var="labelVersionSize"/>
 	<spring:message code="admin_version_save_fail" var="labelVersionSaveFail"/>
 	<spring:message code="admin_app_version_update_fail" var="labelAppVersionUpdateFail"/>
+	<spring:message code="label_admin_version_delete" var="labelVersionDelete"/>
+	<spring:message code="admin_version_delete_confirm" var="messageVersionDelete"/>
+	<spring:message code="admin_version_delete_error" var="messageVersionDeleteError"/>
 	
 	<div style="float:left; width:650px;">
 		<div id="appInfo">
@@ -125,6 +128,11 @@
     		<html:fileField label="${labelVersionFile}" name="appDownloadUrl" require="true"/>	
     	</html:uploadForm>   
 	</div>
+	<div id="deleteVersionDialog" title="${labelVersionDelete}" class="dialog delete-dialog" style="display: none">   
+		<span id="deleteVersionMessage">${messageVersionDelete}</span> 	  
+		<br/>
+		<span id="deleteVersionError" class="error" style="display: none"></span>	
+	</div>
 	<script type="text/javascript">
 		<![CDATA[
 		var globalPlatforms = {};
@@ -204,10 +212,10 @@
 		        },
 		        loadComplete: function() {
 		        	var grid = $(this);
-		        	addAction2JQGrid(grid,'name','act','${labelActionEdit}','ui-icon-pencil',function(id, value){
+		        	addAction2JQGrid(grid,'version','act','${labelActionEdit}','ui-icon-pencil',function(id, value){
 	       			});                
-			        addAction2JQGrid(grid,'name','act','${labelActionDelete}','ui-icon-trash',function(id, value){
-			        	
+			        addAction2JQGrid(grid,'version','act','${labelActionDelete}','ui-icon-trash',function(id, value){
+			        	showDeleteVersionDialog(id, value);
 		    		});		           			           	
 		        }
 		      }); 
@@ -262,6 +270,7 @@
 			        }
 			      }
 			    });
+			
 			$( "#newVersionDialog" ).dialog({
 			      autoOpen: false,
 			      height: 430,
@@ -296,6 +305,31 @@
 			        }
 			      }
 			    });
+			$( "#deleteVersionDialog" ).dialog({
+		          autoOpen: false,
+		          height: 350,
+		          width: 400,
+		          modal: true,
+		          resizable: false,
+		          buttons: {
+		            "${labelActionDelete}": function() {
+		            	var id = $(this).data('id');
+		            	var appId = $(this).data('appId');
+		            	var data = {};
+		            	$.post('${showAppUrl}/version/' + id + '?deleteAjax&appId=' + appId, data, function(response) {
+		            		var version = response.extraData;
+		            		$('#appLatestVersion').html(version);	
+		            	}, 'json').done(function(){
+		            		deleteJQGridRow($('#listVersion'), id);		            		
+		            		$("#deleteVersionDialog").dialog("close");
+		            	}).fail(function(){
+		            		var error = $("#deleteVersionDialog").find("#deleteVersionError");
+		            		error.css({"display": "block"});
+		            		error.html('${messageVersionDeleteError}');
+		            	});	            		
+		            }	            
+		          }
+		        });
 		});
 		function checkboxFormatter(cellvalue, options, rowObject) {
 			var s = $('<div><input id="filterGroup_'+ rowObject.id +'" type="checkbox" onclick="filterGroupClick('+ rowObject.id +');" style="height: auto; margin: 5px"/><span>'+ cellvalue +'</span></div>');
@@ -363,6 +397,14 @@
 			var dialog = $("#newVersionDialog");
 			dialog.data('id',id).dialog("open");    
 		}
+		function showDeleteVersionDialog(id, value){
+	    	var dialog = $("#deleteVersionDialog");
+	    	var message = '${messageVersionDelete}' + ' ' + value + "?";
+	    	dialog.find("#deleteVersionMessage").html(message);
+	    	dialog.find("#deleteVersionError").css({"display": "none"});
+	        dialog.data('id',id);	        
+	        dialog.data('appId','${app.id}').dialog("open");
+	    }
 		]]>
 	</script>
 </div>
