@@ -320,22 +320,22 @@
 		            "${labelActionDelete}": function() {
 		            	var id = $(this).data('id');
 		            	var data = {};
-		            	$.post('${showAppUrl}' + '/' + id + '?deleteAjax', data, function(response) {
-		            		if (response.status == 'FAIL') {
-		        				for (var i = 0; i < response.result.length; i++) {
-		        					var item = response.result[i];
-		        					addInputError("#deleteAppDialog #" + item.fieldName, item.message+"<br/>");								
-		        				}		        				
-		        			} else {
-		        				deleteJQGridRow($('#list'), id);		            		
-			            		$("#deleteAppDialog").dialog("close");
-		        			}
-		            	}, 'json').done(function(){		            		
-		            	}).fail(function(){
-		            		var error = $("#deleteAppDialog").find("#deleteAppError");
-		            		error.css({"display": "block"});
-		            		error.html('${messageAppDeleteError}');
-		            	});	            		
+		            	postAjaxRequest('${showAppUrl}' + '/' + id + '?deleteAjax', data, function(response) {
+			            		if (response.status == 'FAIL') {
+			        				for (var i = 0; i < response.result.length; i++) {
+			        					var item = response.result[i];
+			        					addInputError("#deleteAppDialog #" + item.fieldName, item.message+"<br/>");								
+			        				}		        				
+			        			} else {
+			        				deleteJQGridRow($('#list'), id);		            		
+				            		$("#deleteAppDialog").dialog("close");
+			        			}
+			            	},null,function(){
+			            		var error = $("#deleteAppDialog").find("#deleteAppError");
+			            		error.css({"display": "block"});
+			            		error.html('${messageAppDeleteError}');
+			            	}		            			
+		            	);		                       		
 		            }	            
 		          }
 		        });
@@ -349,14 +349,12 @@
 		            "${labelActionDelete}": function() {
 		            	var id = $(this).data('id');
 		            	var data = {};
-		            	$.post('${showPlatformUrl}' + '/' + id + '?deleteAjax', data, function(response) {
-		            		
-		            	}, 'json').done(function(){
+		            	postAjaxRequest('${showPlatformUrl}' + '/' + id + '?deleteAjax', data, null, function(){
 		            		spliceArray(globalPlatforms, id);
 		            		globalUpdatePlatforms = true;
 		            		deleteJQGridRow($('#listPlatform'), id);		            		
 		            		$("#deletePlatformDialog").dialog("close");
-		            	}).fail(function(){
+		            	}, function(){
 		            		var error = $("#deletePlatformDialog").find("#deletePlatformError");
 		            		error.css({"display": "block"});
 		            		error.html('${messagePlatformDeleteError}');
@@ -405,11 +403,9 @@
 			}	
 			function showEditPlatformDialog(id, value){
 		    	removeInputError("#platformEditForm");
-		    	$.get('${showPlatformUrl}/' + id + '?showAjax', {}, function(response) {
+		    	getAjaxRequest('${showPlatformUrl}/' + id + '?showAjax', {}, function(response) {
 	    			populateFormData('#platformEditForm', response);			    	
-	    		}, 'json').done(function(data){
-	    			        			
-	    		}).fail(function(){
+	    		},null,function(){
 	   				var error = $("#editPlatformError");
 	        		error.css({"display": "block"});
 	        		error.find('span').html('${messageGetPlatformFail}');

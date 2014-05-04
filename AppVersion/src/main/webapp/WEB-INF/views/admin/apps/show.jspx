@@ -288,13 +288,11 @@
 			        			var data = {};
 			        			postAjaxRequest('${showAppUrl}/updateLatestVersion?appId=' + id + '&version=' + version, data, null, 
 	        						function(){
-			        				log('done');
 				            			$('#appLatestVersion').html(version);		
 				            		}, function(){
-				            			log('fail');
-					            		//var error = $("#versionMessage");
-						        		//error.css({"display": "block"});
-						        		//error.find('span').html('${labelAppVersionUpdateFail}');
+					            		var error = $("#versionMessage");
+						        		error.css({"display": "block"});
+						        		error.find('span').html('${labelAppVersionUpdateFail}');
 				            		}		
 			        			);			        			      	
 			        			refreshJQGrid("#listVersion");

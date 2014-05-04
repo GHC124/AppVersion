@@ -123,11 +123,11 @@
 	    		url = '${editUserGroupUrl}' + '?userGroupId=' + checkbox.attr('usergroup');
 	    	}
 	    	disableInputs('#groups','checkbox');
-        	$.post(url, data, function(response) {
+        	postAjaxRequest(url, data, function(response) {
         			enableInputs('#groups','checkbox');
-        		}, 'json').done(function(data){
+        		}, function(data){
         			checkbox.attr('usergroup', data);        			
-        		}).fail(function(){
+        		}, function(){
        				var error = $("#groupMessage");
 	        		error.css({"display": "block"});
 	        		error.find('span').html('${labelUserGroupUpdate}');

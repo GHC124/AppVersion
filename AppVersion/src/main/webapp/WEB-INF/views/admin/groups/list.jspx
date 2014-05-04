@@ -204,10 +204,9 @@
 		    		error.find('span').html('');
 			    	var url = '${editUserGroupUrl}' + '?userGroupId=' + id;
 			    	var data={};
-			    	$.post(url, data, function(response) {
-			    	}, 'json').done(function(data){
+			    	postAjaxRequest(url, data, null, function(data){
 		    			refreshJQGrid('#list');
-		    		}).fail(function(){
+		    		}, function(){
 		   				var error = $("#memberMessage");
 		        		error.css({"display": "block"});
 		        		error.find('span').html('${labelUserGroupUpdate}');
@@ -253,10 +252,9 @@
 			    		error.find('span').html('');
 				    	var url = '${editAppGroupUrl}' + '?appGroupId=' + id;
 				    	var data={};
-				    	$.post(url, data, function(response) {
-				    	}, 'json').done(function(data){
+				    	postAjaxRequest(url, data, null, function(data){
 			    			refreshJQGrid('#list');
-			    		}).fail(function(){
+			    		}, function(){
 			   				var error = $("#appMessage");
 			        		error.css({"display": "block"});
 			        		error.find('span').html('${labelAppGroupUpdate}');
@@ -381,16 +379,14 @@
 	            "${labelActionDelete}": function() {
 	            	var id = $(this).data('id');
 	            	var data = {};
-	            	$.post('${showGroupUrl}' + '/' + id + '?deleteAjax', data, function(response) {
-	            		
-	            	}, 'json').done(function(){
+	            	postAjaxRequest('${showGroupUrl}' + '/' + id + '?deleteAjax', data, null, function(){
 	            		deleteJQGridRow($('#list'), id);
 	            		if(id == globalSelectedGroupId){
 	            			globalSelectedGroupId = -1;
 	            			clearJQGridData($('#listMember'));
 	            		}
 	            		$("#deleteGroupDialog").dialog("close");
-	            	}).fail(function(){
+	            	},function(){
 	            		var error = $("#deleteGroupDialog").find("#deleteGroupError");
 	            		error.css({"display": "block"});
 	            		error.html('${messageGroupDeleteError}');
@@ -467,11 +463,11 @@
 	    		url = '${editUserGroupUrl}' + '?userGroupId=' + checkbox.attr('usergroup');
 	    	}
 	    	disableInputs('#addMemberDialog','checkbox');
-        	$.post(url, data, function(response) {
+        	postAjaxRequest(url, data, function(response) {
         			enableInputs('#addMemberDialog','checkbox');
-        		}, 'json').done(function(data){
+        		}, function(data){
         			checkbox.attr('usergroup', data);        			
-        		}).fail(function(){
+        		}, function(){
        				var error = $("#userMessage");
 	        		error.css({"display": "block"});
 	        		error.find('span').html('${labelUserGroupUpdate}');
@@ -496,11 +492,11 @@
 	    		url = '${editAppGroupUrl}' + '?appGroupId=' + checkbox.attr('appgroup');
 	    	}
 	    	disableInputs('#addAppDialog','checkbox');
-        	$.post(url, data, function(response) {
+        	postAjaxRequest(url, data, function(response) {
         			enableInputs('#addAppDialog','checkbox');
-        		}, 'json').done(function(data){
+        		}, function(data){
         			checkbox.attr('appgroup', data);        			
-        		}).fail(function(){
+        		}, function(){
        				var error = $("#appMessage");
 	        		error.css({"display": "block"});
 	        		error.find('span').html('${labelAppGroupUpdate}');
@@ -516,11 +512,9 @@
 	    }
 	    function showEditGroupDialog(id, value){
 	    	removeInputError("#groupEditForm");
-	    	$.get('${showGroupUrl}/' + id + '?showAjax', {}, function(response) {
+	    	getAjaxRequest('${showGroupUrl}/' + id + '?showAjax', {}, function(response) {
     			populateFormData('#groupEditForm', response);
-    		}, 'json').done(function(data){
-    			        			
-    		}).fail(function(){
+    		}, null, function(){
    				var error = $("#editGroupError");
         		error.css({"display": "block"});
         		error.find('span').html('${messageGetGroupFail}');

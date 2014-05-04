@@ -1,30 +1,10 @@
-$(function(){    
-	$.fn.styleTable = function (options) {
-        var defaults = {
-                css: 'ui-styled-table'
-            };
-        options = $.extend(defaults, options);
-
-        return this.each(function () {
-            $this = $(this);
-            $this.addClass(options.css);
-
-            $this.on('mouseover mouseout', 'tbody tr', function (event) {
-                $(this).children().toggleClass("ui-state-hover",
-                                               event.type == 'mouseover');
-            });
-
-            $this.find("th").addClass("ui-state-default");
-            $this.find("td").addClass("ui-widget-content");
-            $this.find("tr:last-child").addClass("last-child");
-        });
-    };
+$(function(){ 
  	$("button").button();	
  	$('input').addClass("ui-corner-all");
 });
 
 function log(message){
-	if(console){
+	if(console && console.log){
 		console.log(message);
 	}
 }
@@ -107,7 +87,7 @@ function postAjaxRequest(validateUrl, data, successMethod, doneMethod, failMetho
 	    processData: true,
 	    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
 	    type: 'POST',
-	    success: function(response){
+	    success: function(response, status, jqXHR){
 			if(successMethod){
 				successMethod(response);
 			}
@@ -116,8 +96,12 @@ function postAjaxRequest(validateUrl, data, successMethod, doneMethod, failMetho
 		if(doneMethod){
 			doneMethod();
 		}
-	}).fail(function(){
-		if(failMethod){
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		if(jqXHR.status == 200){
+			if(doneMethod){
+				doneMethod();
+			}
+		}else if(failMethod){
 			failMethod();
 		}
 	});
