@@ -289,9 +289,9 @@
 					            	}, 'json').done(function(){
 					            		$('#appLatestVersion').html(version);		
 					            	}).fail(function(){
-					            		var error = $("#versionMessage");
-						        		error.css({"display": "block"});
-						        		error.find('span').html('${labelAppVersionUpdateFail}');
+					            		//var error = $("#versionMessage");
+						        		//error.css({"display": "block"});
+						        		//error.find('span').html('${labelAppVersionUpdateFail}');
 					            	});	            	
 			        			refreshJQGrid("#listVersion");
 				        		$("#newVersionDialog").dialog("close");				        		

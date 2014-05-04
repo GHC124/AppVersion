@@ -15,9 +15,9 @@
 		<!-- CSS -->
 		<html:stylesheet url="/${app_css}"/>		
 		<!-- JQuery -->
-		<html:stylesheet url="/resources/styles/jqueryui/jquery-ui-1.8.16.custom.css"/>
-		<html:script url="/resources/scripts/jquery-1.7.1.js"/>	 	
-		<html:script url="/resources/scripts/jquery-ui-1.8.16.custom.min.js"/>
+		<html:stylesheet url="/resources/styles/jqueryui/jquery-ui-1.10.4.custom.min.css"/>
+		<html:script url="/resources/scripts/jquery-1.10.2.js"/>	 	
+		<html:script url="/resources/scripts/jquery-ui-1.10.4.custom.min.js"/>	 	
 		<html:script url="/resources/scripts/javascript.js"/>	 	
 		<!-- jqGrid --> 
 		<html:stylesheet url="/resources/jqgrid/css/ui.jqgrid.css"/>

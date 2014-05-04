@@ -168,11 +168,19 @@ function fileAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMeth
 }
 
 function enableInput(input){
-	input.button('enable'); 
+	if(input.attr('role') == 'button'){
+		input.button('enable');
+	}else{
+		input.removeAttr('disabled');
+	}	 
 }
 
 function disableInput(input){
-	input.button('disable'); 
+	if(input.attr('role') == 'button'){
+		input.button('disable'); 
+	}else{
+		input.attr("disabled", "disabled");
+	}
 }
 
 function disableInputs(formName, type){

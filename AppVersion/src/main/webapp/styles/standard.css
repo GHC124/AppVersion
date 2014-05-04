@@ -6,16 +6,21 @@ body,div,td {
 }
 
 body {
-	background-color: #fff;
+	background-color: #111;
 	text-align: center;
 	margin: 0px;
 	padding: 0px;
+	color: #fff;
 }
 
 label {
 	width:150px;
 	float:left;
 	margin-left: 5px;
+}
+
+legend{
+	color: #fff;
 }
 
 input {
@@ -94,14 +99,6 @@ a {
 a img {
 	border: 0 none;
 	vertical-align: middle;
-}
-
-tr:nth-child(odd) {
-	background-color: #FFFFFF;
-}
-
-tr:nth-child(even) {
-	background-color: #EFEFEF;
 }
 
 a:link {
@@ -308,6 +305,10 @@ table.ui-styled-table tbody tr:last-child td
 #content{
 	min-height: 700px;
 	margin-top: 5px;
+}
+
+#content > div:first-child{
+	display: inline-block;
 }
 
 .bg-primary {
