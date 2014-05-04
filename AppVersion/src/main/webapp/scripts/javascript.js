@@ -75,6 +75,54 @@ function removeInputError(formId){
 	$form.find('.alert').remove();		
 }
 
+function getAjaxRequest(validateUrl, data, successMethod, doneMethod, failMethod){
+	$.ajax({
+	    url: validateUrl,
+	    data: data,
+	    dataType: 'json',
+	    processData: true,
+	    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+	    type: 'GET',
+	    success: function(response){
+			if(successMethod){
+				successMethod(response);
+			}
+	    }
+	}).done(function(){
+		if(doneMethod){
+			doneMethod();
+		}
+	}).fail(function(){
+		if(failMethod){
+			failMethod();
+		}
+	});
+}
+
+function postAjaxRequest(validateUrl, data, successMethod, doneMethod, failMethod){
+	$.ajax({
+	    url: validateUrl,
+	    data: data,
+	    dataType: 'json',
+	    processData: true,
+	    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+	    type: 'POST',
+	    success: function(response){
+			if(successMethod){
+				successMethod(response);
+			}
+	    }
+	}).done(function(){
+		if(doneMethod){
+			doneMethod();
+		}
+	}).fail(function(){
+		if(failMethod){
+			failMethod();
+		}
+	});
+}
+
 function formAjaxSubmit(formId, validateUrl, successMethod, failMethod, doneMethod, errorMethod, replaceData){
 	var data = collectFormData(formId);
 	if(replaceData){

@@ -285,14 +285,18 @@
 			        		fileAjaxSubmit("#versionNewForm","${showAppUrl}/version?createAjax", function(response){
 			        			// Update app latest version			        			
 			        			var version = $('#versionNewForm #version').val();
-			        			$.post('${showAppUrl}/updateLatestVersion?appId=' + id + '&version=' + version, {}, function(response) {
-					            	}, 'json').done(function(){
-					            		$('#appLatestVersion').html(version);		
-					            	}).fail(function(){
+			        			var data = {};
+			        			postAjaxRequest('${showAppUrl}/updateLatestVersion?appId=' + id + '&version=' + version, data, null, 
+	        						function(){
+			        				log('done');
+				            			$('#appLatestVersion').html(version);		
+				            		}, function(){
+				            			log('fail');
 					            		//var error = $("#versionMessage");
 						        		//error.css({"display": "block"});
 						        		//error.find('span').html('${labelAppVersionUpdateFail}');
-					            	});	            	
+				            		}		
+			        			);			        			      	
 			        			refreshJQGrid("#listVersion");
 				        		$("#newVersionDialog").dialog("close");				        		
 			            	}, null, null, function(){
@@ -316,17 +320,19 @@
 		            	var id = $(this).data('id');
 		            	var appId = $(this).data('appId');
 		            	var data = {};
-		            	$.post('${showAppUrl}/version/' + id + '?deleteAjax&appId=' + appId, data, function(response) {
-		            		var version = response.extraData;
-		            		$('#appLatestVersion').html(version);	
-		            	}, 'json').done(function(){
-		            		deleteJQGridRow($('#listVersion'), id);		            		
-		            		$("#deleteVersionDialog").dialog("close");
-		            	}).fail(function(){
-		            		var error = $("#deleteVersionDialog").find("#deleteVersionError");
-		            		error.css({"display": "block"});
-		            		error.html('${messageVersionDeleteError}');
-		            	});	            		
+		            	postAjaxRequest('${showAppUrl}/version/' + id + '?deleteAjax&appId=' + appId, data, 
+	            			function(response) {
+		            			var version = response.extraData;
+		            			$('#appLatestVersion').html(version);	
+			            	}, function(){
+			            		deleteJQGridRow($('#listVersion'), id);		            		
+			            		$("#deleteVersionDialog").dialog("close");
+			            	}, function(){
+			            		var error = $("#deleteVersionDialog").find("#deleteVersionError");
+			            		error.css({"display": "block"});
+			            		error.html('${messageVersionDeleteError}');
+			            	}		            			
+		            	);		            	      		
 		            }	            
 		          }
 		        });
@@ -358,26 +364,30 @@
 	    		url = '${showAppUrl}/appgroup' + '?appGroupId=' + checkbox.attr('appgroup');
 	    	}
 	    	disableInputs('#groups','checkbox');
-        	$.post(url, data, function(response) {
-        			enableInputs('#groups','checkbox');
-        		}, 'json').done(function(data){
-        			checkbox.attr('appgroup', data);        			
-        		}).fail(function(){
-       				var error = $("#groupMessage");
+	    	postAjaxRequest(url, data, 
+    			function(response) {
+    				enableInputs('#groups','checkbox');
+	    		}, function(data){
+	    			checkbox.attr('appgroup', data);        			
+	    		}, function(){
+	   				var error = $("#groupMessage");
 	        		error.css({"display": "block"});
 	        		error.find('span').html('${labelAppGroupUpdate}');
-	        	});	      
+	        	}
+    		);        	   
 	    }
 		function showEditAppDialog(id){
 	    	removeInputError("#appEditForm");
-	    	$.get('${showAppUrl}/' + id + '?showAjax', {}, function(response) {
-    			populateFormData('#appEditForm', response);
-    	   }, 'json').done(function(data){
-    		}).fail(function(){
-   				var error = $("#editAppError");
-        		error.css({"display": "block"});
-        		error.find('span').html('${messageGetAppFail}');
-        	});
+	    	getAjaxRequest('${showAppUrl}/' + id + '?showAjax', {}, 
+    			function(response) {
+    				populateFormData('#appEditForm', response);
+	    	    }, null
+	    	    , function(){
+	   				var error = $("#editAppError");
+	        		error.css({"display": "block"});
+	        		error.find('span').html('${messageGetAppFail}');
+	        	}   	   
+	    	);	    	
 	    	var dialog = $("#updateAppDialog");	        
 	        dialog.data('id',id).dialog("open");  
 	    }

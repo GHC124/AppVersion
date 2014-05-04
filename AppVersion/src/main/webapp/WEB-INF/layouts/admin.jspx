@@ -10,7 +10,7 @@
 	<jsp:directive.page pageEncoding="UTF-8" />
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=10" />
 		<spring:theme code="styleSheet" var="app_css" />
 		<!-- CSS -->
 		<html:stylesheet url="/${app_css}"/>		
