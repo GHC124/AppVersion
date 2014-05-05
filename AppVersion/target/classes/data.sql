@@ -1,0 +1,1 @@
+insert into ADMINS (USER_NAME, PASSWORD, AUTHORITY, IS_ACTIVE) values ('admin', 'admin123', 'ROLE_ADMIN', 1);

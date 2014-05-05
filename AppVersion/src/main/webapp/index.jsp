@@ -2,6 +2,6 @@
 
 <html>
 <body>
-	<c:redirect url="/pages/login"/>
+	<c:redirect url="/login"/>
 </body>
 </html>

@@ -13,7 +13,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
-import com.ghc.appversion.util.LogUtil;
 import com.ghc.appversion.web.GlobalVariables;
 
 public abstract class AbstractController {
@@ -44,7 +43,6 @@ public abstract class AbstractController {
 
 		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
-			LogUtil.error("Text "  + text);
 			if (StringUtils.hasText(text)) {
 				DateTimeFormatter dtf = DateTimeFormat.forPattern(mDateFormatPattern);
 				LocalDateTime jodatime = dtf.parseLocalDateTime(text);
@@ -52,12 +50,10 @@ public abstract class AbstractController {
 			} else {
 				setValue(null);
 			}
-			LogUtil.error("Date "  + getValue());
 		}
 
 		@Override
 		public String getAsText() throws IllegalArgumentException {
-			LogUtil.error("Value "  + getValue());
 			String s = "";
 			if (getValue() != null) {
 				DateTimeFormatter dtfOut = DateTimeFormat.forPattern(mDateFormatPattern);

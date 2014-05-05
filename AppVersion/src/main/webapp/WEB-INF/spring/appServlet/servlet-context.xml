@@ -35,7 +35,7 @@
 			</beans:list>
 		</beans:property>
 	</beans:bean> 
-	<context:component-scan base-package="com.ghc.appversion.web.controller" />
+	<context:component-scan base-package="com.ghc.appversion.web.controller,com.ghc.appversion.web.rest" />
 	<interceptors>
 	    <beans:bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
 		<beans:bean
