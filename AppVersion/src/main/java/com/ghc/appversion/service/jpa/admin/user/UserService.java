@@ -3,7 +3,7 @@
  *
  *	
  */
-package com.ghc.appversion.service.jpa.user;
+package com.ghc.appversion.service.jpa.admin.user;
 
 import java.util.List;
 
@@ -22,7 +22,9 @@ public interface UserService {
 
 	User findById(Long id);
 
+	User findByEmail(String email);
+	
 	User save(User user);
 
-	Page<User> findAllByPage(Pageable pageable);
+	Page<User> findAllByPage(Pageable pageable);	
 }

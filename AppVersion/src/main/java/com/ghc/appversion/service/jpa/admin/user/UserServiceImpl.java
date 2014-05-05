@@ -3,11 +3,15 @@
  *
  *	
  */
-package com.ghc.appversion.service.jpa.user;
+package com.ghc.appversion.service.jpa.admin.user;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,6 +36,9 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private UserRepository userRepository;
 
+	@PersistenceContext
+	private EntityManager entityManager;
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -82,6 +89,20 @@ public class UserServiceImpl implements UserService {
 	@Transactional(readOnly = true)
 	public long count() {
 		return userRepository.count();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.ghc.appversion.service.jpa.admin.user.UserService#findByEmail(java.lang.String)
+	 */
+	@Override
+	public User findByEmail(String email) {
+		TypedQuery<User> query = entityManager.createNamedQuery("User.findByEmail", User.class);
+		query.setParameter("email", email);
+		List<User> users = query.getResultList();
+		if(users == null || users.size() == 0) {
+			return null;
+		}
+		return users.get(0);
 	}
 
 }

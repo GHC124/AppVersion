@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -18,6 +20,9 @@ import com.ghc.appversion.domain.BaseEntity;
 
 @Entity
 @Table(name = "Users")
+@NamedQueries({
+	@NamedQuery(name="User.findByEmail", query="select u from User u where u.email = :email")
+})
 public class User extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
@@ -27,7 +32,7 @@ public class User extends BaseEntity implements Serializable {
 	private String mFirstName;
 	private String mLastName;
 	private int mIsActive = 1;	
-
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")

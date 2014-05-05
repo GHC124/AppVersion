@@ -3,7 +3,7 @@
  *
  *	
  */
-package com.ghc.appversion.service.jpa.user;
+package com.ghc.appversion.service.jpa.admin.user;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

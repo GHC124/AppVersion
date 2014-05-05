@@ -32,7 +32,7 @@ import com.ghc.appversion.service.jpa.admin.group.GroupMembersService;
 import com.ghc.appversion.service.jpa.admin.group.GroupService;
 import com.ghc.appversion.service.jpa.admin.group.GroupSummaryService;
 import com.ghc.appversion.service.jpa.admin.group.GroupUserCheckService;
-import com.ghc.appversion.service.jpa.user.UserGroupService;
+import com.ghc.appversion.service.jpa.admin.user.UserGroupService;
 import com.ghc.appversion.web.form.DataGrid;
 import com.ghc.appversion.web.form.ErrorMessage;
 import com.ghc.appversion.web.form.ValidationResponse;
