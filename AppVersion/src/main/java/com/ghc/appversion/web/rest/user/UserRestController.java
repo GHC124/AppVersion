@@ -6,6 +6,7 @@
 package com.ghc.appversion.web.rest.user;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,8 +44,9 @@ public class UserRestController {
 		// generate token
 		String token = "";
 		try {
-			token = EncryptUtil.makeTokenSignature(1000, username, password,
-					"token");
+			String key = String.valueOf(Calendar.getInstance()
+					.getTimeInMillis());
+			token = EncryptUtil.makeTokenSignature(1000, username, password, key);
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
@@ -57,7 +59,7 @@ public class UserRestController {
 				response.setMessage(token);
 			}
 		}
-		
+
 		return response;
 	}
 

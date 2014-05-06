@@ -8,7 +8,6 @@ package com.ghc.appversion.web.rest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -17,16 +16,12 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import com.ghc.appversion.service.jpa.admin.user.UserService;
 import com.ghc.appversion.util.EncryptUtil;
 
 /**
  * 
  */
 public class RestDaoAuthenticationProvider extends DaoAuthenticationProvider {
-	@Autowired
-	private UserService userService;
-	
 	@Override
 	public Authentication authenticate(Authentication authentication)
 			throws AuthenticationException {
@@ -46,7 +41,7 @@ public class RestDaoAuthenticationProvider extends DaoAuthenticationProvider {
 		} catch (InvalidKeySpecException e) {
 			e.printStackTrace();
 		}
-		
+
 		if (!valid) {
 			throw new BadCredentialsException("Bad Credentials");
 		}

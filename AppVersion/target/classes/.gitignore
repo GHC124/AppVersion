@@ -1,1 +1,6 @@
 /com/
+/data.sql
+/datasource-tx-jpa.xml
+/log4j.properties
+/schema.sql
+/spy.properties
