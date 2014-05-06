@@ -6,6 +6,7 @@
 package com.ghc.appversion.util;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -13,10 +14,28 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import org.springframework.security.crypto.codec.Hex;
+
 /**
  * 
  */
 public class EncryptUtil {
+	/**
+	 * Calculates the digital signature to be put in the cookie. Default value
+	 * is MD5 ("username:tokenExpiryTime:password:key")
+	 */
+	public static String makeTokenSignature(long tokenExpiryTime,
+			String username, String password, String key)
+			throws NoSuchAlgorithmException {
+		String data = username + ":" + tokenExpiryTime + ":" + password + ":"
+				+ key;
+		MessageDigest digest = MessageDigest.getInstance("MD5");
+		return new String(Hex.encode(digest.digest(data.getBytes())));
+	}
+
+	/**
+	 * Generate PBKDF2
+	 */
 	public static String generatePBKDF2(String password)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		int iterations = 1000;
@@ -30,6 +49,9 @@ public class EncryptUtil {
 		return iterations + ":" + toHex(salt) + ":" + toHex(hash);
 	}
 
+	/**
+	 * Validate PBKD2
+	 */
 	public static boolean validatePBKDF2(String originalPassword,
 			String storedPassword) throws NoSuchAlgorithmException,
 			InvalidKeySpecException {

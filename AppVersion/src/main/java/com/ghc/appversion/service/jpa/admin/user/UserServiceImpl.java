@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,12 +98,25 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User findByEmail(String email) {
 		TypedQuery<User> query = entityManager.createNamedQuery("User.findByEmail", User.class);
-		query.setParameter("email", email);
+		query.setParameter("email", email);		
 		List<User> users = query.getResultList();
 		if(users == null || users.size() == 0) {
 			return null;
 		}
 		return users.get(0);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.ghc.appversion.service.jpa.admin.user.UserService#updateToken(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean updateLoginToken(String email, String token) {
+		Query query = entityManager.createNamedQuery("User.updateLoginToken");
+		query.setParameter("email", email);		
+		query.setParameter("loginToken", token);
+		int result = query.executeUpdate();
+		
+		return result > 0;
 	}
 
 }

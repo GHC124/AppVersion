@@ -21,18 +21,20 @@ import com.ghc.appversion.domain.BaseEntity;
 @Entity
 @Table(name = "Users")
 @NamedQueries({
-	@NamedQuery(name="User.findByEmail", query="select u from User u where u.email = :email")
-})
+		@NamedQuery(name = "User.findByEmail", query = "select u from User u where u.email = :email"),
+		@NamedQuery(name = "User.updateLoginToken", query = "update User set loginToken = :loginToken where email = :email") })
 public class User extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	private Long mId;
 	private String mEmail;
 	private String mPassword;
 	private String mFirstName;
 	private String mLastName;
-	private int mIsActive = 1;	
-	
+	private int mIsActive = 1;
+	private String mAuthority;
+	private String mLoginToken;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -43,10 +45,10 @@ public class User extends BaseEntity implements Serializable {
 	public void setId(Long id) {
 		mId = id;
 	}
-	
+
 	@NotEmpty(message = "{validation.email.NotEmpty.message}")
 	@Size(min = 1, max = 255, message = "{validation.email.Size.message}")
-	@Pattern(regexp="^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message="{validation.email.Pattern.message}")
+	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "{validation.email.Pattern.message}")
 	@Column(name = "email")
 	public String getEmail() {
 		return mEmail;
@@ -65,7 +67,7 @@ public class User extends BaseEntity implements Serializable {
 
 	@NotEmpty(message = "{validation.password.NotEmpty.message}")
 	@Size(min = 3, max = 255, message = "{validation.password.Size.message}")
-	@Column(name="password")	
+	@Column(name = "password")
 	public String getPassword() {
 		return mPassword;
 	}
@@ -86,9 +88,9 @@ public class User extends BaseEntity implements Serializable {
 
 	public void setLastName(String lastName) {
 		mLastName = lastName;
-	}	
+	}
 
-	@NotNull(message="{validation.active.NotNull.message}")
+	@NotNull(message = "{validation.active.NotNull.message}")
 	@Column(name = "is_active")
 	public Integer getIsActive() {
 		return mIsActive;
@@ -96,5 +98,24 @@ public class User extends BaseEntity implements Serializable {
 
 	public void setIsActive(Integer isActive) {
 		mIsActive = isActive;
-	}	
+	}
+
+	@Column(name = "authority")
+	public String getAuthority() {
+		return mAuthority;
+	}
+
+	public void setAuthority(String authority) {
+		mAuthority = authority;
+	}
+
+	@Column(name = "login_token")
+	public String getLoginToken() {
+		return mLoginToken;
+	}
+
+	public void setLoginToken(String loginToken) {
+		mLoginToken = loginToken;
+	}
+
 }

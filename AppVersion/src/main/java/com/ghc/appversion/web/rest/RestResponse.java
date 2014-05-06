@@ -8,18 +8,18 @@ package com.ghc.appversion.web.rest;
 /**
  * 
  */
-public class MessageResponse {
+public class RestResponse {
 	public static final String FAIL = "FAIL";
 	public static final String SUCCESS = "SUCCESS";
 	
 	private String mStatus;
 	private String mMessage;
 
-	public MessageResponse() {
+	public RestResponse() {
 
 	}
 
-	public MessageResponse(String status, String message) {
+	public RestResponse(String status, String message) {
 		mStatus = status;
 		mMessage = message;
 	}

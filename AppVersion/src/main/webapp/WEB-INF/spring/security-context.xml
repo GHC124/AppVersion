@@ -5,24 +5,54 @@
         http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
         http://www.springframework.org/schema/security  
         http://www.springframework.org/schema/security/spring-security-3.1.xsd">
-	<http use-expressions="true" auto-config="true"
+	<!-- Security configuration for REST services. -->
+	<http pattern="/rest/**" authentication-manager-ref="restAuthenticationManager"
+		entry-point-ref="restServicesEntryPoint" create-session="stateless">
+		<custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+	</http>
+	<beans:bean id="restServicesEntryPoint"
+		class="com.ghc.appversion.web.rest.RestAuthenticationEntryPoint" />
+	<beans:bean id="restServicesFilter"
+		class="com.ghc.appversion.web.rest.RestUsernamePasswordAuthenticationFilter">
+		<beans:property name="postOnly" value="false" />
+		<beans:property name="authenticationManager" ref="restAuthenticationManager" />
+		<beans:property name="authenticationSuccessHandler"	ref="restServicesSuccessHandler" />
+		<beans:property name="authenticationFailureHandler"	ref="restServicesFailureHandler" />
+	</beans:bean>
+	<beans:bean id="restServicesSuccessHandler"
+		class="com.ghc.appversion.web.rest.RestAuthenticationSuccessHandler" />
+	<beans:bean id="restServicesFailureHandler"
+		class="com.ghc.appversion.web.rest.RestAuthenticationFailureHandler" />
+	<jdbc-user-service id="restUserService"
+		data-source-ref="dataSource"
+		users-by-username-query="select email, password, is_active from users where email=?"
+		authorities-by-username-query="select email, authority from users where email=?" />
+	<beans:bean id="restDaoAuthenticationProvider"
+		class="com.ghc.appversion.web.rest.RestDaoAuthenticationProvider">
+		<beans:property name="userDetailsService" ref="restUserService"/>
+	</beans:bean>
+	<authentication-manager id="restAuthenticationManager">
+		<authentication-provider ref="restDaoAuthenticationProvider"/>
+	</authentication-manager>
+	
+	<!-- Security configuration for other resources. Use login form. -->
+	<http use-expressions="true" auto-config="true" create-session="always"
+		authentication-manager-ref="appAuthenticationManager"
 		access-denied-page="/accessDenied.html">
 		<!-- Don't set any role restriction on login page -->
-		<intercept-url pattern="/" access="permitAll" />
+		<intercept-url pattern="/login/**" access="permitAll" />
 		<!-- Restrict access to admin pages -->
 		<intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
-		
-		<form-login login-page="/"
-			authentication-failure-url="/login/loginfail" default-target-url="/admin/users" />
+		<form-login login-page="/" authentication-failure-url="/login/loginfail"
+			default-target-url="/admin/users" />
 		<logout logout-success-url="/" />
 	</http>
-
-	<authentication-manager>
+	<authentication-manager id="appAuthenticationManager">
 		<authentication-provider>
 			<jdbc-user-service data-source-ref="dataSource"
 				users-by-username-query="select user_name, password, is_active from admins where user_name=?"
 				authorities-by-username-query="select user_name, authority from admins where user_name=?" />
 		</authentication-provider>
 	</authentication-manager>
-
-</beans:beans>
+ 	<global-method-security jsr250-annotations="enabled" pre-post-annotations="enabled" secured-annotations="enabled" />
+ </beans:beans>

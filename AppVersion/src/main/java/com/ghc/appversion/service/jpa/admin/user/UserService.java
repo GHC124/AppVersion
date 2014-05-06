@@ -25,6 +25,8 @@ public interface UserService {
 	User findByEmail(String email);
 	
 	User save(User user);
+	
+	boolean updateLoginToken(String email, String token);
 
 	Page<User> findAllByPage(Pageable pageable);	
 }
