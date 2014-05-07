@@ -6,7 +6,9 @@
 package com.ghc.appversion.web.rest.user;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.ghc.appversion.domain.admin.User;
 import com.ghc.appversion.service.jpa.admin.user.UserService;
 import com.ghc.appversion.util.EncryptUtil;
-import com.ghc.appversion.util.LogUtil;
 import com.ghc.appversion.web.rest.RestResponse;
 
 /**
@@ -62,20 +63,19 @@ public class UserRestController {
 
 		return response;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.ghc.appversion.web.rest.user.UserRestService#findByEmail(java.lang
-	 * .String)
-	 */
+	
 	@RequestMapping(value = "/findByEmail", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	public User findByEmail(
+	public RestResponse findByEmail(
 			@RequestParam(value = "email", required = true) String email) {
-		LogUtil.error("Email: " + email);
-		return userService.findByEmail(email);
+		RestResponse response = new RestResponse();
+		response.setStatus(RestResponse.SUCCESS);
+		
+		User user = userService.findByEmail(email);
+		List<User> data = new ArrayList<User>();
+		data.add(user);
+		response.setData(data);
+		
+		return response;
 	}
-
 }
