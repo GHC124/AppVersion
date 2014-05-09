@@ -532,7 +532,8 @@ span.error {
 }
 
 .dialog{
-	padding:30px 0px 0px 35px !important
+	padding:30px 0px 0px 35px !important;
+	height: auto !important;
 }
 
 .add-dialog .control-label{
