@@ -23,6 +23,7 @@
 		id="tilesViewResolver">
 		<beans:property name="viewClass"
 			value="org.springframework.web.servlet.view.tiles2.TilesView" />
+		<!-- <beans:property name="redirectHttp10Compatible" value="false"/> -->
 	</beans:bean>
 	<beans:bean
 		class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"

@@ -36,16 +36,16 @@
 	</authentication-manager>
 	
 	<!-- Security configuration for other resources. Use login form. -->
-	<http use-expressions="true" auto-config="true" create-session="always"
-		authentication-manager-ref="appAuthenticationManager"
-		access-denied-page="/accessDenied.html">
-		<!-- Don't set any role restriction on login page -->
-		<intercept-url pattern="/login/**" access="permitAll" />
-		<!-- Restrict access to admin pages -->
-		<intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
-		<form-login login-page="/" authentication-failure-url="/login/loginfail"
+	<http use-expressions="true" auto-config="true" authentication-manager-ref="appAuthenticationManager">
+		<form-login login-page="/login" authentication-failure-url="/login/loginfail"
 			default-target-url="/admin/users" />
-		<logout logout-success-url="/" />
+		<intercept-url pattern="/index.jsp" access="permitAll"/> 			
+		<intercept-url pattern="/login/**" access="permitAll" requires-channel="https"/>
+		<intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')"/>		
+		<logout logout-success-url="/login" invalidate-session="true"/>
+		<port-mappings>
+			<port-mapping http="8089" https="8443"/>
+	    </port-mappings>    
 	</http>
 	<authentication-manager id="appAuthenticationManager">
 		<authentication-provider>
