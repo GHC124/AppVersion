@@ -30,6 +30,7 @@ import com.ghc.appversion.service.jpa.admin.user.UserGroupCheckService;
 import com.ghc.appversion.service.jpa.admin.user.UserGroupService;
 import com.ghc.appversion.service.jpa.admin.user.UserService;
 import com.ghc.appversion.service.jpa.admin.user.UserSummaryService;
+import com.ghc.appversion.web.Constants;
 import com.ghc.appversion.web.form.DataGrid;
 import com.ghc.appversion.web.form.ErrorMessage;
 import com.ghc.appversion.web.form.Message;
@@ -82,6 +83,7 @@ public class UsersController extends AbstractAdminController {
 			}
 		} else {
 			res.setStatus(ValidationResponse.SUCCESS);
+			user.setAuthority(Constants.AUTHORITY_USER);
 			userService.save(user);
 		}
 

@@ -36,16 +36,17 @@
 	</authentication-manager>
 	
 	<!-- Security configuration for other resources. Use login form. -->
+<!-- 	<beans:bean id="configurationService" class="com.ghc.appversion.web.ConfigurationService"></beans:bean> -->
 	<http use-expressions="true" auto-config="true" authentication-manager-ref="appAuthenticationManager">
 		<form-login login-page="/login" authentication-failure-url="/login/loginfail"
 			default-target-url="/admin/users" />
 		<intercept-url pattern="/index.jsp" access="permitAll"/> 			
-		<intercept-url pattern="/login/**" access="permitAll" requires-channel="https"/>
+		<intercept-url pattern="/login/**" access="permitAll"/>
 		<intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')"/>		
 		<logout logout-success-url="/login" invalidate-session="true"/>
-		<port-mappings>
-			<port-mapping http="8089" https="8443"/>
-	    </port-mappings>    
+<!-- 		<port-mappings> -->
+<!-- 			<port-mapping http="#{configurationService.port}" https="8443"/>			 -->
+<!-- 	    </port-mappings>     -->
 	</http>
 	<authentication-manager id="appAuthenticationManager">
 		<authentication-provider>

@@ -62,7 +62,7 @@
     		<html:inputField label="${labelUserFirstName}" name="firstName" require="true"/>    		
     		<html:inputField label="${labelUserLastName}" name="lastName"/>
     		<html:inputField label="${labelUserIsActive}" name="isActive" require="true"/>
-    		<form:hidden path="version" />    		    		
+    		<form:hidden path="version" />
     	</html:form>    	
 	</div>
     <script type="text/javascript">
@@ -166,8 +166,6 @@
 			        	}else{
 			        		var password1 = password.val();
 			        		var password2 = confirmPassword.val();
-			        		console.log(password1);
-			        		console.log(password2);
 			        		if(password1 === password2){
 			        			valid = true;
 			        		}else{

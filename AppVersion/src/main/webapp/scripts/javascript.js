@@ -23,7 +23,7 @@ function cancelDefaultAction(e) {
 function collectFormData(formId) {
 	var data = {};
 	var form = $(formId);
-	var inputs = form.find('input[type=text],input[type=hidden],select,textarea');
+	var inputs = form.find('input[type=text],input[type=password],input[type=hidden],select,textarea');
 	for (var i = 0; i < inputs.length; i++) {
 		var $item = $(inputs[i]);
 		data[$item.attr('name')] = $item.val(); 

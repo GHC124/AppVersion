@@ -30,6 +30,7 @@ public class LogUtil {
 		if (mEnableLog) {
 			String format = String.format(message, args);
 			sLog.debug(format);
+			System.out.println("DEBUG " + format);			
 		}
 	}
 	
@@ -41,6 +42,7 @@ public class LogUtil {
 		if (mEnableLog) {
 			String format = String.format(message, args);
 			sLog.error(format);
+			System.out.println("ERROR " + format);
 		}
 	}
 	
@@ -52,6 +54,7 @@ public class LogUtil {
 		if (mEnableLog) {
 			String format = String.format(message, args);
 			sLog.info(format);
+			System.out.println("INFO " + format);
 		}
 	}
 }
